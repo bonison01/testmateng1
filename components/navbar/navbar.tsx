@@ -139,7 +139,7 @@ function Navbar() {
                 </div>
 
                 <div className="flex flex-row gap-4">
-                    <Link href="/cart">
+                    {/* <Link href="/cart">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
@@ -176,7 +176,7 @@ function Navbar() {
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
-                    </Link>
+                    </Link> */}
 
                     {user ? <UserGreeting /> : <LoginButton />}
                 </div>
