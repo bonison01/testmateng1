@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, { useEffect, useState, useContext, useRef, Dispatch, SetStateAction, useCallback } from "react";
 import { MapContext } from "../context/MapContext";
 import SearchInput from "./SearchInput";
 import { calculatePrice } from "@/lib/calculatePrice";
@@ -23,6 +23,9 @@ interface DistanceMatrixComponentProps {
     price: string | null;
   }) => void;
   onBookService?: () => void;
+  // Define the new props for selectedVehicle and its setter function
+  selectedVehicle: 'two-wheeler' | 'light-vehicle';
+  onSelectVehicle: Dispatch<SetStateAction<'two-wheeler' | 'light-vehicle'>>;
 }
 
 const decodePolyline = (encoded: string) => {
@@ -59,7 +62,7 @@ const decodePolyline = (encoded: string) => {
   return points;
 };
 
-const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDataUpdate, onBookService, }) => {
+const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDataUpdate, onBookService, selectedVehicle, onSelectVehicle }) => {
   const { pickup, dropoff, updatePickup, updateDropoff } = useContext(MapContext);
   const [map, setMap] = useState<any>(null);
   const [olaMapsInstance, setOlaMapsInstance] = useState<any>(null);
@@ -72,11 +75,10 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [isMapLoading, setIsMapLoading] = useState(true);
-
+  
   const pickupInputRef = useRef<HTMLInputElement>(null);
   const dropoffInputRef = useRef<HTMLInputElement>(null);
 
-  // Store previous data to compare and avoid unnecessary updates
   const prevDataRef = useRef<{
     pickup: Location | null;
     dropoff: Location | null;
@@ -93,7 +95,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
 
   const manipurLocation = { lat: 24.817, lng: 93.936 };
 
-  // Reverse geocode function
   const reverseGeocode = async (lng: number, lat: number) => {
     const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${process.env.NEXT_PUBLIC_OLA_API_KEY}`;
     try {
@@ -109,7 +110,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     }
   };
 
-  // Ask for location permission upfront
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser.");
@@ -135,7 +135,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     );
   }, [pickup, updatePickup]);
 
-  // Load the map SDK and initialize
   useEffect(() => {
     const loadSDK = async () => {
       try {
@@ -177,7 +176,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     if (locationPermission !== null) loadSDK();
   }, [locationPermission]);
 
-  // Handle geolocation events
   useEffect(() => {
     if (!geolocate) return;
 
@@ -199,7 +197,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     };
   }, [geolocate, pickup, updatePickup]);
 
-  // Handle map click events
   useEffect(() => {
     if (!map) return;
 
@@ -218,7 +215,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     return () => map.off("click", handleClick);
   }, [map, pickup, dropoff, updatePickup, updateDropoff]);
 
-  // Add or update pickup marker and focus map
   useEffect(() => {
     if (map && olaMapsInstance && pickup && !pickupMarker) {
       const marker = olaMapsInstance
@@ -245,7 +241,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     }
   }, [map, olaMapsInstance, pickup, pickupMarker, updatePickup, dropoff]);
 
-  // Add or update dropoff marker and focus map
   useEffect(() => {
     if (map && olaMapsInstance && pickup && dropoff && !dropoffMarker) {
       const marker = olaMapsInstance
@@ -260,7 +255,6 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
         updateDropoff([lng, lat], name);
       });
 
-      // Focus map on dropoff location initially
       map.setCenter(dropoff.coords);
       map.setZoom(15);
     } else if (dropoffMarker && dropoff) {
@@ -268,211 +262,123 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
     }
   }, [map, olaMapsInstance, pickup, dropoff, dropoffMarker, updateDropoff]);
 
-  // Fetch distance, time, draw route, and fit route in view
-  useEffect(() => {
-    if (map && pickup && dropoff) {
-      const fetchDistanceMatrix = async () => {
-        if (map.getLayer("route")) map.removeLayer("route");
-        if (map.getSource("route")) map.removeSource("route");
-
-        const origins = `${pickup.coords[1]},${pickup.coords[0]}`;
-        const destinations = `${dropoff.coords[1]},${dropoff.coords[0]}`;
-        const url = `https://api.olamaps.io/routing/v1/distanceMatrix/basic?origins=${encodeURIComponent(
-          origins
-        )}&destinations=${encodeURIComponent(destinations)}&api_key=${process.env.NEXT_PUBLIC_OLA_API_KEY}`;
-
-        try {
-          const response = await fetch(url, {
-            method: "GET",
-            headers: { "X-Request-Id": "distance-matrix-" + Date.now() },
-          });
-          const data = await response.json();
-
-          if (data.status === "SUCCESS" && data.rows?.[0]?.elements?.[0]?.status === "OK") {
-            const element = data.rows[0].elements[0];
-            const distanceInKm = element.distance / 1000;
-            const timeValue = `${Math.round(element.duration / 60)} mins`;
-            const priceValue = `${calculatePrice(distanceInKm).toFixed(2)}`;
-
-            setDistance(distanceInKm);
-            setTime(timeValue);
-            setPrice(priceValue);
-
-            // Only call onDataUpdate if data has changed
-            const newData = { pickup, dropoff, distance: distanceInKm, time: timeValue, price: priceValue };
-            const prevData = prevDataRef.current;
-            if (
-              onDataUpdate &&
-              (prevData.pickup !== pickup ||
-                prevData.dropoff !== dropoff ||
-                prevData.distance !== distanceInKm ||
-                prevData.time !== timeValue ||
-                prevData.price !== priceValue)
-            ) {
-              onDataUpdate(newData);
-              prevDataRef.current = newData;
-            }
-
-            if (element.polyline) {
-              const coordinates = decodePolyline(element.polyline);
-              map.addSource("route", {
-                type: "geojson",
-                data: { type: "Feature", geometry: { type: "LineString", coordinates } },
-              });
-              map.addLayer({
-                id: "route",
-                type: "line",
-                source: "route",
-                layout: { "line-join": "round", "line-cap": "round" },
-                paint: { "line-color": "#3887be", "line-width": 5 },
-              });
-
-              // Calculate bounds manually
-              let minLng = pickup.coords[0];
-              let maxLng = pickup.coords[0];
-              let minLat = pickup.coords[1];
-              let maxLat = pickup.coords[1];
-
-              minLng = Math.min(minLng, dropoff.coords[0]);
-              maxLng = Math.max(maxLng, dropoff.coords[0]);
-              minLat = Math.min(minLat, dropoff.coords[1]);
-              maxLat = Math.max(maxLat, dropoff.coords[1]);
-
-              coordinates.forEach(([lng, lat]) => {
-                minLng = Math.min(minLng, lng);
-                maxLng = Math.max(maxLng, lng);
-                minLat = Math.min(minLat, lat);
-                maxLat = Math.max(maxLat, lat);
-              });
-
-              const bounds: [[number, number], [number, number]] = [
-                [minLng, minLat],
-                [maxLng, maxLat],
-              ];
-
-              map.fitBounds(bounds, {
-                padding: 50,
-                maxZoom: 15,
-                duration: 1000,
-              });
-            }
-          } else {
-            setDistance(null);
-            setTime("N/A");
-            setPrice("N/A");
-            if (onDataUpdate) {
-              const newData = { pickup, dropoff, distance: null, time: "N/A", price: "N/A" };
-              const prevData = prevDataRef.current;
-              if (
-                prevData.pickup !== pickup ||
-                prevData.dropoff !== dropoff ||
-                prevData.distance !== null ||
-                prevData.time !== "N/A" ||
-                prevData.price !== "N/A"
-              ) {
-                onDataUpdate(newData);
-                prevDataRef.current = newData;
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch distance matrix:", error);
-          setDistance(null);
-          setTime("Error");
-          setPrice("Error");
-          if (onDataUpdate) {
-            const newData = { pickup, dropoff, distance: null, time: "Error", price: "Error" };
-            const prevData = prevDataRef.current;
-            if (
-              prevData.pickup !== pickup ||
-              prevData.dropoff !== dropoff ||
-              prevData.distance !== null ||
-              prevData.time !== "Error" ||
-              prevData.price !== "Error"
-            ) {
-              onDataUpdate(newData);
-              prevDataRef.current = newData;
-            }
-          }
-        }
-      };
-
-      fetchDistanceMatrix();
-    } else {
+  const fetchAndUpdateRoute = useCallback(async () => {
+    if (!map || !pickup || !dropoff) {
       setDistance(null);
       setTime(null);
       setPrice(null);
       if (onDataUpdate) {
-        const newData = { pickup, dropoff, distance: null, time: null, price: null };
+        const newData = { pickup: null, dropoff: null, distance: null, time: null, price: null };
+        onDataUpdate(newData);
+        prevDataRef.current = newData;
+      }
+      if (map && map.getLayer("route")) map.removeLayer("route");
+      if (map && map.getSource("route")) map.removeSource("route");
+      return;
+    }
+
+    if (map.getLayer("route")) map.removeLayer("route");
+    if (map.getSource("route")) map.removeSource("route");
+
+    const origins = `${pickup.coords[1]},${pickup.coords[0]}`;
+    const destinations = `${dropoff.coords[1]},${dropoff.coords[0]}`;
+    const url = `https://api.olamaps.io/routing/v1/distanceMatrix/basic?origins=${encodeURIComponent(
+      origins
+    )}&destinations=${encodeURIComponent(destinations)}&api_key=${process.env.NEXT_PUBLIC_OLA_API_KEY}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "X-Request-Id": "distance-matrix-" + Date.now() },
+      });
+      const data = await response.json();
+
+      if (data.status === "SUCCESS" && data.rows?.[0]?.elements?.[0]?.status === "OK") {
+        const element = data.rows[0].elements[0];
+        const distanceInKm = element.distance / 1000;
+        const timeValue = `${Math.round(element.duration / 60)} mins`;
+        const priceValue = `${calculatePrice(distanceInKm, selectedVehicle).toFixed(2)}`;
+
+        setDistance(distanceInKm);
+        setTime(timeValue);
+        setPrice(priceValue);
+
+        const newData = { pickup, dropoff, distance: distanceInKm, time: timeValue, price: priceValue };
         const prevData = prevDataRef.current;
-        if (
-          prevData.pickup !== pickup ||
-          prevData.dropoff !== dropoff ||
-          prevData.distance !== null ||
-          prevData.time !== null ||
-          prevData.price !== null
-        ) {
+        if (onDataUpdate && JSON.stringify(newData) !== JSON.stringify(prevData)) {
+          onDataUpdate(newData);
+          prevDataRef.current = newData;
+        }
+
+        if (element.polyline) {
+          const coordinates = decodePolyline(element.polyline);
+          map.addSource("route", {
+            type: "geojson",
+            data: { type: "Feature", geometry: { type: "LineString", coordinates } },
+          });
+          map.addLayer({
+            id: "route",
+            type: "line",
+            source: "route",
+            layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "#3887be", "line-width": 5 },
+          });
+
+          let minLng = Math.min(pickup.coords[0], dropoff.coords[0]);
+          let maxLng = Math.max(pickup.coords[0], dropoff.coords[0]);
+          let minLat = Math.min(pickup.coords[1], dropoff.coords[1]);
+          let maxLat = Math.max(pickup.coords[1], dropoff.coords[1]);
+
+          coordinates.forEach(([lng, lat]) => {
+            minLng = Math.min(minLng, lng);
+            maxLng = Math.max(maxLng, lng);
+            minLat = Math.min(minLat, lat);
+            maxLat = Math.max(maxLat, lat);
+          });
+
+          const bounds: [[number, number], [number, number]] = [
+            [minLng, minLat],
+            [maxLng, maxLat],
+          ];
+
+          map.fitBounds(bounds, {
+            padding: 50,
+            maxZoom: 15,
+            duration: 1000,
+          });
+        }
+      } else {
+        setDistance(null);
+        setTime("N/A");
+        setPrice("N/A");
+        if (onDataUpdate) {
+          const newData = { pickup, dropoff, distance: null, time: "N/A", price: "N/A" };
+          const prevData = prevDataRef.current;
+          if (JSON.stringify(newData) !== JSON.stringify(prevData)) {
+            onDataUpdate(newData);
+            prevDataRef.current = newData;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch distance matrix:", error);
+      setDistance(null);
+      setTime("Error");
+      setPrice("Error");
+      if (onDataUpdate) {
+        const newData = { pickup, dropoff, distance: null, time: "Error", price: "Error" };
+        const prevData = prevDataRef.current;
+        if (JSON.stringify(newData) !== JSON.stringify(prevData)) {
           onDataUpdate(newData);
           prevDataRef.current = newData;
         }
       }
-      if (map && map.getLayer("route")) map.removeLayer("route");
-      if (map && map.getSource("route")) map.removeSource("route");
     }
-  }, [map, pickup, dropoff, onDataUpdate]);
+  }, [map, pickup, dropoff, onDataUpdate, selectedVehicle]);
 
-  // const resetMap = () => {
-  //   // Remove markers
-  //   if (pickupMarker) {
-  //     pickupMarker.remove();
-  //     setPickupMarker(null);
-  //   }
-  //   if (dropoffMarker) {
-  //     dropoffMarker.remove();
-  //     setDropoffMarker(null);
-  //   }
-
-  //   if (map && map.getLayer("route")) map.removeLayer("route");
-  //   if (map && map.getSource("route")) map.removeSource("route");
-
-  //   // Reset context locations
-  //   if (pickup) {
-  //     updatePickup([manipurLocation.lng, manipurLocation.lat], ''); 
-  //   }
-  //   if (dropoff) {
-  //     updateDropoff([manipurLocation.lng, manipurLocation.lat], ''); 
-  //   }
-
-  //   // Clear input fields
-  //   if (pickupInputRef.current) pickupInputRef.current.value = '';
-  //   if (dropoffInputRef.current) dropoffInputRef.current.value = '';
-
-  //   // Reset state values
-  //   setDistance(null);
-  //   setTime(null);
-  //   setPrice(null);
-
-
-  //   // Reset map view to default location
-  //   if (map) {
-  //     map.setCenter([manipurLocation.lng, manipurLocation.lat]);
-  //     map.setZoom(15);
-  //     map.marker.remove();
-  //   }
-
-  //   // Update parent component
-  //   if (onDataUpdate) {
-  //     const resetData = {
-  //       pickup: null,
-  //       dropoff: null,
-  //       distance: null,
-  //       time: null,
-  //       price: null
-  //     };
-  //     onDataUpdate(resetData);
-  //     prevDataRef.current = resetData;
-  //   }
-  // };
+  useEffect(() => {
+    fetchAndUpdateRoute();
+  }, [fetchAndUpdateRoute]);
 
   return (
     <>
@@ -493,16 +399,26 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="flex flex-row gap-2 mb-4">
+                    <Button
+                      variant={selectedVehicle === 'two-wheeler' ? 'default' : 'secondary'}
+                      onClick={() => onSelectVehicle('two-wheeler')}
+                    >
+                      Two-Wheeler
+                    </Button>
+                    <Button
+                      variant={selectedVehicle === 'light-vehicle' ? 'default' : 'secondary'}
+                      onClick={() => onSelectVehicle('light-vehicle')}
+                    >
+                      Light Vehicle
+                    </Button>
+                  </div>
                   <div className="flex flex-row gap-2">
                     <Label className="text-base text-zinc-300 font-bold">Distance:</Label>
                     <span className="text-lg text-green-400 font-semibold">
                       {distance !== null ? `${distance.toFixed(1)} km` : "Calculating..."}
                     </span>
                   </div>
-                  {/* <div className="flex flex-row gap-2">
-                    <Label className="text-base text-zinc-300 font-bold">Time:</Label>
-                    <span className="text-lg text-green-400 font-semibold">{time || "Calculating..."}</span>
-                  </div> */}
                   <div className="flex flex-row gap-2">
                     <Label className="text-base text-zinc-300 font-bold">Cost:</Label>
                     <span className="text-lg text-green-400 font-semibold">{`₹ ${price}` || "Calculating..."}</span>

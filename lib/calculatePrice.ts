@@ -1,35 +1,65 @@
+type FixedRateTier = {
+  maxKm: number;
+  rate: number;
+  type: 'fixed';
+};
+
+type VariableRateTier = {
+  maxKm: number;
+  base: number;
+  perKm: number;
+  type: 'variable';
+};
+
+type PricingTier = FixedRateTier | VariableRateTier;
+
+// Define pricing tiers for a two-wheeler vehicle
+const twoWheelerTiers: PricingTier[] = [
+  { maxKm: 4, rate: 60, type: 'fixed' },
+  { maxKm: 7, base: 20, perKm: 15, type: 'variable' },
+  { maxKm: 10, rate: 130, type: 'fixed' },
+  { maxKm: 17, rate: 150, type: 'fixed' },
+  { maxKm: 26, rate: 180, type: 'fixed' },
+  { maxKm: 30, rate: 230, type: 'fixed' },
+  { maxKm: 33, rate: 250, type: 'fixed' },
+  { maxKm: 36, rate: 280, type: 'fixed' },
+  { maxKm: Infinity, rate: 330, type: 'fixed' },
+];
+
+// Define pricing tiers for a light vehicle
+const lightVehicleTiers: PricingTier[] = [
+  { maxKm: 5, rate: 150, type: 'fixed' },
+  { maxKm: 10, base: 50, perKm: 20, type: 'variable' },
+  { maxKm: 20, rate: 350, type: 'fixed' },
+  { maxKm: 30, rate: 450, type: 'fixed' },
+  { maxKm: 50, rate: 600, type: 'fixed' },
+  { maxKm: Infinity, base: 600, perKm: 10, type: 'variable' },
+];
+
 /**
- * Calculates the price based on distance.
- * - Below 4 km: Fixed Rs 60
- * - 4 km to below 10 km: Rs 30 base + Rs 10 per km
- * - 10 km to below 13 km: Rs 120 fixed
- * - 13 km to below 20 km: Rs 140 fixed
- * - 20 km to below 26 km: Rs 180 fixed
- * - 26 km to below 30 km: Rs 230 fixed
- * - 30 km to below 33 km: Rs 250 fixed
- * - 33 km to below 36 km: Rs 280 fixed
- * - 36 km and above: Rs 330 fixed
+ * Calculates the total delivery price based on distance and vehicle type.
+ * @param distance The distance of the delivery in kilometers.
+ * @param vehicleType The type of vehicle ('two-wheeler' or 'light-vehicle').
+ * @returns The final price as a number.
  */
-export const calculatePrice = (distance: number): number => {
-  if (distance < 4) {
-    return 60;
-  } else if (distance < 7) {
-    const baseCharge = 20;
-    const perKmRate = 15;
-    return baseCharge + perKmRate * distance;
-  } else if (distance < 10) {
-    return 130;
-  } else if (distance < 17) {
-    return 150;
-  } else if (distance < 26) {
-    return 180;
-  } else if (distance < 30) {
-    return 230;
-  } else if (distance < 33) {
-    return 250;
-  } else if (distance < 36) {
-    return 280;
-  } else {
-    return 330;
+export const calculatePrice = (distance: number, vehicleType: 'two-wheeler' | 'light-vehicle'): number => {
+  const tiers = vehicleType === 'two-wheeler' ? twoWheelerTiers : lightVehicleTiers;
+
+  for (const tier of tiers) {
+    if (distance <= tier.maxKm) {
+      if (tier.type === 'fixed') {
+        return tier.rate;
+      } else {
+        // TypeScript now knows 'tier' must be of type VariableRateTier here
+        return tier.base + tier.perKm * distance;
+      }
+    }
   }
+
+  // This part is a safe fallback, as the 'Infinity' tier should always be matched.
+  const lastTier = tiers[tiers.length - 1];
+  if (lastTier.type === 'fixed') {
+    return lastTier.rate;
+  }
+  return 0;
 };
