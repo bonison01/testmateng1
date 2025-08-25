@@ -5,26 +5,33 @@ import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const categories = ["Food", "Craft", "Music", "Art", "Games", "Other"];
+const categories = ["Food", "Craft", "Music", "Art", "Games", "Event", "Other", "Business"];
 
 export default function AddPlacePage() {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
-  const [rating, setRating] = useState("");
   const [openingHours, setOpeningHours] = useState("");
+  const [description, setDescription] = useState("");
+  const [contact, setContact] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [price, setPrice] = useState("");
+  const [location, setLocation] = useState("");
+  const [features, setFeatures] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Upload image to Supabase Storage
+  // ... uploadImage and handleSubmit (updated without rating) remain unchanged
+
   const uploadImage = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split(".").pop();
     const fileName = `place-${Date.now()}.${fileExt}`;
     const filePath = fileName;
 
     const { error: uploadError } = await supabase.storage
-      .from("places-images") // <-- change to your bucket name
+      .from("places-images")
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
@@ -42,7 +49,6 @@ export default function AddPlacePage() {
     return publicUrlData?.publicUrl ?? null;
   };
 
-  // Submit handler
   const handleSubmit = async () => {
     setUploading(true);
     setSuccessMessage("");
@@ -59,20 +65,28 @@ export default function AddPlacePage() {
       imageUrl = uploadedUrl;
     }
 
-    // Validate rating: only allow number between 0 and 5, else null
-    const parsedRating = parseFloat(rating);
-    const validRating =
-      !isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5
-        ? parsedRating
-        : null;
+    // Validate price as number or null
+    const parsedPrice = parseFloat(price);
+    const validPrice = !isNaN(parsedPrice) && parsedPrice >= 0 ? parsedPrice : null;
+
+    const featuresArray = features
+      .split(",")
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0);
 
     const { error } = await supabase.from("places").insert([
       {
         name: name || null,
         type: type || null,
-        rating: validRating,
         opening_hours: openingHours || null,
         image_url: imageUrl,
+        description: description || null,
+        contact: contact || null,
+        start_date: type === "Event" ? startDate || null : null,
+        end_date: type === "Event" ? endDate || null : null,
+        price: type === "Event" ? validPrice : null,
+        location: location || null,
+        features: featuresArray.length > 0 ? featuresArray : null,
       },
     ]);
 
@@ -86,8 +100,14 @@ export default function AddPlacePage() {
       // Reset form
       setName("");
       setType("");
-      setRating("");
       setOpeningHours("");
+      setDescription("");
+      setContact("");
+      setStartDate("");
+      setEndDate("");
+      setPrice("");
+      setLocation("");
+      setFeatures("");
       setImageFile(null);
     }
   };
@@ -121,19 +141,6 @@ export default function AddPlacePage() {
           ))}
         </select>
 
-        {/* Rating */}
-        <label className="block mb-1">Rating (0 to 5)</label>
-        <Input
-          value={rating}
-          onChange={(e) => setRating(e.target.value)}
-          placeholder="e.g., 4.5"
-          type="number"
-          step="0.1"
-          min="0"
-          max="5"
-          className="mb-4"
-        />
-
         {/* Opening Hours */}
         <label className="block mb-1">Opening Hours</label>
         <Input
@@ -141,6 +148,75 @@ export default function AddPlacePage() {
           onChange={(e) => setOpeningHours(e.target.value)}
           placeholder="e.g., 10:00 AM - 9:00 PM"
           className="mb-4"
+        />
+
+        {/* Description */}
+        <label className="block mb-1">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Describe the place"
+          className="w-full p-2 mb-4 bg-gray-700 rounded text-white resize-none"
+          rows={3}
+        />
+
+        {/* Contact */}
+        <label className="block mb-1">Contact</label>
+        <Input
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          placeholder="Phone or email"
+          className="mb-4"
+        />
+
+        {/* Conditionally show these only for Event */}
+        {type === "Event" && (
+          <>
+            <label className="block mb-1">Start Date</label>
+            <Input
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              type="date"
+              className="mb-4"
+            />
+
+            <label className="block mb-1">End Date</label>
+            <Input
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              type="date"
+              className="mb-4"
+            />
+
+            <label className="block mb-1">Price (₹)</label>
+            <Input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g., 499.99"
+              className="mb-4"
+            />
+          </>
+        )}
+
+        {/* Location */}
+        <label className="block mb-1">Location</label>
+        <Input
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Address or area"
+          className="mb-4"
+        />
+
+        {/* Features */}
+        <label className="block mb-1">Features (comma separated)</label>
+        <Input
+          value={features}
+          onChange={(e) => setFeatures(e.target.value)}
+          placeholder="e.g., Wifi, Parking, Pet Friendly"
+          className="mb-6"
         />
 
         {/* Image Upload */}

@@ -104,7 +104,7 @@ export default function BookingPage() {
   if (!place) return <div className="p-4">Place not found.</div>;
 
   return (
-    <div className="max-w-xl mx-auto p-4">
+    <div className="max-w-xl mx-auto p-4 pt-20">
       <h1 className="text-3xl font-bold mb-4">Book: {place.name}</h1>
 
       {place.image && (
