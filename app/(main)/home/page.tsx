@@ -135,7 +135,7 @@ export default function page() {
         </div>
 
         <div>
-          <div className='relative'>
+          {/* <div className='relative'>
             <CardDescription className="text-sm mb-2 sm:mb-5 text-gray-300">Visit our cargo service page to get started.</CardDescription>
             <a href="https://cargo4.vercel.app/">
               <button
@@ -155,7 +155,7 @@ export default function page() {
                 </svg>
               </button>
             </a>
-          </div>
+          </div> */}
         </div>
 
       </div>

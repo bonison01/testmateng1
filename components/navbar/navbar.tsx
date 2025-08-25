@@ -57,10 +57,10 @@ function Navbar() {
 
     const links = [
         { name: "Home", href: "/home" },
-        { name: "Marketplace", href: "/products" },
-        { name: "Discover Seller", href: "/discover" },
+        // { name: "Marketplace", href: "/products" },
+        { name: "Discover", href: "/discovery" },
         { name: "Delivery Rates", href: "/delivery-rates" },
-        { name: "Business Login", href: "https://matengbusiness.vercel.app/delivery_orders" },
+        // { name: "Business Login", href: "https://matengbusiness.vercel.app/delivery_orders" },
     ];
 
     const UserGreeting = () => (
