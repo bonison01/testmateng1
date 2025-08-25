@@ -11,9 +11,9 @@ export default function page() {
   const [businesses, setBusinesses] = useState(0);
 
   useEffect(() => {
-    const targetParcels = 30000;
-    const targetMerchants = 150;
-    const targetBusinesses = 70;
+    const targetParcels = 80000;
+    const targetMerchants = 250;
+    const targetBusinesses = 120;
 
     const startParcels = 10000;
     const startMerchants = 50;
@@ -73,7 +73,7 @@ export default function page() {
             <button
               className="relative inline-flex items-center gap-2 px-8 py-3 font-semibold text-teal-50 bg-gradient-to-tr from-amber-200/60 via-amber-300/70 to-amber-300/80 ring-4 ring-amber-200/25 rounded-full overflow-hidden hover:opacity-95 transition-opacity before:absolute before:top-4 before:left-1/2 before:-translate-x-1/2 before:w-[100px] before:h-[100px] before:rounded-full before:bg-gradient-to-b before:from-teal-50/10 before:blur-xl text-base animate-arrow"
             >
-              Explore Marketplace
+              Discover New
               <span className="svg pt-[1px]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -94,7 +94,7 @@ export default function page() {
             <button
               className="relative inline-flex items-center gap-2 px-8 py-3 font-semibold text-teal-50 bg-gradient-to-tr from-teal-900/30 via-teal-900/70 to-teal-900/30 ring-4 ring-teal-900/20 rounded-full overflow-hidden hover:opacity-90 transition-opacity before:absolute before:top-4 before:left-1/2 before:-translate-x-1/2 before:w-[100px] before:h-[100px] before:rounded-full before:bg-gradient-to-b before:from-teal-50/10 before:blur-xl text-base animate-arrow"
             >
-              Book Delivery Service
+              Book Delivery
               <span className="svg pt-[1px]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

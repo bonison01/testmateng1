@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation"; // Step 1: import router
 
 interface Place {
   id: string;
@@ -13,13 +14,13 @@ interface Place {
   price?: number;
 }
 
-interface CategoryTabsProps {
-  events: Place[];
-  business: Place[];
+interface OthersListProps {
   others: Place[];
 }
 
-export default function CategoryTabs({ business }: CategoryTabsProps) {
+export default function OthersList({ others }: OthersListProps) {
+  const router = useRouter(); // Step 2: use router
+
   const renderPlaces = (places: Place[]) => {
     if (places.length === 0) {
       return <p className="text-gray-400">No results found.</p>;
@@ -30,7 +31,8 @@ export default function CategoryTabs({ business }: CategoryTabsProps) {
         {places.map((place) => (
           <div
             key={place.id}
-            className="bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+            onClick={() => router.push(`/place/${place.id}`)} // Step 3: navigate
+            className="cursor-pointer bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
           >
             {place.image && (
               <img
@@ -57,6 +59,5 @@ export default function CategoryTabs({ business }: CategoryTabsProps) {
     );
   };
 
-  // Only show business places, no tabs
-  return <>{renderPlaces(business)}</>;
+  return <>{renderPlaces(others)}</>;
 }

@@ -6,7 +6,10 @@ import { LocateFixed, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
-import CategoryTabs from "@/components/discovery/CategoryTabs";
+import EventHero from "@/components/events/EventHero";
+import EventCategoryIcons from "@/components/events/EventCategoryIcons";
+import BusinessList from "@/components/discovery/BusinessList";
+import OthersList from "@/components/discovery/OthersList";
 
 interface Place {
   id: string;
@@ -28,20 +31,22 @@ interface Place {
 
 export default function DiscoverPage() {
   const dispatch = useDispatch();
+
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [activeTab, setActiveTab] = useState<"Business" | "Events" | "Others">("Business");
 
   function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 6371; // Radius of Earth in km
+    const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2;
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -84,8 +89,6 @@ export default function DiscoverPage() {
       });
 
       setPlaces(placesData);
-      const cats = Array.from(new Set(placesData.map((p) => p.type)));
-      setCategories(["All", ...cats]);
     } catch (err) {
       console.error(err);
     }
@@ -112,64 +115,116 @@ export default function DiscoverPage() {
     );
   }, []);
 
-  // Apply filters
-  const filteredPlaces = places.filter((p) => {
-    const matchesCategory = selectedCategory === "All" || p.type === selectedCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Filter and categorize places
+  const filteredPlaces = places.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  // Grouping
   const events = filteredPlaces.filter((p) => p.type.toLowerCase() === "event");
   const business = filteredPlaces.filter((p) => p.type.toLowerCase() === "business");
   const others = filteredPlaces.filter(
     (p) => p.type.toLowerCase() !== "event" && p.type.toLowerCase() !== "business"
   );
 
+  const featuredEvent =
+    events.find((e) => e.name === "Echoes of Earth, 2025") || events[0];
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 p-4 pt-20">
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Discover Nearby</h1>
-          {currentLocation && (
-            <Button
-              variant="outline"
-              onClick={() => fetchPlaces(currentLocation[0], currentLocation[1])}
+        {/* Main Tabs */}
+        <div className="flex gap-6 border-b border-gray-700 mb-4">
+          {["Business", "Events", "Others"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as "Business" | "Events" | "Others")}
+              className={`px-4 py-2 font-semibold ${
+                activeTab === tab
+                  ? "border-b-2 border-purple-500 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
             >
-              <LocateFixed className="mr-2" size={16} />
-              Near Me
-            </Button>
-          )}
+              {tab}
+            </button>
+          ))}
         </div>
 
-        {/* Search bar + Category */}
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="relative w-full sm:w-1/2">
-            <Input
-              placeholder="Search places..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.currentTarget.value)}
-            />
-            <Search
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer"
-              size={16}
-            />
+        {/* Search Input */}
+        <div className="relative w-full sm:w-1/2">
+          <Input
+            placeholder={`Search ${activeTab === "Events" ? "events" : "places"}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            className="pl-10 bg-gray-800 border-gray-700 text-gray-200"
+          />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={16}
+          />
+        </div>
+
+        {/* Active Tab Content */}
+        {activeTab === "Events" ? (
+  <>
+    <EventCategoryIcons /> {/* Always show icons */}
+
+    {events.length === 0 ? (
+      <p className="text-center text-gray-400 mt-10 text-lg">
+        No events found as of now.
+      </p>
+    ) : (
+      <>
+        {featuredEvent && (
+          <EventHero
+            event={{
+              id: featuredEvent.id,
+              name: featuredEvent.name,
+              location: featuredEvent.location,
+              start_date: featuredEvent.start_date ?? "",
+              end_date: featuredEvent.end_date ?? "",
+              price: featuredEvent.price ?? 0,
+              image: featuredEvent.image ?? "/placeholder.jpg",
+            }}
+          />
+        )}
+
+        <div className="w-full mt-4">
+          <h2 className="text-xl font-semibold text-white mb-4">Other Events</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {events
+              .filter((e) => e.id !== featuredEvent?.id)
+              .map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => (window.location.href = `/booking/${event.id}`)}
+                  className="relative flex flex-col items-center justify-end p-4 rounded-lg bg-gray-800 text-gray-200 min-w-[150px] aspect-square shadow-lg hover:bg-gray-700 transition-colors cursor-pointer overflow-hidden"
+                >
+                  <img
+                    src={event.image || "/placeholder.jpg"}
+                    alt={event.name}
+                    className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                  />
+                  <div className="relative z-10 w-full bg-black bg-opacity-60 rounded-b-lg p-2 text-center">
+                    <h3 className="text-sm font-semibold truncate">{event.name}</h3>
+                    <p className="text-xs text-gray-300 mt-1">
+                      {event.start_date
+                        ? new Date(event.start_date).toLocaleDateString()
+                        : "TBA"}
+                    </p>
+                  </div>
+                </div>
+              ))}
           </div>
-          <select
-            className="bg-gray-800 text-gray-200 rounded p-2"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
         </div>
+      </>
+    )}
+  </>
+) : activeTab === "Business" ? (
+  <BusinessList business={business} />
+) : (
+  <OthersList others={others} />
+)}
 
-        {/* CategoryTabs component */}
-        <CategoryTabs business={business} events={events} others={others} />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation"; // <-- Add this
 
 interface Place {
   id: string;
@@ -13,13 +14,17 @@ interface Place {
   price?: number;
 }
 
-interface CategoryTabsProps {
-  events: Place[];
+interface BusinessListProps {
   business: Place[];
-  others: Place[];
 }
 
-export default function CategoryTabs({ business }: CategoryTabsProps) {
+export default function BusinessList({ business }: BusinessListProps) {
+  const router = useRouter(); // <-- Router hook
+
+  const handleCardClick = (id: string) => {
+    router.push(`/place/${id}`);
+  };
+
   const renderPlaces = (places: Place[]) => {
     if (places.length === 0) {
       return <p className="text-gray-400">No results found.</p>;
@@ -30,7 +35,8 @@ export default function CategoryTabs({ business }: CategoryTabsProps) {
         {places.map((place) => (
           <div
             key={place.id}
-            className="bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+            onClick={() => handleCardClick(place.id)} // <-- Click handler
+            className="cursor-pointer bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
           >
             {place.image && (
               <img
@@ -57,6 +63,5 @@ export default function CategoryTabs({ business }: CategoryTabsProps) {
     );
   };
 
-  // Only show business places, no tabs
   return <>{renderPlaces(business)}</>;
 }
