@@ -236,6 +236,17 @@ export default function page() {
             </div>
           </div>
 
+
+<div className="flex justify-end mb-12">
+  <Button
+    variant="default"
+    className="w-full sm:w-1/2 bg-red-600 hover:bg-red-700 text-white"
+    onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSdWvj-sjeZ8FgxW7fUprqk55swqhM1YPEJqqT-bB2prsKG9PA/viewform?usp=header", "_blank")}
+  >
+    Submit a Complaint
+  </Button>
+</div>
+
           <div className='my-[5rem] space-y-2'>
             <div className='mb-4'>
               <CardTitle className='text-2xl sm:text-3xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400'>Stay Connected!</CardTitle>
