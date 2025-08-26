@@ -39,7 +39,7 @@ export default function Footer() {
                   Invoice Generator
                 </Button>
               </Link>
-              <Link href="https://textscan.vercel.app/scan-post">
+              <Link href="https://textscan.vercel.app/">
                 <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
                   Text Converter
                 </Button>
