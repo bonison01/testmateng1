@@ -20,6 +20,9 @@ export default function Footer() {
         <Link href={`/terms`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Terms</Button>
         </Link>
+        <Link href="https://invoice-one-snowy.vercel.app">
+          <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Invoice Generator</Button>
+        </Link>
       </div>
     </div>
   )

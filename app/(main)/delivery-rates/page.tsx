@@ -22,10 +22,10 @@ export default function DeliveryRatesPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[100svh] p-4 bg-zinc-950 text-white poppins">
+    <div className="flex flex-col items-center justify-center min-h-[100svh] p-4  pt-20 bg-zinc-950 text-white poppins">
       <div className="w-full max-w-4xl mx-auto text-center my-8">
         <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">
-          Choose Your Delivery Service
+          Choose Your Delivery Mode
         </h1>
         <p className="text-lg text-gray-400">
           Select the service that best fits your needs, from local deliveries to B2B cargo.
@@ -65,7 +65,7 @@ export default function DeliveryRatesPage() {
               <Car className="w-8 h-8 text-purple-400" />
             </div>
             <CardTitle className="text-lg font-bold text-neutral-100 mt-2 text-center">
-              Instant Delivery Rates
+              Instant Delivery
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center p-0 flex-grow">
@@ -103,7 +103,7 @@ export default function DeliveryRatesPage() {
               className="w-full text-white bg-orange-600 hover:bg-orange-700 transition-colors"
               onClick={handleDownloadPdf}
             >
-              Download Brochure
+              Get Started
             </Button>
           </div>
         </Card>
