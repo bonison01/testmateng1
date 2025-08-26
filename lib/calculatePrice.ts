@@ -1,3 +1,4 @@
+// Pricing Tier Types
 type FixedRateTier = {
   maxKm: number;
   rate: number;
@@ -13,20 +14,7 @@ type VariableRateTier = {
 
 type PricingTier = FixedRateTier | VariableRateTier;
 
-// Define pricing tiers for a two-wheeler vehicle
-const twoWheelerTiers: PricingTier[] = [
-  { maxKm: 4, rate: 60, type: 'fixed' },
-  { maxKm: 7, base: 20, perKm: 15, type: 'variable' },
-  { maxKm: 10, rate: 130, type: 'fixed' },
-  { maxKm: 17, rate: 150, type: 'fixed' },
-  { maxKm: 26, rate: 180, type: 'fixed' },
-  { maxKm: 30, rate: 230, type: 'fixed' },
-  { maxKm: 33, rate: 250, type: 'fixed' },
-  { maxKm: 36, rate: 280, type: 'fixed' },
-  { maxKm: Infinity, rate: 330, type: 'fixed' },
-];
-
-// Define pricing tiers for a light vehicle
+// Light vehicle pricing tiers
 const lightVehicleTiers: PricingTier[] = [
   { maxKm: 5, rate: 150, type: 'fixed' },
   { maxKm: 10, base: 50, perKm: 20, type: 'variable' },
@@ -38,28 +26,59 @@ const lightVehicleTiers: PricingTier[] = [
 
 /**
  * Calculates the total delivery price based on distance and vehicle type.
- * @param distance The distance of the delivery in kilometers.
- * @param vehicleType The type of vehicle ('two-wheeler' or 'light-vehicle').
- * @returns The final price as a number.
+ * - Two-wheelers use fixed if-else logic.
+ * - Light vehicles use tier-based logic.
+ *
+ * @param distance The delivery distance in kilometers.
+ * @param vehicleType Either 'two-wheeler' or 'light-vehicle'.
+ * @returns The calculated price as a number.
  */
-export const calculatePrice = (distance: number, vehicleType: 'two-wheeler' | 'light-vehicle'): number => {
-  const tiers = vehicleType === 'two-wheeler' ? twoWheelerTiers : lightVehicleTiers;
+export const calculatePrice = (
+  distance: number,
+  vehicleType: 'two-wheeler' | 'light-vehicle'
+): number => {
+  // Two-wheeler pricing with direct conditional logic
+  if (vehicleType === 'two-wheeler') {
+    if (distance < 4) {
+      return 60;
+    } else if (distance < 7) {
+      const baseCharge = 20;
+      const perKmRate = 15;
+      return baseCharge + perKmRate * distance;
+    } else if (distance < 10) {
+      return 130;
+    } else if (distance < 17) {
+      return 150;
+    } else if (distance < 26) {
+      return 180;
+    } else if (distance < 30) {
+      return 230;
+    } else if (distance < 33) {
+      return 250;
+    } else if (distance < 36) {
+      return 280;
+    } else {
+      return 330;
+    }
+  }
 
+  // Light vehicle pricing using tiers
+  const tiers = lightVehicleTiers;
   for (const tier of tiers) {
     if (distance <= tier.maxKm) {
       if (tier.type === 'fixed') {
         return tier.rate;
       } else {
-        // TypeScript now knows 'tier' must be of type VariableRateTier here
         return tier.base + tier.perKm * distance;
       }
     }
   }
 
-  // This part is a safe fallback, as the 'Infinity' tier should always be matched.
+  // Fallback for safety (should never be hit because of Infinity tier)
   const lastTier = tiers[tiers.length - 1];
   if (lastTier.type === 'fixed') {
     return lastTier.rate;
+  } else {
+    return lastTier.base + lastTier.perKm * distance;
   }
-  return 0;
 };
