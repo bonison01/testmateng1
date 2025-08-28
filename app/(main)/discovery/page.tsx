@@ -169,9 +169,17 @@ export default function DiscoverPage() {
     <EventCategoryIcons /> {/* Always show icons */}
 
     {events.length === 0 ? (
-      <p className="text-center text-gray-400 mt-10 text-lg">
-        No events found as of now.
-      </p>
+  <div className="flex flex-col items-center justify-center mt-10 gap-4">
+    <img
+      src="/coming-soon.svg" // or use a suitable icon from your assets
+      alt="Coming Soon"
+      className="w-40 h-40 opacity-70"
+    />
+    <h2 className="text-xl font-bold text-gray-100">Coming Soon!</h2>
+    <p className="text-gray-400 text-center max-w-sm">
+      We're working on bringing exciting events to your area. Check back later!
+    </p>
+  </div>
     ) : (
       <>
         {featuredEvent && (
