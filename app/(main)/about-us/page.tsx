@@ -120,6 +120,9 @@ export default function Page() {
           </div>
         </div>
 
+        {/* <div className="w-full min-h-800"></div>
+      <Footer  /> */}
+
         <div className="w-full min-h-60"></div>
 
         <Footer />

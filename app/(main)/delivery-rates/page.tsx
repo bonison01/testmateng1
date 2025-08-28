@@ -101,7 +101,7 @@ export default function DeliveryRatesPage() {
           <div className="w-full mt-4">
             <Button
               className="w-full text-white bg-orange-600 hover:bg-orange-700 transition-colors"
-              onClick={handleDownloadPdf}
+              onClick={() => router.push("/RouteRatesPage")}
             >
               Get Started
             </Button>
