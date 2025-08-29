@@ -90,7 +90,7 @@ export default function DeliveryRatesPage() {
               <Boxes className="w-8 h-8 text-orange-400" />
             </div>
             <CardTitle className="text-lg font-bold text-neutral-100 mt-2 text-center">
-              B2B Services
+              Standard Rates
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center p-0 flex-grow">
