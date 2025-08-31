@@ -98,7 +98,7 @@ export default function BusinessList({ business, banners }: BusinessListProps) {
         return (
           <div key={category}>
             <h2 className="text-xl font-bold text-white mb-4">{category}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
               {items.map((item, index) => {
                 if ("isBanner" in item && item.isBanner) {
                   return (

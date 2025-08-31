@@ -159,7 +159,8 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-800 text-gray-200 pt-20 px-4">
-      <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
+      {/* <div className="w-full max-w-7xl mx-auto flex flex-col gap-6"> */}
+      <div className="w-full mx-auto flex flex-col gap-6">
 
         {/* Sticky Header: Tabs + Search */}
 {/* <div className="sticky top-20 z-30 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-800 pb-4"> */}
