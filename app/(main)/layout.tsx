@@ -19,7 +19,9 @@ export default function MainLayout({
           <CartLoader />
           <StorageWatcher />
           <Navbar />
-          {children}
+          <main className="pt-20"> {/* Adjust to match your navbar height */}
+    {children}
+  </main>
       </Provider>
     </>
   );

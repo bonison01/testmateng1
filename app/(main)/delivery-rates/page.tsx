@@ -59,10 +59,10 @@ export default function DeliveryRatesPage() {
         </Card> */}
 
         {/* Light Vehicles Delivery Card */}
-        <Card className="flex flex-col items-center justify-between p-6 bg-zinc-900 border-zinc-600 hover:border-purple-500 transition-colors duration-200 ease-in-out">
+        <Card className="flex flex-col items-center justify-between p-6 bg-zinc-900 border-zinc-600 hover:border-green-500 transition-colors duration-200 ease-in-out">
           <CardHeader className="flex flex-col items-center p-0 mb-4">
             <div className="w-16 h-16 flex items-center justify-center rounded-full bg-purple-500/10 mb-2">
-              <Car className="w-8 h-8 text-purple-400" />
+              <Car className="w-8 h-8 text-green-400" />
             </div>
             <CardTitle className="text-lg font-bold text-neutral-100 mt-2 text-center">
               Instant Delivery
@@ -75,7 +75,7 @@ export default function DeliveryRatesPage() {
           </CardContent>
           <div className="w-full mt-4">
             <Button
-              className="w-full text-white bg-purple-600 hover:bg-purple-700 transition-colors"
+              className="w-full text-white bg-green-600 hover:bg-green-700 transition-colors"
               onClick={() => router.push("/light-vehicle")}
             >
               Get Started
@@ -84,10 +84,10 @@ export default function DeliveryRatesPage() {
         </Card>
 
         {/* B2B Services Card */}
-        <Card className="flex flex-col items-center justify-between p-6 bg-zinc-900 border-zinc-600 hover:border-orange-500 transition-colors duration-200 ease-in-out">
+        <Card className="flex flex-col items-center justify-between p-6 bg-zinc-900 border-zinc-600 hover:border-green-500 transition-colors duration-200 ease-in-out">
           <CardHeader className="flex flex-col items-center p-0 mb-4">
             <div className="w-16 h-16 flex items-center justify-center rounded-full bg-orange-500/10 mb-2">
-              <Boxes className="w-8 h-8 text-orange-400" />
+              <Boxes className="w-8 h-8 text-green-400" />
             </div>
             <CardTitle className="text-lg font-bold text-neutral-100 mt-2 text-center">
               Standard Rates
@@ -100,7 +100,7 @@ export default function DeliveryRatesPage() {
           </CardContent>
           <div className="w-full mt-4">
             <Button
-              className="w-full text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+              className="w-full text-white bg-green-600 hover:bg-green-700 transition-colors"
               onClick={() => router.push("/RouteRatesPage")}
             >
               Get Started
@@ -124,7 +124,7 @@ export default function DeliveryRatesPage() {
             </p>
           </CardContent>
           <div className="w-full mt-4">
-            <a href="https://cargo4.vercel.app/" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.link/350bfh" target="_blank" rel="noopener noreferrer">
               <Button
                 className="w-full text-white bg-green-600 hover:bg-green-700 transition-colors"
               >
@@ -138,7 +138,7 @@ export default function DeliveryRatesPage() {
       <Separator className="bg-zinc-700 w-full max-w-2xl my-8" />
 
       <div className="text-center text-gray-500 mt-4">
-        <p>&copy; {new Date().getFullYear()} Delivery Service. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Mateng. All rights reserved.</p>
       </div>
     </div>
   );
