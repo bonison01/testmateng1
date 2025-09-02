@@ -79,11 +79,12 @@ export default function RouteRatesPage() {
     );
 
   return (
-    <div className="p-6 pt-40 max-w-4xl mx-auto text-gray-200">
-      <h1 className="text-2xl font-bold mb-4">Select your pickup points.</h1>
-      <p className="text-gray-400 mb-6">
+    <div className="p-6 pt-20 max-w-4xl mx-auto text-gray-200">
+      <h1 className="text-5xl font-bold mb-4">STANDARD RATES</h1>
+      <h2 className="text-2xl mb-4">Select your pickup points. This is for business only.</h2>
+      {/* <p className="text-gray-400 mb-6">
         This is for business only.
-      </p>
+      </p> */}
 
       {/* Tabs */}
       <Tabs
