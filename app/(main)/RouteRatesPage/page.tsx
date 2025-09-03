@@ -128,7 +128,7 @@ export default function RouteRatesPage() {
                       <p className="text-sm text-gray-400">Instant: ₹{rate.instant_rate}</p>
                       <p className="text-sm text-gray-400">Light Vehicle: ₹{rate.light_vehicle_rate}</p>
                     </div>
-                    <Button variant="secondary">Book Now</Button>
+                    {/* <Button variant="secondary">Book Now</Button> */}
                   </div>
                 ))}
               </div>

@@ -16,12 +16,12 @@ type PricingTier = FixedRateTier | VariableRateTier;
 
 // Light vehicle pricing tiers
 const lightVehicleTiers: PricingTier[] = [
-  { maxKm: 5, rate: 150, type: 'fixed' },
-  { maxKm: 10, base: 50, perKm: 20, type: 'variable' },
-  { maxKm: 20, rate: 350, type: 'fixed' },
-  { maxKm: 30, rate: 450, type: 'fixed' },
-  { maxKm: 50, rate: 600, type: 'fixed' },
-  { maxKm: Infinity, base: 600, perKm: 10, type: 'variable' },
+  { maxKm: 5, rate: 300, type: 'fixed' },
+  { maxKm: 10, base: 300, perKm: 20, type: 'variable' },
+  { maxKm: 20, rate: 1000, type: 'fixed' },
+  { maxKm: 30, rate: 1300, type: 'fixed' },
+  { maxKm: 50, rate: 1700, type: 'fixed' },
+  { maxKm: Infinity, base: 1500, perKm: 10, type: 'variable' },
 ];
 
 /**
