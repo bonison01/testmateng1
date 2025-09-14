@@ -109,7 +109,7 @@ function Navbar() {
             <button className="cartBtn rounded-full p-0.5 text-[0.95rem] leading-none">
                 <div className="button-overlay"></div>
                 <span className="rounded-full py-2 px-6 gap-1">
-                    Login
+                    User Login
                     <ArrowRight size={18} className="text-white" />
                 </span>
             </button>
