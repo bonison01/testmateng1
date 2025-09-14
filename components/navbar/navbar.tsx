@@ -108,10 +108,10 @@ function Navbar() {
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} onClick={() => setNavOpen(false)}>
             <button className="cartBtn rounded-full p-0.5 text-[0.95rem] leading-none">
                 <div className="button-overlay"></div>
-                {/* <span className="rounded-full py-2 px-6 gap-1">
+                <span className="rounded-full py-2 px-6 gap-1">
                     Login
                     <ArrowRight size={18} className="text-white" />
-                </span> */}
+                </span>
             </button>
         </Link>
     );
@@ -156,12 +156,13 @@ function Navbar() {
                 <div className="flex flex-row gap-4">
                     {user ? (
                         <UserGreeting />
+                        
                     ) : (
                         <>
                             <LoginButton />
-                            <VendorLoginButton />
                         </>
                     )}
+                    <VendorLoginButton />
                 </div>
             </div>
 
@@ -259,9 +260,10 @@ function Navbar() {
                             ) : (
                                 <>
                                     <LoginButton />
-                                    <VendorLoginButton />
+                                    
                                 </>
                             )}
+                            <VendorLoginButton />
                         </div>
 
                         <div className='relative mt-[7rem]'>

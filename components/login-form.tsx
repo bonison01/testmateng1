@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/cart/store";
 import { setUser } from "@/lib/cart/userSlice";
-import { GalleryVerticalEnd, BellRing, Loader2 } from "lucide-react"; // Added Loader2 for spinner
+import { GalleryVerticalEnd, BellRing, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-  DialogClose, // Added for explicit close button
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -44,17 +43,18 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFormProps) {
-  const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [dob, setDob] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [isOtpSent, setIsOtpSent] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [isRequestingOtp, setIsRequestingOtp] = useState(false); 
+  const [isResetting, setIsResetting] = useState(false);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -63,7 +63,7 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emailOrPhone, password }),
+        body: JSON.stringify({ emailOrPhone: email || phone, password }), // Use email or phone for login
       });
 
       const data = await res.json();
@@ -101,47 +101,18 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
     }
   };
 
-  const handleRequestOtp = async () => {
-    if (!emailOrPhone) {
-      toast.error("Please enter email", { position: "top-right" });
+  const handleResetPassword = async () => {
+    if (!email || !phone || !dob || !newPassword) {
+      toast.error("All fields are required.", { position: "top-right" });
       return;
     }
-
-    setIsRequestingOtp(true); // Start loading state
+    setIsResetting(true);
 
     try {
       const res = await fetch('/api/forgotPassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailOrPhone }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setIsOtpSent(true);
-        toast.success(data.message, { position: "top-right" });
-      } else {
-        toast.error(data.message, { position: "top-right" });
-      }
-    } catch (err: any) {
-      toast.error("Something went wrong", { position: "top-right" });
-    } finally {
-      setIsRequestingOtp(false); // End loading state
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!newPassword) {
-      toast.error("Please enter new password", { position: "top-right" });
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/forgotPassword', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailOrPhone, otp, newPassword }),
+        body: JSON.stringify({ email, phone, dob, newPassword }),
       });
 
       const data = await res.json();
@@ -154,17 +125,20 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
         toast.error(data.message, { position: "top-right" });
       }
     } catch (err: any) {
-      toast.error("Something went wrong", { position: "top-right" });
+      toast.error("An error occurred. Please try again.", { position: "top-right" });
+    } finally {
+      setIsResetting(false);
+      setConfirmDialogOpen(false);
     }
   };
 
   const resetFields = () => {
-    setEmailOrPhone("");
+    setEmail("");
+    setPhone("");
+    setDob("");
     setNewPassword("");
-    setOtp("");
-    setIsOtpSent(false);
     setConfirmDialogOpen(false);
-    setIsRequestingOtp(false);
+    setIsResetting(false);
   };
 
   return (
@@ -189,13 +163,13 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
           <Card className="p-8">
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="emailOrPhone">Email / Phone</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="emailOrPhone"
-                  value={emailOrPhone}
-                  onChange={(e) => setEmailOrPhone(e.target.value)}
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   type="text"
-                  placeholder="m@example.com or 1234567890"
+                  placeholder="m@example.com"
                   required
                 />
               </div>
@@ -233,85 +207,78 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
       {/* Forgot Password Dialog */}
       <Dialog
         open={forgotDialogOpen}
-        onOpenChange={(open) => setForgotDialogOpen(open)} // Controlled by state only
+        onOpenChange={(open) => {
+          setForgotDialogOpen(open);
+          if (!open) resetFields();
+        }}
       >
-        <DialogContent 
+        <DialogContent
           className="w-[90%] sm:w-full"
-          onInteractOutside={(e) => e.preventDefault()} // Prevent closing on outside click
-          onEscapeKeyDown={(e) => e.preventDefault()} // Prevent closing with Escape key
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader className="text-left pb-2 mb-1 border-b">
             <DialogTitle>Reset Password</DialogTitle>
             <DialogDescription>
-              {isOtpSent
-                ? "Enter the OTP sent to your email and your new password"
-                : "Enter your email to receive an OTP"}
+              Enter your registered email and phone number, date of birth, and new password.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4">
             <div>
-              <Label className="mb-3">Email</Label>
+              <Label htmlFor="forgot-email">Email</Label>
               <Input
-                value={emailOrPhone}
-                onChange={(e) => setEmailOrPhone(e.target.value)}
+                id="forgot-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter email"
-                disabled={isOtpSent}
               />
             </div>
-
-            {isOtpSent && (
-              <>
-                <div>
-                  <Label className="mb-3">Enter OTP</Label>
-                  <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                <div>
-                  <Label className="mb-3">New Password</Label>
-                  <Input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                  />
-                </div>
-              </>
-            )}
+            <div>
+              <Label htmlFor="forgot-phone">Phone</Label>
+              <Input
+                id="forgot-phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="forgot-dob">Date of Birth</Label>
+              <Input
+                id="forgot-dob"
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="forgot-newPassword">New Password</Label>
+              <Input
+                id="forgot-newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+              />
+            </div>
           </div>
 
-          <DialogFooter className="flex justify-between items-center">
-            {!isOtpSent ? (
-              <Button 
-                className="text-white mt-2" 
-                onClick={handleRequestOtp}
-                disabled={isRequestingOtp}
-              >
-                {isRequestingOtp ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Requesting...
-                  </>
-                ) : (
-                  "Request OTP"
-                )}
-              </Button>
-            ) : (
-              <Button className="text-white mt-2" onClick={() => setConfirmDialogOpen(true)}>
-                Verify OTP & Reset
-              </Button>
-            )}
+          <DialogFooter className="flex justify-end">
+            <Button
+              className="text-white mt-2"
+              onClick={() => setConfirmDialogOpen(true)}
+              disabled={isResetting}
+            >
+              {isResetting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                "Reset Password"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -329,10 +296,8 @@ export function LoginForm({ className, setIsLogin, redirect, ...props }: LoginFo
             <AlertDialogCancel className="w-fit">Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="text-white w-fit"
-              onClick={() => {
-                handleResetPassword();
-                setConfirmDialogOpen(false);
-              }}
+              onClick={handleResetPassword}
+              disabled={isResetting}
             >
               Yes, Reset
             </AlertDialogAction>

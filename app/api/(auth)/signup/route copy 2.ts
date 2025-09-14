@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { randomBytes } from 'crypto';
+import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto'; // Import crypto module
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { name, email, phone, password, dob, address } = await req.json();
+    const { name, email, phone, password } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ success: false, message: 'Name, email, and password are required' }, { status: 400 });
@@ -23,31 +24,27 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ success: false, message: 'User with this email or phone already exists' }, { status: 409 });
     }
 
-    const newToken = randomBytes(32).toString('hex');
-    
-    // 💥 FIX: Convert the dob string back to a Date object
-    const dobDate = dob ? new Date(dob) : null;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newToken = randomBytes(32).toString('hex'); // Generate a random hex token
 
     const newUser = await prisma.customers.create({
       data: {
         name,
         email,
         phone,
-        password: password,
-        token: newToken,
-        dob: dobDate, // Pass the new Date object to Prisma
-        address,
+        password: hashedPassword,
+        token: newToken, // Add the generated token here
       },
       select: {
         customer_id: true,
         name: true,
         email: true,
         phone: true,
-        dob: true,
-        address: true,
+        // is_active: true,
+        // is_verified: true,
         created_at: true,
         updated_at: true,
-        token: true,
+        token: true, // Also include the token in the response if the client needs it
       },
     });
 
