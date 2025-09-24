@@ -139,9 +139,9 @@ export default function HangoutList({ hangouts, isDarkMode }: HangoutListProps) 
       )}
 
       {/* === Filter by Category Dropdown */}
-      <div className="flex justify-between items-center mb-6">
+      {/* <div className="flex justify-between items-center mb-6"> */}
         {/* <h2 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-black"}`}>Hangout & Food Spots</h2> */}
-        <select
+        {/* <select
           className={`px-4 py-2 rounded-md ${isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-black"
             }`}
           value={selectedCategory}
@@ -152,8 +152,8 @@ export default function HangoutList({ hangouts, isDarkMode }: HangoutListProps) 
               {cat}
             </option>
           ))}
-        </select>
-      </div>
+        </select> */}
+      {/* </div> */}
 
       {/* === Grouped Listings */}
       {Object.entries(groupedPlaces).map(([category, places]) => (
@@ -198,18 +198,19 @@ export default function HangoutList({ hangouts, isDarkMode }: HangoutListProps) 
       {/* === Top Banner Section === */}
       {hangouts.length === 0 ? (
         <div
-  className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-6 mt-2 ${
+  className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-10 mt-2 ${
     isDarkMode ? "bg-gray-900" : "bg-gray-100"
   }`}
 >
   <img
     src="/banner.png"
     alt="Sample Banner"
-    className="w-full h-64 sm:h-80 object-cover"
+    className="w-full h-100 sm:h-80 object-cover"
   />
   <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 sm:px-12">
     <h1 className="text-5xl sm:text-6xl font-bold text-white drop-shadow-lg">
       Thanks for visiting!
+      <span className="block sm:hidden"><br /></span>
     </h1>
     <p className="mt-2 text-sm sm:text-base text-gray-200 max-w-xl">
       Our Hangout & Foods category is coming soon—stay tuned!

@@ -11,6 +11,7 @@ import BusinessList from "@/components/discovery/BusinessList";
 import OthersList from "@/components/discovery/OthersList";
 import HangoutList from "@/components/discovery/HangoutList";
 import FeedbackForm from "@/components/FeedbackForm";
+import SearchBar from "@/components/SearchBar";
 
 interface Place {
   id: string;
@@ -224,7 +225,7 @@ export default function DiscoverPage() {
           <div className={`flex flex-wrap items-center justify-between gap-4 border-b pb-2 ${isDarkMode ? "border-gray-700" : "border-gray-300"}`}>
             {/* Tabs */}
             <div className="flex flex-wrap gap-4">
-              {["Hangout & Foods","Business",  "Events", "Others"].map((tab) => {
+              {["Hangout & Foods", "Business", "Events", "Others"].map((tab) => {
                 const isActive = activeTab === tab;
                 return (
                   <button
@@ -249,39 +250,32 @@ export default function DiscoverPage() {
                   </button>
                 );
               })}
+
+              
             </div>
 
             {/* Search + Switch */}
             <div className="flex items-center gap-4 ml-auto">
-              <div className="relative w-full sm:w-64">
-                <Input
-                  placeholder={`Search ${activeTab === "Events"
-                    ? "events"
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={
+                  activeTab === "Events"
+                    ? "Search events..."
                     : activeTab === "Hangout & Foods"
-                      ? "hangouts or food places"
-                      : "places"
-                    }...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                  className={`pl-10 pr-4 py-3 rounded-xl shadow focus:ring-2 focus:outline-none ${isDarkMode
-                    ? "bg-gray-800 border border-gray-700 text-gray-200 focus:ring-green-500"
-                    : "bg-gray-100 border border-gray-300 text-gray-900 focus:ring-green-600"
-                    }`}
-                />
-                <Search
-                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  size={18}
-                />
-              </div>
+                      ? "Search hangouts or food places..."
+                      : "Search places..."
+                }
+                isDarkMode={isDarkMode}
+              />
 
-              <Switch checked={isDarkMode} onChange={setIsDarkMode} />
             </div>
           </div>
         </div>
 
+              <Switch checked={isDarkMode} onChange={setIsDarkMode} />
         {/* === Main Content === */}
-        <div className="pt-6">
+        <div className="pt-0">
           {activeTab === "Events" ? (
             <>
               <EventCategoryIcons />

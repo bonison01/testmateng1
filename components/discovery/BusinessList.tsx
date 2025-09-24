@@ -76,38 +76,38 @@ export default function BusinessList({ business, banners, isDarkMode }: Business
 
   return (
     <div className={`flex flex-col gap-10 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
-      
+
       {/* === Top Banner Section === */}
-                  <div
-                    className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-6 mt-2 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"
-                      }`}
-                  >
-                    <img
-                      src="/banner.png"
-                      alt="Sample Banner"
-                      className="w-full h-64 sm:h-80 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 sm:px-12">
-    <h1 className="text-2xl sm:text-6xl font-bold text-white drop-shadow-lg">
-                        Discover Great Businesses Near You
-                      </h1>
-                      <p className="mt-2 text-sm sm:text-base text-gray-200 max-w-xl">
-                        Looking for something local? Explore a variety of nearby businesses—from cafes and shops to services and hangout spots—all just around the corner. Start exploring your area now!
-                      </p>
-                    </div>
-                  </div>
-      
-      
+      <div
+        className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-6 mt-2 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"
+          }`}
+      >
+        <img
+          src="/banner.png"
+          alt="Sample Banner"
+          className="w-full h-100 sm:h-80 object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 sm:px-12">
+          <h1 className="text-5xl sm:text-6xl font-bold text-white drop-shadow-lg">
+            Discover Great Businesses Near You
+            {/* <span className="block sm:hidden"><br /></span> */}
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-200 max-w-xl">
+            Looking for something local? Explore a variety of nearby businesses—from cafes and shops to services and hangout spots—all just around the corner. Start exploring your area now!
+          </p>
+        </div>
+      </div>
+
+
       {/* Category Filter */}
       <div className="flex justify-end mb-4">
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className={`px-4 py-2 rounded-md border ${
-            isDarkMode
+          className={`px-4 py-2 rounded-md border ${isDarkMode
               ? "bg-gray-800 text-white border-gray-700"
               : "bg-gray-100 text-gray-900 border-gray-300"
-          }`}
+            }`}
         >
           {allCategories.map((cat) => (
             <option key={cat} value={cat}>
@@ -166,9 +166,8 @@ export default function BusinessList({ business, banners, isDarkMode }: Business
                     </div>
                     <div className="p-4 space-y-2">
                       <h3
-                        className={`text-lg font-semibold transition-colors duration-200 group-hover:text-green-400 ${
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        }`}
+                        className={`text-lg font-semibold transition-colors duration-200 group-hover:text-green-400 ${isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
                       >
                         {place.name}
                       </h3>
