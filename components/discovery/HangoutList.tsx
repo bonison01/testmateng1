@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import FeedbackForm from "@/components/FeedbackForm";
 
 interface Place {
   id: string;
@@ -196,30 +197,38 @@ export default function HangoutList({ hangouts, isDarkMode }: HangoutListProps) 
 
 
       {/* === Top Banner Section === */}
-      {hangouts.length === 0 ? (
+      {/* {hangouts.length === 0 ? (
         <div
-  className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-10 mt-2 ${
-    isDarkMode ? "bg-gray-900" : "bg-gray-100"
-  }`}
->
-  <img
-    src="/banner.png"
-    alt="Sample Banner"
-    className="w-full h-100 sm:h-80 object-cover"
-  />
-  <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 sm:px-12">
-    <h1 className="text-5xl sm:text-6xl font-bold text-white drop-shadow-lg">
-      Thanks for visiting!
-      <span className="block sm:hidden"><br /></span>
-    </h1>
-    <p className="mt-2 text-sm sm:text-base text-gray-200 max-w-xl">
-      Our Hangout & Foods category is coming soon—stay tuned!
-      Meanwhile, explore other categories and share your feedback. We’d love to hear from you!
-    </p>
-  </div>
+          className={`w-full relative rounded-2xl overflow-hidden shadow-md mb-10 mt-2 ${isDarkMode ? "bg-gray-900" : "bg-gray-100"
+            }`}
+        >
+          <img
+            src="/banner.png"
+            alt="Sample Banner"
+            className="w-full h-100 sm:h-80 object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 sm:px-12">
+            <h1 className="text-5xl sm:text-6xl font-bold text-white drop-shadow-lg">
+              Thanks for visiting!
+              <span className="block sm:hidden"><br /></span>
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-200 max-w-xl">
+              Our Hangout & Foods category is coming soon—stay tuned!
+              Meanwhile, explore other categories and share your feedback. We’d love to hear from you!
+            </p>
+          </div>
 </div>
 
-      ) : null}
+      ) : null} */}
+
+
+
+      {hangouts.length === 0 && (
+  <div>
+    <FeedbackForm isDarkMode={isDarkMode} />
+  </div>
+)}
+
 
       {/* {hangouts.length === 0 ? (
   <div className={`text-center mt-5 text-xl font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>

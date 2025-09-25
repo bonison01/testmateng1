@@ -10,7 +10,7 @@ import EventCategoryIcons from "@/components/events/EventCategoryIcons";
 import BusinessList from "@/components/discovery/BusinessList";
 import OthersList from "@/components/discovery/OthersList";
 import HangoutList from "@/components/discovery/HangoutList";
-import FeedbackForm from "@/components/FeedbackForm";
+
 import SearchBar from "@/components/SearchBar";
 
 interface Place {
@@ -212,7 +212,7 @@ export default function DiscoverPage() {
         : "bg-white text-gray-900"
         }`}
     >
-      <div className="w-full mx-auto flex flex-col gap-6">
+      <div className="w-full mx-auto flex flex-col gap-6"> {/* //size and gaps */}
 
         {/* === Sticky Header === */}
         <div
@@ -275,7 +275,10 @@ export default function DiscoverPage() {
 
               <Switch checked={isDarkMode} onChange={setIsDarkMode} />
         {/* === Main Content === */}
-        <div className="pt-0">
+        {/* <div className="pt-0"> */}
+        {/* <div className="w-full mx-auto flex flex-col gap-0"> */}
+        <div className="w-full mt-0">
+
           {activeTab === "Events" ? (
             <>
               <EventCategoryIcons />
@@ -366,7 +369,7 @@ export default function DiscoverPage() {
           )}
         </div>
       </div>
-      <FeedbackForm isDarkMode={isDarkMode} />
+      {/* <FeedbackForm isDarkMode={isDarkMode} /> */}
 
     </div>
   );
