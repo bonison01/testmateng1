@@ -9,4 +9,5 @@ export interface Place {
   description?: string;
   coordinates: [number, number]; // from latitude, longitude
   rating?: number;
+  nearby_places?: string | string[] | null; // <-- Add this
 }

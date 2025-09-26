@@ -6,6 +6,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { MapProvider } from "@/components/context/MapContext";
 
+import { DarkModeProvider } from "@/components/DarkModeContext";
+import DarkModeWrapper from "@/components/DarkModeWrapper";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,16 +23,16 @@ export const metadata: Metadata = {
   title: "Mateng",
   description: "Explore with Mateng",
   icons: {
-    icon: '/favi.png',
+    icon: "/favi.png",
   },
 };
 
 export const viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -48,18 +51,20 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-           <div className="w-[100vw] custom-bg relative">
-          <div className="lines">
-            <div className="line"></div>
-            <div className="line"></div>
-            <div className="line"></div>
-            <div className="line"></div>
-          </div>
-          <div className="bg-overlay"></div>
-          <MapProvider>
-            {children}
-          </MapProvider>
-          </div>
+          <DarkModeProvider>
+            <DarkModeWrapper>
+              <div className="w-[100vw] custom-bg relative">
+                <div className="lines">
+                  <div className="line"></div>
+                  <div className="line"></div>
+                  <div className="line"></div>
+                  <div className="line"></div>
+                </div>
+                <div className="bg-overlay"></div>
+                <MapProvider>{children}</MapProvider>
+              </div>
+            </DarkModeWrapper>
+          </DarkModeProvider>
         </ThemeProvider>
         <Toaster />
       </body>

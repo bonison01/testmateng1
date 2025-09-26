@@ -2,69 +2,71 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import styles from "../PlaceDetail.module.css";
-import { CommentsSection } from "./CommentsSection"; // Adjust path as needed
-
-// ---------------------
-// Type Definitions
-// ---------------------
+import { CommentsSection } from "./CommentsSection";
+import { useDarkMode } from "@/components/DarkModeContext";
 
 interface Place {
   id: string;
   name: string;
   image?: string;
+  image_urls?: string[];
   description?: string;
   location?: string;
   features: string[];
   contact?: string;
   type: string;
   price?: number;
+  category?: string;
+  openingHours?: string;
+  nearby_places?: string | string[] | null;
 }
-
-interface Product {
-  id: string;
-  place_id: string;
-  name: string;
-  description?: string;
-  price?: number;
-  image_url?: string;
-}
-
-// ---------------------
-// Main Component
-// ---------------------
 
 export function PlaceDetailClient({ place }: { place: Place }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isDarkMode } = useDarkMode();
 
-  const fromTab = searchParams.get("fromTab") || "Hangout & Foods"; // default tab
+  const fromTab = searchParams.get("fromTab") || "Hangout & Foods";
   const searchQuery = searchParams.get("search") || "";
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [nearbyPlaces, setNearbyPlaces] = useState<string[]>([]);
 
-  // Fetch Products for the place
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data: productData, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("place_id", place.id);
+  console.log("Raw nearby_places from place:", place.nearby_places);
 
-      if (error) {
-        console.error("Error fetching products:", error);
-        return;
+  if (!place.nearby_places) {
+    setNearbyPlaces([]);
+    return;
+  }
+
+  try {
+    if (typeof place.nearby_places === "string") {
+      const parsed = JSON.parse(place.nearby_places);
+      console.log("Parsed nearby_places:", parsed);
+      if (Array.isArray(parsed)) {
+        setNearbyPlaces(parsed);
+      } else {
+        setNearbyPlaces([]);
       }
+    } else if (Array.isArray(place.nearby_places)) {
+      setNearbyPlaces(place.nearby_places);
+    } else {
+      setNearbyPlaces([]);
+    }
 
-      setProducts(productData || []);
-    };
+    // ✅ Add this
+    console.log("Final nearbyPlaces state:", nearbyPlaces);
 
-    fetchProducts();
-  }, [place.id]);
+  } catch (error) {
+    console.error("Error parsing nearby_places:", error);
+    setNearbyPlaces([]);
+  }
+}, [place.nearby_places]);
+
+
 
   const handleBack = () => {
-    // fallback: if no history (e.g., direct URL access), redirect manually
     if (window.history.length > 1) {
       router.back();
     } else {
@@ -74,11 +76,34 @@ export function PlaceDetailClient({ place }: { place: Place }) {
     }
   };
 
+  const resolvedImageUrls: string[] = (() => {
+    if (place.image_urls && Array.isArray(place.image_urls)) {
+      return place.image_urls;
+    }
+    if (place.image) {
+      try {
+        const parsed = JSON.parse(place.image);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        return [place.image];
+      }
+    }
+    return [];
+  })();
+
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 p-4 pt-20">
+    <div
+      className={`min-h-screen p-4 pt-20 transition-colors duration-300 ${
+        isDarkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-900"
+      }`}
+    >
       <button
         onClick={handleBack}
-        className="mb-4 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+        className={`mb-4 px-4 py-2 rounded transition ${
+          isDarkMode
+            ? "bg-gray-700 text-white hover:bg-gray-600"
+            : "bg-gray-200 text-black hover:bg-gray-300"
+        }`}
       >
         ← Back
       </button>
@@ -90,11 +115,20 @@ export function PlaceDetailClient({ place }: { place: Place }) {
           <div className={styles.content}>
             <h1 className={styles.title}>{place.name}</h1>
 
-            {place.image ? (
-              <img src={place.image} alt={place.name} className={styles.image} />
+            {resolvedImageUrls.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                {resolvedImageUrls.map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`Image ${index + 1}`}
+                    className="w-full h-48 object-cover rounded-md"
+                  />
+                ))}
+              </div>
             ) : (
               <div className={styles.noImage}>
-                <span>No image available</span>
+                <span>No images available</span>
               </div>
             )}
 
@@ -103,20 +137,32 @@ export function PlaceDetailClient({ place }: { place: Place }) {
             <p className={styles.detail}>
               <strong>Type:</strong> {place.type}
             </p>
+
+            {place.category && (
+              <p className={styles.detail}>
+                <strong>Category:</strong> {place.category}
+              </p>
+            )}
+
             <p className={styles.detail}>
               <strong>Location:</strong> {place.location}
             </p>
 
-            {place.price && (
+            {place.openingHours && (
               <p className={styles.detail}>
-                <strong>Price:</strong> ₹{place.price}
+                <strong>Opening Hours:</strong> {place.openingHours}
               </p>
             )}
 
             {place.contact && (
               <p className={styles.detail}>
                 <strong>Contact:</strong>{" "}
-                <a href={`mailto:${place.contact}`} className={styles.contactLink}>
+                <a
+                  href={`mailto:${place.contact}`}
+                  className={`${styles.contactLink} ${
+                    isDarkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
+                >
                   {place.contact}
                 </a>
               </p>
@@ -133,45 +179,41 @@ export function PlaceDetailClient({ place }: { place: Place }) {
               </ul>
             </div>
 
+            {/* Nearby Places */}
+            <div className="mt-6">
+              <strong>Nearby Places:</strong>
+              {nearbyPlaces.length > 0 ? (
+                <ul className="list-disc pl-6 mt-2">
+                  {nearbyPlaces.map((nearby, index) => (
+                    <li key={index} className="mb-1">
+                      {nearby}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="italic text-gray-500 mt-1">
+                  No nearby places listed.
+                </p>
+              )}
+            </div>
+
             {place.contact && (
-              <a href={`mailto:${place.contact}`} className={styles.buttonContact}>
+              <a
+                href={`mailto:${place.contact}`}
+                className={`${styles.buttonContact} ${
+                  isDarkMode
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                }`}
+              >
                 Contact Now
               </a>
             )}
           </div>
-
-          {/* Products */}
-          {products.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Products Available</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-gray-800 p-4 rounded shadow text-sm"
-                  >
-                    <h3 className="text-lg font-bold">{product.name}</h3>
-                    {product.image_url && (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-48 object-cover rounded mb-2"
-                      />
-                    )}
-                    <p className="mb-1">{product.description}</p>
-                    {product.price && (
-                      <p className="text-blue-400 font-semibold">₹{product.price}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right Pane */}
         <div className={styles.rightPane}>
-          {/* Import and render the separated CommentsSection */}
           <CommentsSection placeId={place.id} />
         </div>
       </div>

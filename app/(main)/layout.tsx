@@ -7,6 +7,7 @@ import CartLoader from "@/components/cart-loader";
 import UserLoader from "@/components/user-loader";
 import StorageWatcher from "@/components/storage-watcher";
 import { usePathname } from "next/navigation";
+import { DarkModeProvider } from "@/components/DarkModeContext"; // ✅ Import
 
 export default function MainLayout({
   children,
@@ -24,11 +25,13 @@ export default function MainLayout({
       <CartLoader />
       <StorageWatcher />
 
-      {shouldShowNavbar && <Navbar />}
-
-      <main className={shouldShowNavbar ? "pt-20" : ""}>
-        {children}
-      </main>
+      {/* ✅ Wrap inside DarkModeProvider */}
+      <DarkModeProvider>
+        {shouldShowNavbar && <Navbar />}
+        <main className={shouldShowNavbar ? "pt-20" : ""}>
+          {children}
+        </main>
+      </DarkModeProvider>
     </Provider>
   );
 }

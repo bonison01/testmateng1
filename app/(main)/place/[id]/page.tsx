@@ -14,6 +14,7 @@ interface Place {
   contact?: string;
   type: string;
   price?: number;
+  nearby_places?: string | string[] | null; // Add this line
 }
 
 // ⚠️ Correctly type params as a Promise
@@ -45,6 +46,7 @@ export default async function PlaceDetailPage({
     contact: data.contact,
     type: data.type,
     price: data.price,
+    nearby_places: data.nearby_places, // ✅ Add this
   };
 
   return <PlaceDetailClient place={place} />;

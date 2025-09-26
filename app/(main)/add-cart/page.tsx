@@ -19,51 +19,60 @@ export default function AddPlacePage() {
   const [price, setPrice] = useState("");
   const [location, setLocation] = useState("");
   const [features, setFeatures] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Upload single image to supabase storage and return URL
-  const uploadImage = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `place-${Date.now()}.${fileExt}`;
-    const filePath = fileName;
+  // Upload all images and return JSON stringified array of public URLs
+  const uploadImages = async (files: File[]): Promise<string | null> => {
+    const urls: string[] = [];
 
-    const { error: uploadError } = await supabase.storage
-      .from("places-images")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+    for (const file of files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `place-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
+      const filePath = fileName;
 
-    if (uploadError) {
-      console.error("Image upload error:", uploadError.message);
-      return null;
+      const { error: uploadError } = await supabase.storage
+        .from("places-images")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Image upload error:", uploadError.message);
+        return null;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("places-images")
+        .getPublicUrl(filePath);
+
+      if (publicUrlData?.publicUrl) {
+        urls.push(publicUrlData.publicUrl);
+      }
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from("places-images")
-      .getPublicUrl(filePath);
-
-    return publicUrlData?.publicUrl ?? null;
+    return JSON.stringify(urls);
   };
 
-  // Handle form submit for single place
   const handleSubmit = async () => {
     setUploading(true);
     setSuccessMessage("");
 
-    let imageUrl = "";
+    let imageUrl: string | null = null;
 
-    if (imageFile) {
-      const uploadedUrl = await uploadImage(imageFile);
-      if (!uploadedUrl) {
-        alert("❌ Image upload failed.");
+    if (imageFiles.length > 0) {
+      imageUrl = await uploadImages(imageFiles);
+      if (!imageUrl) {
+        alert("❌ Failed to upload images.");
         setUploading(false);
         return;
       }
-      imageUrl = uploadedUrl;
     }
 
     const parsedPrice = parseFloat(price);
@@ -82,11 +91,17 @@ export default function AddPlacePage() {
         image_url: imageUrl,
         description: description || null,
         contact: contact || null,
-        start_date: type === "Event" ? startDate || null : null,
-        end_date: type === "Event" ? endDate || null : null,
-        price: type === "Event" ? validPrice : null,
+        start_date: type === "Events" ? startDate || null : null,
+        end_date: type === "Events" ? endDate || null : null,
+        price: type === "Events" ? validPrice : null,
         location: location || null,
         features: featuresArray.length > 0 ? featuresArray : null,
+        // nearby_places: nearbyPlaces || null,
+        nearby_places: nearbyPlaces
+          .split(",")
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0) || null,
+
       },
     ]);
 
@@ -97,6 +112,7 @@ export default function AddPlacePage() {
       alert("❌ Failed to add place: " + error.message);
     } else {
       setSuccessMessage("✅ Place added successfully!");
+      // Reset form
       setName("");
       setType("");
       setOpeningHours("");
@@ -107,11 +123,11 @@ export default function AddPlacePage() {
       setPrice("");
       setLocation("");
       setFeatures("");
-      setImageFile(null);
+      setNearbyPlaces("");
+      setImageFiles([]);
     }
   };
 
-  // Handle CSV upload & parsing - NO casting, pass File directly
   const handleCSVUpload = (file: File) => {
     setUploading(true);
     setSuccessMessage("");
@@ -123,7 +139,6 @@ export default function AddPlacePage() {
         const data = results.data as Record<string, any>[];
 
         try {
-          // Bulk insert into supabase
           const { error } = await supabase.from("places").insert(
             data.map((row) => ({
               name: row.name || null,
@@ -142,6 +157,7 @@ export default function AddPlacePage() {
               features: row.features
                 ? row.features.split(",").map((f: string) => f.trim())
                 : null,
+              nearby_places: row.nearby_places || null,
               category: row.category || null,
               user_id: row.user_id || null,
               ads: row.ads || null,
@@ -169,11 +185,9 @@ export default function AddPlacePage() {
     });
   };
 
-  // Download sample CSV template
   const handleDownloadSample = () => {
-    const sampleCSV =
-      `name,type,latitude,longitude,rating,opening_hours,image_url,description,contact,start_date,end_date,price,location,features,category,user_id,ads,ads_url,ads_no
-Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,1234567890,,,,Sample Location,"Wifi,Parking",Business,userid123,,,`;
+    const sampleCSV = `name,type,latitude,longitude,rating,opening_hours,image_url,description,contact,start_date,end_date,price,location,features,nearby_places,category,user_id,ads,ads_url,ads_no
+Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,1234567890,,,,Sample Location,"Wifi,Parking","Mall, Metro Station",Business,userid123,,,`;
 
     const blob = new Blob([sampleCSV], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -191,7 +205,6 @@ Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,12345678
       <div className="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-6">➕ Add New Place</h1>
 
-        {/* Single Add Form */}
         <label className="block mb-1">Place Name</label>
         <Input
           value={name}
@@ -239,7 +252,7 @@ Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,12345678
           className="mb-4"
         />
 
-        {type === "Event" && (
+        {type === "Events" && (
           <>
             <label className="block mb-1">Start Date</label>
             <Input
@@ -283,16 +296,38 @@ Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,12345678
           value={features}
           onChange={(e) => setFeatures(e.target.value)}
           placeholder="e.g., Wifi, Parking, Pet Friendly"
+          className="mb-4"
+        />
+
+        <label className="block mb-1">Nearby Places (comma separated)</label>
+        <Input
+          value={nearbyPlaces}
+          onChange={(e) => setNearbyPlaces(e.target.value)}
+          placeholder="e.g., Mall, Metro, Park"
           className="mb-6"
         />
 
-        <label className="block mb-1">Image</label>
+        <label className="block mb-1">Images (multiple allowed)</label>
         <Input
           type="file"
           accept="image/*"
-          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-          className="mb-6"
+          multiple
+          onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+          className="mb-4"
         />
+
+        {imageFiles.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-4">
+            {imageFiles.map((file, idx) => (
+              <img
+                key={idx}
+                src={URL.createObjectURL(file)}
+                alt={`Preview ${idx}`}
+                className="w-24 h-24 object-cover rounded"
+              />
+            ))}
+          </div>
+        )}
 
         <Button onClick={handleSubmit} disabled={uploading} className="w-full mb-6">
           {uploading ? "Saving..." : "Save Place"}
@@ -321,9 +356,8 @@ Sample Place,Business,12.9716,77.5946,4.5,9am-9pm,,A sample description,12345678
           <p className="text-sm text-gray-400 mt-2">
             Columns must match:<br />
             <code>
-              name, type, latitude, longitude, rating, opening_hours,
-              image_url, description, contact, start_date, end_date, price,
-              location, features, category, user_id, ads, ads_url, ads_no
+              name, type, latitude, longitude, rating, opening_hours, image_url, description, contact,
+              start_date, end_date, price, location, features, nearby_places, category, user_id, ads, ads_url, ads_no
             </code>
           </p>
         </div>
