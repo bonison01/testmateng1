@@ -216,6 +216,7 @@ export default function LotteryEntryPage() {
               isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
             }`}
           >
+            <h1 className="text-2xl font-bold mb-2">🎉 Lottery Date 19th Oct, 2025 <br />at Hiyangei Keithel, Thoubal Mela Ground. 5:30PM!</h1>
             <h2 className="text-2xl font-bold mb-2">🎉 Congratulations!</h2>
             <p className="text-lg mb-4">Your Lottery Entry Number is:</p>
             <div className="text-4xl font-mono font-bold text-green-500 mb-4">
