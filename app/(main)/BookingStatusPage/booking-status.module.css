@@ -1,0 +1,209 @@
+/* General Container */
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f9fafb;
+}
+
+/* Card Styling */
+.card {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Card Header */
+.cardHeader {
+  padding: 20px;
+  background-color: #4C51BF;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+/* Card Content */
+.cardContent {
+  padding: 20px;
+  color: #333;
+}
+
+/* Heading */
+.heading {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.subHeading {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Form and Input */
+.inputField,
+.textareaField {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.inputField:focus,
+.textareaField:focus {
+  outline: none;
+  border-color: #4C51BF;
+}
+
+/* Button Styles */
+.button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  opacity: 0.8;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.buttonGreen {
+  background-color: #48bb78;
+  color: white;
+}
+
+.buttonRed {
+  background-color: #f56565;
+  color: white;
+}
+
+.buttonBlue {
+  background-color: #3182ce;
+  color: white;
+}
+
+.buttonOutline {
+  background-color: transparent;
+  border: 1px solid #4C51BF;
+  color: #4C51BF;
+}
+
+/* Status Update Section */
+.statusUpdate {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.statusUpdateButton {
+  flex: 1;
+  max-width: 200px;
+}
+
+/* Weight Update Section */
+.weightUpdate {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.weightUpdateInput {
+  max-width: 200px;
+}
+
+/* Booking Details */
+.bookingDetails {
+  margin-top: 20px;
+}
+
+.bookingDetails div {
+  margin-bottom: 10px;
+}
+
+.bookingDetails strong {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Invoice Button */
+.invoiceButton {
+  margin-top: 20px;
+  display: inline-block;
+}
+
+/* Loader Spinner */
+.loader {
+  margin: 0 auto;
+  display: block;
+  color: #4C51BF;
+}
+
+/* Error/Success Messages */
+.toast {
+  padding: 10px 20px;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+.toastError {
+  background-color: #f56565;
+  color: white;
+}
+
+.toastSuccess {
+  background-color: #48bb78;
+  color: white;
+}
+
+.toastWarning {
+  background-color: #f6ad55;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+
+  .cardContent {
+    padding: 15px;
+  }
+
+  .statusUpdate {
+    flex-direction: column;
+  }
+
+  .statusUpdateButton {
+    max-width: 100%;
+  }
+}

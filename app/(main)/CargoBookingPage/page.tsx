@@ -11,6 +11,8 @@ import { Loader2 } from "lucide-react";
 import { useSession, useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { rateMap, Rate } from "@/utils/rateMap";
 import jsPDF from "jspdf";
+import styles from './cargo-booking.module.css';
+import { color } from "framer-motion";
 
 interface FormData {
   senderName: string;
@@ -174,41 +176,46 @@ export default function CargoBookingPage() {
     setEstimateCharge(total);
   }, [formData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target;
-    const name = target.name as keyof FormData;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const target = e.target;
+  const name = target.name as keyof FormData;
 
-    if (target instanceof HTMLInputElement) {
-      if (target.type === "checkbox") {
-        setFormData(prev => ({
-          ...prev,
-          [name]: target.checked as any,
-        }));
-        return;
-      }
-      if (name === "weightEstimate" || name === "handlingCharge" || name === "docketCharge") {
-        setFormData(prev => ({
-          ...prev,
-          [name]: parseFloat(target.value) || 0,
-        }));
-        return;
-      }
+  if (target instanceof HTMLSelectElement) {
+    setFormData(prev => ({
+      ...prev,
+      [name]: target.value,
+    }));
+  } else if (target instanceof HTMLInputElement) {
+    if (target.type === "checkbox") {
       setFormData(prev => ({
         ...prev,
-        [name]: target.value,
+        [name]: target.checked as any,
       }));
-    } else if (target instanceof HTMLTextAreaElement) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: target.value,
-      }));
+      return;
     }
-  };
+    if (name === "weightEstimate" || name === "handlingCharge" || name === "docketCharge") {
+      setFormData(prev => ({
+        ...prev,
+        [name]: parseFloat(target.value) || 0,
+      }));
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: target.value,
+    }));
+  } else if (target instanceof HTMLTextAreaElement) {
+    setFormData(prev => ({
+      ...prev,
+      [name]: target.value,
+    }));
+  }
+};
+
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
-    // TODO: Implement actual upload to Supabase Storage here
     const fakeUrl = URL.createObjectURL(file);
     setFormData(prev => ({ ...prev, photoUrl: fakeUrl }));
   };
@@ -226,145 +233,186 @@ export default function CargoBookingPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    const payload = {
-      userId: session?.user?.id || null,  // optional userId
-      ...formData,
-      estimateCharge,
-    };
+    try {
+      const payload = {
+        userId: session?.user?.id || null,  // optional userId
+        ...formData,
+        estimateCharge,
+      };
 
-    const response = await fetch("/api/book-cargo/fixed-delivery", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch("/api/book-cargo/fixed-delivery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const json = await response.json();
+      const json = await response.json();
 
-    if (!response.ok) {
-      throw new Error(json.error || "Booking failed");
+      if (!response.ok) {
+        throw new Error(json.error || "Booking failed");
+      }
+
+      setTrackingPopup({ trackingId: json.trackingId, estimateCharge });
+      setSuccessMessage("Booking placed successfully!");
+
+      // Reset form
+      setFormData({
+        senderName: "",
+        senderPhone: "",
+        senderAddress: "",
+        senderPincode: "",
+        senderCityState: "",
+
+        receiverName: "",
+        receiverPhone: "",
+        receiverAddress: "",
+        receiverPincode: "",
+        receiverCityState: "",
+
+        productName: "",
+        weightEstimate: 0,
+        photoUrl: undefined,
+
+        pickupRequired: false,
+        deliveryRequired: false,
+        deliveryMode: "standard",
+        handlingCharge: 0,
+        docketCharge: 0,
+        notes: "",
+      });
+      setEstimateCharge(0);
+    } catch (error) {
+      toast.error((error as Error).message || "Booking failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setTrackingPopup({ trackingId: json.trackingId, estimateCharge });
-    setSuccessMessage("Booking placed successfully!");
-
-    // Reset form
-    setFormData({
-      senderName: "",
-      senderPhone: "",
-      senderAddress: "",
-      senderPincode: "",
-      senderCityState: "",
-
-      receiverName: "",
-      receiverPhone: "",
-      receiverAddress: "",
-      receiverPincode: "",
-      receiverCityState: "",
-
-      productName: "",
-      weightEstimate: 0,
-      photoUrl: undefined,
-
-      pickupRequired: false,
-      deliveryRequired: false,
-      deliveryMode: "standard",
-      handlingCharge: 0,
-      docketCharge: 0,
-      notes: "",
-    });
-    setEstimateCharge(0);
-  } catch (error) {
-    toast.error((error as Error).message || "Booking failed. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   return (
-    <div className="min-h-screen py-10 flex flex-col items-center px-4">
-      <Card className="w-full max-w-3xl">
+    <div className={styles.container}>
+      <Card className={styles.card}>
         <CardHeader>
-          <CardTitle className="text-xl">Cargo Booking (Fixed Charges)</CardTitle>
+          <CardTitle className="text-xl text-black">Cross State Delivery</CardTitle>
+
         </CardHeader>
         <CardContent>
           {successMessage && (
-            <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+            <div className={`${styles.successMessage} mb-4 p-3 rounded`}>
               {successMessage}
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Sender Details */}
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Sender Details</h2>
-              <Input name="senderName" value={formData.senderName} onChange={handleChange} placeholder="Sender's Name" required />
-              <Input name="senderPhone" value={formData.senderPhone} onChange={handleChange} placeholder="Sender's Phone" required />
-              <Textarea name="senderAddress" value={formData.senderAddress} onChange={handleChange} placeholder="Sender's Address" required />
-              <Input name="senderPincode" type="text" value={formData.senderPincode} onChange={handleChange} placeholder="Sender’s Pincode" required />
-              {formData.senderCityState && <div className="text-sm text-gray-500">City/State: {formData.senderCityState}</div>}
-            </div>
+            {/* Sender and Receiver Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Sender Details */}
+              <div className="space-y-2">
+                <h2 className={styles.subHeader}>Sender Details</h2>
+                <Input 
+  name="senderName" 
+  value={formData.senderName} 
+  onChange={handleChange} 
+  placeholder="Sender's Name" 
+  required 
+  style={{ color: 'black' }} 
+/>
 
-            {/* Receiver Details */}
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Receiver Details</h2>
-              <Input name="receiverName" value={formData.receiverName} onChange={handleChange} placeholder="Receiver's Name" required />
-              <Input name="receiverPhone" value={formData.receiverPhone} onChange={handleChange} placeholder="Receiver's Phone" required />
-              <Textarea name="receiverAddress" value={formData.receiverAddress} onChange={handleChange} placeholder="Receiver's Address" required />
-              <Input name="receiverPincode" type="text" value={formData.receiverPincode} onChange={handleChange} placeholder="Receiver’s Pincode" required />
-              {formData.receiverCityState && <div className="text-sm text-gray-500">City/State: {formData.receiverCityState}</div>}
+                <Input name="senderPhone" value={formData.senderPhone} onChange={handleChange} placeholder="Sender's Phone" required style={{ color: 'black' }} />
+                <Textarea name="senderAddress" value={formData.senderAddress} onChange={handleChange} placeholder="Sender's Address" required style={{ color: 'black' }} />
+                <Input name="senderPincode" type="text" value={formData.senderPincode} onChange={handleChange} placeholder="Sender’s Pincode" required style={{ color: 'black' }} />
+                {formData.senderCityState && <div className="text-sm text-black">{formData.senderCityState}</div>}
+              </div>
+
+              {/* Receiver Details */}
+              <div className="space-y-2">
+                <h2 className={styles.subHeader}>Receiver Details</h2>
+                <Input name="receiverName" value={formData.receiverName} onChange={handleChange} placeholder="Receiver's Name" required style={{ color: 'black' }} />
+                <Input name="receiverPhone" value={formData.receiverPhone} onChange={handleChange} placeholder="Receiver's Phone" required style={{ color: 'black' }} />
+                <Textarea name="receiverAddress" value={formData.receiverAddress} onChange={handleChange} placeholder="Receiver's Address" required style={{ color: 'black' }} />
+                <Input name="receiverPincode" type="text" value={formData.receiverPincode} onChange={handleChange} placeholder="Receiver’s Pincode" required style={{ color: 'black' }} />
+                {formData.receiverCityState && <div className="text-sm text-black">{formData.receiverCityState}</div>}
+              </div>
             </div>
 
             {/* Product Details */}
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Product Details</h2>
-              <Input name="productName" value={formData.productName} onChange={handleChange} placeholder="Product Name" required />
-              <Input name="weightEstimate" type="number" min="0" step="0.01" value={formData.weightEstimate} onChange={handleChange} placeholder="Estimated Weight (kg)" required />
-              <div>
-                <Label htmlFor="photo">Product Photo (optional)</Label>
-                <Input id="photo" name="photo" type="file" accept="image/*" onChange={handlePhotoChange} />
-                {formData.photoUrl && <img src={formData.photoUrl} alt="Product" className="mt-2 max-h-48 object-contain" />}
-              </div>
+              <h2 className={styles.subHeader}>Product Details</h2>
+              <Input name="productName" value={formData.productName} onChange={handleChange} placeholder="Product Name" required style={{ color: 'black' }} />
+              <Input name="weightEstimate" type="number" min="0" step="0.01" value={formData.weightEstimate} onChange={handleChange} placeholder="Estimated Weight (kg)" required style={{ color: 'black' }} />
+              <Label htmlFor="photo" className="text-black font-semibold text-lg mb-2">Product Photo (optional)</Label>
+<Input 
+  id="photo" 
+  name="photo" 
+  type="file" 
+  accept="image/*" 
+  onChange={handlePhotoChange} 
+  className="border rounded-md p-2 mb-4 text-black" 
+/>
+{formData.photoUrl && (
+  <img 
+    src={formData.photoUrl} 
+    alt="Product" 
+    className="max-w-full h-auto rounded-md border border-black mt-2"  
+  />
+)}
             </div>
 
             {/* Delivery Mode */}
-            <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Delivery Mode</h2>
-              <div className="flex gap-4">
-                <Button type="button" variant={formData.deliveryMode === "standard" ? "default" : "outline"} onClick={() => setFormData(prev => ({ ...prev, deliveryMode: "standard" }))}>Standard</Button>
-                <Button type="button" variant={formData.deliveryMode === "express" ? "default" : "outline"} onClick={() => setFormData(prev => ({ ...prev, deliveryMode: "express" }))}>Express (50% extra)</Button>
-              </div>
-            </div>
+            {/* Delivery Mode */}
+<div className="space-y-2">
+  <h2 className={styles.subHeader}>Delivery Mode</h2>
+  {/* Dropdown for selecting delivery mode */}
+  <select
+    name="deliveryMode"
+    value={formData.deliveryMode}
+    onChange={handleChange}
+    className="border rounded-md p-2 text-black"
+  >
+    <option value="standard">Standard</option>
+    <option value="express">Express</option>
+  </select>
+</div>
+
 
             {/* Additional Charges */}
             <div className="space-y-2">
               <div>
                 <input type="checkbox" name="pickupRequired" checked={formData.pickupRequired} onChange={handleChange} id="pickupRequired" />
-                <Label htmlFor="pickupRequired" className="ml-2">Pickup required (₹30 extra)</Label>
+                <Label htmlFor="pickupRequired" className="ml-2 text-black">Pickup required (Extra Charges may apply)</Label>
               </div>
               <div>
-                <input type="checkbox" name="deliveryRequired" checked={formData.deliveryRequired} onChange={handleChange} id="deliveryRequired" />
-                <Label htmlFor="deliveryRequired" className="ml-2">Delivery to endpoint required (₹40 extra)</Label>
+                {/* <input type="checkbox" name="deliveryRequired" checked={formData.deliveryRequired} onChange={handleChange} id="deliveryRequired" /> */}
+                {/* <Label htmlFor="deliveryRequired" className="ml-2 text-black">Delivery to endpoint required (₹40 extra)</Label> */}
               </div>
-              <Input name="handlingCharge" type="number" min="0" step="0.01" value={formData.handlingCharge} onChange={handleChange} placeholder="Handling Charge (optional)" />
-              <Input name="docketCharge" type="number" min="0" step="0.01" value={formData.docketCharge} onChange={handleChange} placeholder="Docket Charge (optional)" />
+              {/* <Input name="handlingCharge" type="number" min="0" step="0.01" value={formData.handlingCharge} onChange={handleChange} placeholder="Handling Charge (optional)" />
+              <Input name="docketCharge" type="number" min="0" step="0.01" value={formData.docketCharge} onChange={handleChange} placeholder="Docket Charge (optional)" /> */}
             </div>
 
             {/* Notes */}
             <Textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Additional notes (optional)" />
 
             {/* Route unsupported warning */}
-            {!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] && (
-              <div className="text-red-600 text-sm">This route is currently unsupported.</div>
-            )}
+            
 
-            {/* Estimate */}
-            <div className="text-right font-semibold text-lg">
-              Estimated Charges: ₹{estimateCharge.toFixed(2)}
-            </div>
+{/* Route unsupported warning */}
+{!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] ? (
+  <div className={styles.unsupportedRoute}>
+    This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges.
+  </div>
+) : (
+  <>
+    <div className={styles.estimateCharge}>
+      Estimated Charges: ₹{estimateCharge.toFixed(2)}
+    </div>
+    <div style={{ color: 'black' }}>
+      This charge is an estimate and may vary after pickup based on actual weight and other factors.
+    </div>
+  </>
+)}
+
+
 
             {/* Submit */}
             <Button type="submit" disabled={isSubmitting}>
@@ -377,10 +425,10 @@ export default function CargoBookingPage() {
       {/* Tracking Popup */}
       {trackingPopup && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <div className={styles.trackingPopup}>
             <h2 className="text-lg font-semibold mb-2">🎉 Booking Confirmed</h2>
             <p><strong>Tracking ID:</strong> {trackingPopup.trackingId}</p>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-black">
               Our team will connect with you soon. You can also reach us at <strong>9774795906</strong>.
             </p>
             <p className="mt-1 text-sm text-yellow-600">
