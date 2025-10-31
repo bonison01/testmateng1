@@ -274,7 +274,7 @@ export default function Page() {
 
           <div className='relative flex flex-col items-start p-4 my-6 sm:hidden sm:h-0'>
             <CardDescription className="text-sm mb-3 text-gray-300 px-2">Visit our cargo service page to get started.</CardDescription>
-            <a href="https://cargo4.vercel.app/">
+            <a href="/CargoBookingPage">
               <button
                 type="submit"
                 className="flex px-5 py-2.5 font-semibold justify-center gap-10 items-center mx-auto shadow-md text-sm text-white bg-gradient-to-tr from-green-900/30 via-green-900/70 to-green-900/30 ring-4 ring-green-900/20 backdrop-blur-md lg:font-medium isolation-auto before:absolute before:w-full before:transition-all before:duration-500 hover:before:w-full before:right-full hover:before:right-0 before:rounded-full before:bg-green-700 hover:text-gray-50 before:-z-10 before:aspect-square hover:before:scale-150 hover:before:duration-500 relative z-10 px-3.5 py-1.5 overflow-hidden border-2 rounded-full group"
@@ -301,7 +301,7 @@ export default function Page() {
                 Set Your Locations
               </span>
 
-              <a href="https://cargo4.vercel.app/" className="hidden sm:flex">
+              <a href="/CargoBookingPage" className="hidden sm:flex">
                 <button
                   type="submit"
                   className="flex px-5 h-10 mr-2 font-semibold justify-center gap-4 items-center mx-auto shadow-md text-sm text-white bg-gradient-to-tr from-green-900/30 via-green-900/70 to-green-900/30 ring-4 ring-green-900/20 backdrop-blur-md lg:font-medium isolation-auto before:absolute before:w-full before:transition-all before:duration-500 hover:before:w-full before:right-full hover:before:right-0 before:rounded-full before:bg-green-700 hover:text-gray-50 before:-z-10 before:aspect-square hover:before:scale-150 hover:before:duration-500 relative z-10 px-3.5 py-1.5 overflow-hidden border-2 rounded-full group"

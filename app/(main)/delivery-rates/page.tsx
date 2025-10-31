@@ -124,7 +124,7 @@ export default function DeliveryRatesPage() {
             </p>
           </CardContent>
           <div className="w-full mt-4">
-            <a href="https://wa.link/350bfh" target="_blank" rel="noopener noreferrer">
+            <a href="/CargoBookingPage" target="_blank" rel="noopener noreferrer">
               <Button
                 className="w-full text-white bg-green-600 hover:bg-green-700 transition-colors"
               >

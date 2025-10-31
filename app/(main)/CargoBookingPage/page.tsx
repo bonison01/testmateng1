@@ -533,7 +533,8 @@ const generateInvoice = (data: TrackingPopupData) => {
             {/* Route unsupported warning */}
             {!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] ? (
               <div className={styles.unsupportedRoute}>
-                This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges.
+                {/* This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges. */}
+                Parcels between Delhi and Imphal delivered in 1-3 days, ₹130-₹270/kg. For other routes, third-party carriers (Bluedart, Indian Post, Delhivery) are used. Contact 9774795906 for details. 
               </div>
             ) : (
               <>

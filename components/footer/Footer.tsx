@@ -44,7 +44,7 @@ export default function Footer() {
                   Text Converter
                 </Button>
               </Link>
-              <Link href="https://cargo4.vercel.app/">
+              <Link href="/CargoBookingPage">
                 <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
                   Cargo Service
                 </Button>
