@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import BookingDetailsForm from './BookingDetailsForm';  // Import the new form component
-import { BookingData } from "../../app/types/index";
+import { BookingData } from "../../../types/index";
 import styles from './BookingDetailsPage.module.css';  // Import the same styles
 import ReactDOMServer from 'react-dom/server';  // Import ReactDOMServer
 
@@ -123,11 +123,11 @@ const BookingDetailsPage = ({ booking, onClose }: BookingDetailsPageProps) => {
         selectedBooking={selectedBooking}
         onInputChange={handleInputChange}
         handleSave={handleSave}
-        handleDownloadInvoice={handleDownloadInvoice}
+        // handleDownloadInvoice={handleDownloadInvoice}
         handleDownloadLabel={handleDownloadLabel}
         onClose={onClose}
       />
-    </div>
+    </div> 
   );
 };
 

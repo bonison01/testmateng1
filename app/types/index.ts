@@ -1,6 +1,7 @@
 // types/index.ts (or types/booking.d.ts)
 
 // src/app/types/index.ts
+// src/app/types/index.ts
 export interface BookingData {
   sender_name: string;
   sender_phone: string;
@@ -22,7 +23,17 @@ export interface BookingData {
   tracking_id: string;
   status: string;
   created_at: string; // Or Date if necessary
+  sender_city_state?: string;  // Optional field
+  receiver_city_state?: string;  // Optional field
+  packaging_charge: number;
+
+  // New fields
+  photo_url?: string;             // Optional field for product photo URL
+  pickup_charge?: number;         // Optional field for pickup charges
+  extra_mile_delivery?: number;  // Optional field for extra mile delivery charges
+  final_charge?: number;          // Optional field for final charge after all adjustments
 }
+
 
 
 export interface StatusCount {

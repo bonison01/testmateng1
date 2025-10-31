@@ -177,40 +177,40 @@ export default function CargoBookingPage() {
   }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const target = e.target;
-  const name = target.name as keyof FormData;
+    const target = e.target;
+    const name = target.name as keyof FormData;
 
-  if (target instanceof HTMLSelectElement) {
-    setFormData(prev => ({
-      ...prev,
-      [name]: target.value,
-    }));
-  } else if (target instanceof HTMLInputElement) {
-    if (target.type === "checkbox") {
+    if (target instanceof HTMLSelectElement) {
       setFormData(prev => ({
         ...prev,
-        [name]: target.checked as any,
+        [name]: target.value,
       }));
-      return;
-    }
-    if (name === "weightEstimate" || name === "handlingCharge" || name === "docketCharge") {
+    } else if (target instanceof HTMLInputElement) {
+      if (target.type === "checkbox") {
+        setFormData(prev => ({
+          ...prev,
+          [name]: target.checked as any,
+        }));
+        return;
+      }
+      if (name === "weightEstimate" || name === "handlingCharge" || name === "docketCharge") {
+        setFormData(prev => ({
+          ...prev,
+          [name]: parseFloat(target.value) || 0,
+        }));
+        return;
+      }
       setFormData(prev => ({
         ...prev,
-        [name]: parseFloat(target.value) || 0,
+        [name]: target.value,
       }));
-      return;
+    } else if (target instanceof HTMLTextAreaElement) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: target.value,
+      }));
     }
-    setFormData(prev => ({
-      ...prev,
-      [name]: target.value,
-    }));
-  } else if (target instanceof HTMLTextAreaElement) {
-    setFormData(prev => ({
-      ...prev,
-      [name]: target.value,
-    }));
-  }
-};
+  };
 
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,17 +220,110 @@ export default function CargoBookingPage() {
     setFormData(prev => ({ ...prev, photoUrl: fakeUrl }));
   };
 
-  const generateInvoice = (data: TrackingPopupData) => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("SuperBox - Booking Invoice", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Tracking ID: ${data.trackingId}`, 20, 40);
-    doc.text(`Estimate Charge: ₹${data.estimateCharge.toFixed(2)}`, 20, 50);
-    doc.text(`Support: 9774795906`, 20, 60);
-    doc.text(`Note: Estimated charges may vary after pickup.`, 20, 70);
-    doc.save(`Invoice-${data.trackingId}.pdf`);
-  };
+const generateInvoice = (data: TrackingPopupData) => {
+  const doc = new jsPDF();
+
+  // Set font and title
+  doc.setFont("helvetica", "normal");
+
+  // Company Header (Logo/Details)
+  doc.setFontSize(14);
+  doc.text("Mateng Delivery", 20, 20); // Company name
+  doc.setFontSize(10);
+  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 25);
+  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 30);
+
+  // Add a horizontal line below the header
+  doc.setLineWidth(0.5);
+  doc.line(20, 35, 190, 35); // Horizontal line across the page
+
+  // Invoice Title
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Invoice", 20, 45);
+  
+  // Invoice Date and Tracking ID
+  const today = new Date();
+  const invoiceDate = today.toLocaleDateString(); // Format to local date
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date: ${invoiceDate}`, 140, 45);
+  doc.text(`Tracking ID: ${data.trackingId}`, 20, 55);
+  
+  // Add a line below the invoice header
+  doc.setLineWidth(0.5);
+  doc.line(20, 60, 190, 60); 
+
+  // Sender and Receiver Details (Side by Side)
+  const senderX = 20; // X position for sender details
+  const receiverX = 110; // X position for receiver details (shifted to right side)
+
+  // Sender Details
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Sender Details", senderX, 70);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Name: ${formData.senderName}`, senderX, 80);
+  doc.text(`Phone: ${formData.senderPhone}`, senderX, 90);
+  doc.text(`Address: ${formData.senderAddress}`, senderX, 100);
+  doc.text(`Pincode: ${formData.senderPincode}`, senderX, 110);
+  doc.text(`City/State: ${formData.senderCityState || "-"}`, senderX, 120);
+
+  // Receiver Details
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Receiver Details", receiverX, 70);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Name: ${formData.receiverName}`, receiverX, 80);
+  doc.text(`Phone: ${formData.receiverPhone}`, receiverX, 90);
+  doc.text(`Address: ${formData.receiverAddress}`, receiverX, 100);
+  doc.text(`Pincode: ${formData.receiverPincode}`, receiverX, 110);
+  doc.text(`City/State: ${formData.receiverCityState || "-"}`, receiverX, 120);
+
+  // Add a line separating the details and footer
+  doc.setLineWidth(0.5);
+  doc.line(20, 130, 190, 130);
+
+  // Pricing Details
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Pricing Details", 20, 140);
+  
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Freight Charges (Estimated): ₹${estimateCharge.toFixed(2)}`, 20, 150);
+  doc.text("Handling Charge: Will be known after pickup", 20, 160);
+  doc.text("Docket Charge: Will be known after pickup", 20, 170);
+  doc.text("Packaging Charge: Will be known after pickup", 20, 180);
+  doc.text("Pickup Charges: ₹30 (if pickup is required)", 20, 190);
+  doc.text("Delivery Charges: ₹40 (if delivery required)", 20, 200);
+
+  // Add a line separating the details and footer
+  doc.setLineWidth(0.5);
+  doc.line(20, 210, 190, 210);
+
+  // Support & Notes Section
+  doc.setFontSize(10);
+  doc.text("Support: 9774795906", 20, 220);
+  doc.text("Note: Final Bill comes after pickup. Estimated charges may vary.", 20, 230);
+  doc.text("For 100kg and above, GST bill is required.", 20, 240);
+  doc.text("For medicine and electronic devices, GST bill is required.", 20, 250);
+
+  // Footer with company address and legal disclaimer
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "italic");
+  doc.text("Mateng Delivery | Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 260);
+  doc.text("Website: justmateng.com | Phone: 8787649928", 20, 265);
+  doc.text("This is a computer-generated invoice and does not require a signature.", 20, 270);
+  
+  // Save the PDF
+  doc.save(`Invoice-${data.trackingId}.pdf`);
+};
+
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -310,14 +403,14 @@ export default function CargoBookingPage() {
               {/* Sender Details */}
               <div className="space-y-2">
                 <h2 className={styles.subHeader}>Sender Details</h2>
-                <Input 
-  name="senderName" 
-  value={formData.senderName} 
-  onChange={handleChange} 
-  placeholder="Sender's Name" 
-  required 
-  style={{ color: 'black' }} 
-/>
+                <Input
+                  name="senderName"
+                  value={formData.senderName}
+                  onChange={handleChange}
+                  placeholder="Sender's Name"
+                  required
+                  style={{ color: 'black' }}
+                />
 
                 <Input name="senderPhone" value={formData.senderPhone} onChange={handleChange} placeholder="Sender's Phone" required style={{ color: 'black' }} />
                 <Textarea name="senderAddress" value={formData.senderAddress} onChange={handleChange} placeholder="Sender's Address" required style={{ color: 'black' }} />
@@ -339,49 +432,90 @@ export default function CargoBookingPage() {
             {/* Product Details */}
             <div className="space-y-2">
               <h2 className={styles.subHeader}>Product Details</h2>
-              <Input name="productName" value={formData.productName} onChange={handleChange} placeholder="Product Name" required style={{ color: 'black' }} />
-              <Input name="weightEstimate" type="number" min="0" step="0.01" value={formData.weightEstimate} onChange={handleChange} placeholder="Estimated Weight (kg)" required style={{ color: 'black' }} />
-              <Label htmlFor="photo" className="text-black font-semibold text-lg mb-2">Product Photo (optional)</Label>
-<Input 
-  id="photo" 
-  name="photo" 
-  type="file" 
-  accept="image/*" 
-  onChange={handlePhotoChange} 
-  className="border rounded-md p-2 mb-4 text-black" 
+              <Input
+  name="productName"
+  value={formData.productName}
+  onChange={handleChange}
+  placeholder="Product Name"
+  required
+  style={{ color: 'black' }}
 />
-{formData.photoUrl && (
-  <img 
-    src={formData.photoUrl} 
-    alt="Product" 
-    className="max-w-full h-auto rounded-md border border-black mt-2"  
-  />
-)}
+<Input
+  name="weightEstimate"
+  type="number"
+  min="0"
+  step="0.01"
+  value={formData.weightEstimate === 0 ? '' : formData.weightEstimate}
+  onChange={handleChange}
+  placeholder="Estimated Weight"
+  style={{ color: 'black' }}
+/>
+<Label htmlFor="photo" className="text-black font-semibold text-lg mb-2">
+  Product Photo (optional)
+</Label>
+
+
+              <Input
+                id="photo"
+                name="photo"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="border rounded-md p-2 mb-4 text-black"
+              />
+              {formData.photoUrl && (
+                <img
+                  src={formData.photoUrl}
+                  alt="Product"
+                  className="max-w-full h-auto rounded-md border border-black mt-2"
+                />
+              )}
             </div>
 
             {/* Delivery Mode */}
             {/* Delivery Mode */}
-<div className="space-y-2">
+            <div className="space-y-2">
   <h2 className={styles.subHeader}>Delivery Mode</h2>
-  {/* Dropdown for selecting delivery mode */}
-  <select
-    name="deliveryMode"
-    value={formData.deliveryMode}
-    onChange={handleChange}
-    className="border rounded-md p-2 text-black"
-  >
-    <option value="standard">Standard</option>
-    <option value="express">Express</option>
-  </select>
+
+  
+  {/* Container for Delivery Mode dropdown and Pickup checkbox */}
+  <div className="flex items-center space-x-30">
+    {/* Delivery Mode Dropdown */}
+    <select
+      name="deliveryMode"
+      value={formData.deliveryMode}
+      onChange={handleChange}
+      className="border rounded-md p-2 text-black"
+    >
+      <option value="standard">Surface</option>
+      <option value="express">Express</option>
+    </select>
+    
+    {/* Pickup Charges Checkbox */}
+    <div className="flex items-center">
+      <input
+        type="checkbox"
+        name="pickupRequired"
+        checked={formData.pickupRequired}
+        onChange={handleChange}
+        id="pickupRequired"
+        style={{ transform: 'scale(1.5)' }} // Adjust the scale factor as needed
+      />
+      <Label htmlFor="pickupRequired" className="ml-2 text-black">
+        Pickup required (Extra Charges may apply)
+      </Label>
+    </div>
+  </div>
 </div>
+
 
 
             {/* Additional Charges */}
             <div className="space-y-2">
               <div>
-                <input type="checkbox" name="pickupRequired" checked={formData.pickupRequired} onChange={handleChange} id="pickupRequired" />
-                <Label htmlFor="pickupRequired" className="ml-2 text-black">Pickup required (Extra Charges may apply)</Label>
-              </div>
+  
+</div>
+
               <div>
                 {/* <input type="checkbox" name="deliveryRequired" checked={formData.deliveryRequired} onChange={handleChange} id="deliveryRequired" /> */}
                 {/* <Label htmlFor="deliveryRequired" className="ml-2 text-black">Delivery to endpoint required (₹40 extra)</Label> */}
@@ -394,23 +528,23 @@ export default function CargoBookingPage() {
             <Textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Additional notes (optional)" />
 
             {/* Route unsupported warning */}
-            
 
-{/* Route unsupported warning */}
-{!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] ? (
-  <div className={styles.unsupportedRoute}>
-    This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges.
-  </div>
-) : (
-  <>
-    <div className={styles.estimateCharge}>
-      Estimated Charges: ₹{estimateCharge.toFixed(2)}
-    </div>
-    <div style={{ color: 'black' }}>
-      This charge is an estimate and may vary after pickup based on actual weight and other factors.
-    </div>
-  </>
-)}
+
+            {/* Route unsupported warning */}
+            {!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] ? (
+              <div className={styles.unsupportedRoute}>
+                This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges.
+              </div>
+            ) : (
+              <>
+                <div className={styles.estimateCharge}>
+                  Estimated Charges: ₹{estimateCharge.toFixed(2)}
+                </div>
+                <div style={{ color: 'black' }}>
+                  This charge is an estimate and may vary after pickup based on actual weight and other factors.
+                </div>
+              </>
+            )}
 
 
 

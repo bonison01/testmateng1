@@ -1,0 +1,202 @@
+/* BookingDetailsPage.module.css */
+
+/* The modal backdrop (overlay) */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Make sure it sits on top of other elements */
+}
+
+/* Modal content box */
+.modalContent {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 80%;
+  max-width: 900px; /* Set a max-width to make the form more readable */
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 80vh; /* Prevent modal from getting too large */
+}
+
+/* Close button (optional) */
+.modalCloseButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+}
+
+/* Title of the modal */
+.modalContent h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Form row for sender and receiver details (side by side) */
+.formGroupRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+/* Individual form group */
+.formGroup {
+  flex: 1;
+}
+
+/* Label for form fields */
+.formGroup label {
+  font-weight: bold;
+  color: #555;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+/* Input fields for text and number types */
+.formGroup input[type="text"],
+.formGroup input[type="number"],
+.formGroup input[type="date"],
+.formGroup textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  color: #333;
+  background-color: #f9f9f9;
+}
+
+.formGroup input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.2);
+}
+
+/* For the textarea field */
+.formGroup textarea {
+  height: 100px;
+}
+
+/* Styling for the save, cancel, and download buttons */
+.modalActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.buttonSave,
+.buttonCancel {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 48%;
+}
+
+.buttonSave {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+}
+
+.buttonCancel {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.buttonSave:hover,
+.buttonCancel:hover {
+  opacity: 0.8;
+}
+
+/* Styling for download buttons */
+.downloadButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.downloadButton {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.downloadButton svg {
+  margin-right: 8px;
+}
+
+.downloadButton:hover {
+  background-color: #1565c0;
+  opacity: 0.9;
+}
+
+/* Form inputs for the details (Handle input margin) */
+.formGroup input[type="text"],
+.formGroup input[type="number"],
+.formGroup textarea {
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fafafa;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+/* Handle responsiveness for smaller screens */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .formGroupRow {
+    flex-direction: column;
+  }
+
+  .formGroup {
+    margin-bottom: 15px;
+  }
+
+  .modalActions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .buttonSave,
+  .buttonCancel {
+    width: 100%;
+  }
+}

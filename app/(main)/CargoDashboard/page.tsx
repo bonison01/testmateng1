@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { BookingData, StatusCount } from "../../types/index"; // Import interfaces for bookings
-import BookingDetailsPage from "@/components/cargo/BookingDetailsPage"; // Import new component for details
+import BookingDetailsPage from "@/app/(main)/CargoDashboard/cargo/BookingDetailsPage"; // Import new component for details
 import styles from './dashboard.module.css'; // Add appropriate styles
 
 const DashboardPage = () => {
