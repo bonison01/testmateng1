@@ -436,7 +436,8 @@ const DistanceMatrixComponent: React.FC<DistanceMatrixComponentProps> = ({ onDat
               </Card>
             ) : (
               <CardDescription className="px-2">
-                Select pick-up and drop-off locations to see distance, time, and price.
+                Select pick-up and drop-off locations to see distance, time, and price.<br /><br />
+                This rate is valid only in the Imphal area. For assistance outside Imphal, please contact our support team at: 8787649928.
               </CardDescription>
             )}
           </div>

@@ -299,7 +299,9 @@ export default function Page() {
               <span className="text-3xl font-bold mb-6 flex justify-center items-center leading-none gap-1 w-fit bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">
                 <Pin className="text-gray-300" />
                 Set Your Locations
-              </span>
+              </span><br /><br />
+
+              
 
               <a href="/CargoBookingPage" className="hidden sm:flex">
                 <button

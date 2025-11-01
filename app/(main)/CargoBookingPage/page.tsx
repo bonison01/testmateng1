@@ -570,7 +570,7 @@ const generateInvoice = (data: TrackingPopupData) => {
               Note: Estimate charges (₹{trackingPopup.estimateCharge.toFixed(2)}) may vary after pickup.
             </p>
             <div className="flex justify-between mt-4">
-              <Button onClick={() => generateInvoice(trackingPopup)}>Download Invoice</Button>
+              <Button onClick={() => generateInvoice(trackingPopup)}>Download Reciept</Button>
               <Button variant="outline" onClick={() => setTrackingPopup(null)}>Close</Button>
             </div>
           </div>
