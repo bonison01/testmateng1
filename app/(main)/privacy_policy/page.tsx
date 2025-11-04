@@ -78,7 +78,7 @@ export default function TermsPage() {
             title: "1. Refund Eligibility",
             content: [
                 "Refunds may be issued under the following conditions:",
-                "• Incorrect Items Delivered: If the wrong product was delivered, we will arrange for a replacement or refund, subject to availability and conditions.",
+                "• Incorrect Items Delivered: If the wrong product was delivered, we will arrange for a refund, subject to availability and conditions.",
                 "• Failed Deliveries: If your order was not delivered within the expected timeframe and the delay was not due to circumstances beyond our control (e.g., weather, traffic), we will issue a refund or credit."
             ]
         },
@@ -96,7 +96,7 @@ export default function TermsPage() {
                 "The following conditions apply to refunds:",
                 "• Change of Mind: We do not offer refunds for change of mind or incorrect orders unless the product is damaged or defective upon delivery.",
                 "• Delivery Time Issues: While we will make every effort to deliver on time, we cannot guarantee specific delivery windows. Refunds due to minor delays will be considered on a case-by-case basis.",
-                "• Insurance Claims: If you have purchased insurance and the product is damaged, a claim will need to be filed within [insert number] days after delivery to qualify for a refund or replacement."
+                "• Insurance Claims: If you have purchased insurance and the product is damaged, a claim will need to be filed within 15 days after delivery to qualify for a refund or replacement."
             ]
         },
         {
@@ -106,13 +106,13 @@ export default function TermsPage() {
                 "• Order number",
                 "• Description of the issue",
                 "• Photos of damaged or incorrect items (if applicable)",
-                "Refund requests will be processed within [insert number] business days."
+                "Refund requests will be processed within 3-5 business days."
             ]
         },
         {
             title: "5. Refund Processing",
             content: [
-                "Refunds will be issued to the original payment method within [insert number] business days after approval."
+                "Refunds will be issued to the original payment method within 15 business days after approval."
             ]
         },
         {
