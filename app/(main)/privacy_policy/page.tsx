@@ -29,7 +29,7 @@ export default function TermsPage() {
             content: [
                 "We collect the following types of information to provide our services effectively:",
                 "• Personal Information: When you create an account, place an order, or interact with our platform, we may collect your name, contact details (email and phone number), delivery address, and payment information.",
-                "• Transactional Data: Information about the products you purchase and details of your delivery requests.",
+                "• Transactional Data: Information about the products you get and details of your delivery requests.",
                 "• Usage Data: Information about how you interact with our website or app, including location data, browsing behavior, device information, and cookies."
             ]
         },
@@ -96,7 +96,7 @@ export default function TermsPage() {
                 "The following conditions apply to refunds:",
                 "• Change of Mind: We do not offer refunds for change of mind or incorrect orders unless the product is damaged or defective upon delivery.",
                 "• Delivery Time Issues: While we will make every effort to deliver on time, we cannot guarantee specific delivery windows. Refunds due to minor delays will be considered on a case-by-case basis.",
-                "• Insurance Claims: If you have purchased insurance and the product is damaged, a claim will need to be filed within 15 days after delivery to qualify for a refund or replacement."
+                // "• Insurance Claims: If you have purchased insurance and the product is damaged, a claim will need to be filed within 15 days after delivery to qualify for a refund or replacement."
             ]
         },
         {
