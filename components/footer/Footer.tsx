@@ -20,7 +20,7 @@ export default function Footer() {
         <Link href={`/terms`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Terms of Use</Button>
         </Link>
-        <Link href={`/privacy-policy`}>
+        <Link href={`/privacy_policy`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Privacy Policy</Button>
         </Link>
 
