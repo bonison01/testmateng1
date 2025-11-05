@@ -7,7 +7,6 @@ import EventHero from "@/components/events/EventHero";
 import EventCategoryIcons from "@/components/events/EventCategoryIcons";
 import BusinessList from "@/components/discovery/BusinessList";
 import OthersList from "@/components/discovery/OthersList";
-import HangoutList from "@/components/discovery/HangoutList";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/SearchBar";
 
@@ -65,9 +64,7 @@ export default function DiscoverPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [activeTab, setActiveTab] = useState<"Business" | "Events" | "Others" | "Hangout & Foods">(
-    "Hangout & Foods"
-  );
+  const [activeTab, setActiveTab] = useState<"Business" | "Events" >("Events");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   const searchParams = useSearchParams();
@@ -75,7 +72,7 @@ export default function DiscoverPageContent() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["Hangout & Foods", "Business", "Events", "Others"].includes(tabParam)) {
+    if (tabParam && ["Business", "Events"].includes(tabParam)) {
       setActiveTab(tabParam as typeof activeTab);
     }
   }, [searchParams]);
@@ -160,15 +157,12 @@ export default function DiscoverPageContent() {
     }
   };
 
-  // Improved fetchBanners with verbose error logging and explicit columns
   const fetchBanners = async () => {
     try {
       const { data, error } = await supabase
         .from("banners")
         .select("id, image_url, link");
-      
-      console.log("Banners data:", data, "Error:", error);
-      
+
       if (error) {
         console.error("Error fetching banners:", JSON.stringify(error, null, 2));
         return;
@@ -225,13 +219,6 @@ export default function DiscoverPageContent() {
     return t !== "event" && t !== "business";
   });
 
-  const hangouts = filteredPlaces.filter((p) => {
-    const cat = (p.category || "").trim().toLowerCase();
-    const isHangoutOrFood = cat.includes("hangout") || cat.includes("food");
-    const isNotEvent = p.type.trim().toLowerCase() !== "event";
-    return isHangoutOrFood && isNotEvent;
-  });
-
   const featuredEvent = events.find((e) => e.name === "Echoes of Earth, 2025") || events[0];
 
   return (
@@ -252,7 +239,7 @@ export default function DiscoverPageContent() {
             }`}
           >
             <div className="flex flex-wrap gap-4">
-              {["Hangout & Foods", "Business", "Events", "Others"].map((tab) => {
+              {["Business", "Events"].map((tab) => {
                 const isActive = activeTab === tab;
                 return (
                   <button
@@ -368,10 +355,9 @@ export default function DiscoverPageContent() {
             </>
           ) : activeTab === "Business" ? (
             <BusinessList business={business} banners={banners} isDarkMode={isDarkMode} />
-          ) : activeTab === "Hangout & Foods" ? (
-            <HangoutList hangouts={hangouts} isDarkMode={isDarkMode} />
           ) : (
             <OthersList others={others} />
+
           )}
         </div>
       </div>

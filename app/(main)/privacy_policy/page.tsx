@@ -80,6 +80,7 @@ export default function TermsPage() {
                 "Refunds may be issued under the following conditions:",
                 "• Incorrect Items Delivered: If the wrong product was delivered, we will arrange for a refund, subject to availability and conditions.",
                 "• Failed Deliveries: If your order was not delivered within the expected timeframe and the delay was not due to circumstances beyond our control (e.g., weather, traffic), we will issue a refund or credit."
+                
             ]
         },
         {
@@ -95,7 +96,7 @@ export default function TermsPage() {
             content: [
                 "The following conditions apply to refunds:",
                 "• Change of Mind: We do not offer refunds for change of mind or incorrect orders unless the product is damaged or defective upon delivery.",
-                "• Delivery Time Issues: While we will make every effort to deliver on time, we cannot guarantee specific delivery windows. Refunds due to minor delays will be considered on a case-by-case basis.",
+                "• Delivery Time Issues: While we will make every effort to deliver on time, we cannot guarantee specific delivery windows. Refunds due to minor delays will be considered on a case-by-case basis. No Refunds will be provided for Cargo Services",
                 // "• Insurance Claims: If you have purchased insurance and the product is damaged, a claim will need to be filed within 15 days after delivery to qualify for a refund or replacement."
             ]
         },
