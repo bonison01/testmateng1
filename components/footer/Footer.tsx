@@ -24,6 +24,7 @@ export default function Footer() {
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Privacy Policy</Button>
         </Link>
 
+        {/* Dropup Toggle Button */}
         
       </div>
     </div>

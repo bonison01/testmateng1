@@ -117,7 +117,13 @@ export default function TermsPage() {
             ]
         },
         {
-            title: "6. Changes to the Refund Policy",
+            title: "6. Return Policy",
+            content: [
+                "All sales are final. We do not accept returns, exchanges, or cancellations under any circumstances."
+            ]
+        },
+        {
+            title: "7. Changes to the Refund Policy",
             content: [
                 "We reserve the right to update or modify this Refund Policy at any time. Any changes will be posted on our website and will be effective immediately upon posting."
             ]
