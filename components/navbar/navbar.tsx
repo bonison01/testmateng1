@@ -57,7 +57,7 @@ function Navbar() {
 
     const links = [
         { name: "Home", href: "/home" },
-        // { name: "Discover", href: "/discovery" },
+        { name: "Discover", href: "/discovery" },
         { name: "Delivery Rates", href: "/delivery-rates" },
         { name: "Cargo Booking", href: "/CargoBookingPage" },
     ];
