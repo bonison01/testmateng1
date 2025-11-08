@@ -16,8 +16,8 @@ type PricingTier = FixedRateTier | VariableRateTier;
 
 // Light vehicle pricing tiers
 const lightVehicleTiers: PricingTier[] = [
-  { maxKm: 5, rate: 300, type: 'fixed' },
-  { maxKm: 10, base: 300, perKm: 20, type: 'variable' },
+  { maxKm: 5, rate: 350, type: 'fixed' },
+  { maxKm: 10, base: 350, perKm: 20, type: 'variable' },
   { maxKm: 20, rate: 1000, type: 'fixed' },
   { maxKm: 30, rate: 1300, type: 'fixed' },
   { maxKm: 50, rate: 1700, type: 'fixed' },
@@ -45,17 +45,17 @@ export const calculatePrice = (
       const baseCharge = 20;
       const perKmRate = 15;
       return baseCharge + perKmRate * distance;
-    } else if (distance < 10) {
+    } else if (distance < 7) {
       return 130;
-    } else if (distance < 17) {
+    } else if (distance < 10) {
       return 150;
-    } else if (distance < 26) {
+    } else if (distance < 20) {
       return 180;
-    } else if (distance < 30) {
+    } else if (distance < 24) {
       return 230;
-    } else if (distance < 33) {
+    } else if (distance < 26) {
       return 250;
-    } else if (distance < 36) {
+    } else if (distance < 30) {
       return 280;
     } else {
       return 330;
