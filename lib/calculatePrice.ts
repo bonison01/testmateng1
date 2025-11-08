@@ -49,14 +49,16 @@ export const calculatePrice = (
       return 130;
     } else if (distance < 10) {
       return 150;
+      } else if (distance < 15) {
+      return 200;
     } else if (distance < 20) {
-      return 180;
-    } else if (distance < 24) {
       return 230;
-    } else if (distance < 26) {
+    } else if (distance < 24) {
       return 250;
+    } else if (distance < 26) {
+      return 270;
     } else if (distance < 30) {
-      return 280;
+      return 300;
     } else {
       return 330;
     }
