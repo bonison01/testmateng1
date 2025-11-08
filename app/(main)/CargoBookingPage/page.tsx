@@ -11,9 +11,9 @@ import { Loader2 } from "lucide-react";
 import { useSession, useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { rateMap, Rate } from "@/utils/rateMap";
 import jsPDF from "jspdf";
-import styles from './cargo-booking.module.css';
-import { color } from "framer-motion";
+import styles from "./cargo-booking.module.css";
 
+/* -------------------- Types -------------------- */
 interface FormData {
   senderName: string;
   senderPhone: string;
@@ -44,6 +44,162 @@ interface TrackingPopupData {
   estimateCharge: number;
 }
 
+/* -------------------- Invoice Generator -------------------- */
+const generateInvoice = (data: TrackingPopupData, formData: FormData) => {
+  const doc = new jsPDF();
+
+  // Helper function for wrapping text
+  const addText = (text: string, x: number, y: number, maxWidth = 80) => {
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.text(lines, x, y);
+    return lines.length * 5;
+  };
+
+  // Reset letter spacing before writing any text
+  (doc as any).setCharSpace?.(0);
+
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Mateng Delivery", 20, 20);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004", 20, 25);
+  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 30);
+  doc.line(20, 35, 190, 35);
+
+  // Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Invoice", 20, 45);
+  const today = new Date();
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Date: ${today.toLocaleDateString()}`, 140, 45);
+  doc.text(`Tracking ID: ${data.trackingId}`, 20, 55);
+  doc.line(20, 60, 190, 60);
+
+  // Sender Details
+  let currentY = 70;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Sender Details", 20, currentY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  currentY += 10;
+  doc.text(`Name: ${formData.senderName}`, 20, currentY);
+  currentY += 5;
+  doc.text(`Phone: ${formData.senderPhone}`, 20, currentY);
+  currentY += 5;
+  const senderAddressHeight = addText(`Address: ${formData.senderAddress}`, 20, currentY, 80);
+  currentY += senderAddressHeight + 2;
+  doc.text(`Pincode: ${formData.senderPincode}`, 20, currentY);
+  currentY += 5;
+  doc.text(`City/State: ${formData.senderCityState || "-"}`, 20, currentY);
+
+  // Receiver Details
+  let receiverY = 70;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Receiver Details", 110, receiverY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  receiverY += 10;
+  doc.text(`Name: ${formData.receiverName}`, 110, receiverY);
+  receiverY += 5;
+  doc.text(`Phone: ${formData.receiverPhone}`, 110, receiverY);
+  receiverY += 5;
+  const receiverAddressHeight = addText(`Address: ${formData.receiverAddress}`, 110, receiverY, 80);
+  receiverY += receiverAddressHeight + 2;
+  doc.text(`Pincode: ${formData.receiverPincode}`, 110, receiverY);
+  receiverY += 5;
+  doc.text(`City/State: ${formData.receiverCityState || "-"}`, 110, receiverY);
+
+  const sectionBottom = Math.max(currentY, receiverY) + 10;
+  doc.line(20, sectionBottom, 190, sectionBottom);
+
+  // Product Details
+  let productY = sectionBottom + 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Product Details", 20, productY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  productY += 10;
+  doc.text(`Product Name: ${formData.productName}`, 20, productY);
+  productY += 5;
+  doc.text(`Weight: ${formData.weightEstimate} kg`, 20, productY);
+  productY += 5;
+  doc.text(`Delivery Mode: ${formData.deliveryMode === "express" ? "Express" : "Surface"}`, 20, productY);
+  productY += 5;
+  doc.text(`Pickup Required: ${formData.pickupRequired ? "Yes" : "No"}`, 20, productY);
+  productY += 5;
+  const notesHeight = addText(`Notes: ${formData.notes || "-"}`, 20, productY, 160);
+  productY += notesHeight + 5;
+
+  doc.line(20, productY, 190, productY);
+  productY += 10;
+
+  // Pricing Section (Proper Table Style)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Pricing Details", 20, productY);
+  productY += 8;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  const labelX = 25;
+  const valueX = 110;
+  const lineHeight = 7;
+
+  const charges = [
+    ["Freight Charges (Estimated)", `₹${data.estimateCharge.toFixed(2)}`],
+    ["Handling Charge", "Will be confirmed after pickup"],
+    ["Docket Charge", "Will be confirmed after pickup"],
+    ["Pickup Charges", "Will be defined after the pickup(depends on location)"],
+    // ["Delivery Charges", "Will be defined after order confirmation"],
+  ];
+
+  charges.forEach(([label, value]) => {
+    productY += lineHeight;
+    doc.text(`${label}:`, labelX, productY);
+    doc.text(value, valueX, productY);
+  });
+
+  productY += 5;
+  doc.line(20, productY, 190, productY);
+  productY += 10;
+
+  // Footer Notes
+  doc.setFontSize(9);
+  doc.text("Note: Final bill may vary after pickup. Estimated charges are indicative.", 20, productY);
+  productY += 6;
+  doc.text("For 100kg+, electronics or medicines — GST invoice is mandatory.", 20, productY);
+  productY += 6;
+  doc.text("Support: 9774795906 | www.justmateng.com/contact-us", 20, productY);
+
+  productY += 10;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "italic");
+  doc.text("This is a computer-generated invoice. No signature required.", 20, productY);
+
+  doc.save(`Invoice-${data.trackingId}.pdf`);
+  // Product Image (optional)
+  // if (formData.photoUrl) {
+  //   const img = new Image();
+  //   img.src = formData.photoUrl;
+  //   img.onload = () => {
+  //     doc.addImage(img, "JPEG", 140, productY - 60, 50, 35);
+  //     doc.save(`Invoice-${data.trackingId}.pdf`);
+  //   };
+  // } else {
+  //   doc.save(`Invoice-${data.trackingId}.pdf`);
+  // }
+};
+
+
+
+/* -------------------- Main Component -------------------- */
 export default function CargoBookingPage() {
   const session = useSession();
   const user = useUser();
@@ -55,17 +211,14 @@ export default function CargoBookingPage() {
     senderAddress: "",
     senderPincode: "",
     senderCityState: "",
-
     receiverName: "",
     receiverPhone: "",
     receiverAddress: "",
     receiverPincode: "",
     receiverCityState: "",
-
     productName: "",
     weightEstimate: 0,
     photoUrl: undefined,
-
     pickupRequired: false,
     deliveryRequired: false,
     deliveryMode: "standard",
@@ -79,11 +232,11 @@ export default function CargoBookingPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [trackingPopup, setTrackingPopup] = useState<TrackingPopupData | null>(null);
 
-  // Autofill sender info from user metadata
+  /* ---------- Autofill Sender Info ---------- */
   useEffect(() => {
     if (user) {
       const meta = user.user_metadata || {};
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         senderName: meta.name || "",
         senderPhone: meta.phone || "",
@@ -93,459 +246,228 @@ export default function CargoBookingPage() {
     }
   }, [user]);
 
-  // Fetch city/state for sender Pincode
-  useEffect(() => {
-    const pin = formData.senderPincode;
+  /* ---------- Fetch City/State for Pincodes ---------- */
+  const fetchCityState = (pin: string, field: "senderCityState" | "receiverCityState") => {
     if (/^\d{6}$/.test(pin)) {
       fetch(`https://api.postalpincode.in/pincode/${pin}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data) && data[0]?.Status === "Success") {
+        .then((res) => res.json())
+        .then((data) => {
+          if (data[0]?.Status === "Success") {
             const po = data[0].PostOffice[0];
-            const city = po?.District;
-            const state = po?.State;
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
-              senderCityState: `${city}, ${state}`,
+              [field]: `${po.District}, ${po.State}`,
             }));
           }
-        })
-        .catch(err => console.error("Sender PIN lookup error:", err));
+        });
     }
-  }, [formData.senderPincode]);
+  };
 
-  // Fetch city/state for receiver Pincode
-  useEffect(() => {
-    const pin = formData.receiverPincode;
-    if (/^\d{6}$/.test(pin)) {
-      fetch(`https://api.postalpincode.in/pincode/${pin}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data) && data[0]?.Status === "Success") {
-            const po = data[0].PostOffice[0];
-            const city = po?.District;
-            const state = po?.State;
-            setFormData(prev => ({
-              ...prev,
-              receiverCityState: `${city}, ${state}`,
-            }));
-          }
-        })
-        .catch(err => console.error("Receiver PIN lookup error:", err));
-    }
-  }, [formData.receiverPincode]);
+  useEffect(() => fetchCityState(formData.senderPincode, "senderCityState"), [formData.senderPincode]);
+  useEffect(() => fetchCityState(formData.receiverPincode, "receiverCityState"), [formData.receiverPincode]);
 
-  // Calculate estimate charge
+  /* ---------- Calculate Estimate ---------- */
+  /* ---------- Calculate Estimate ---------- */
+  /* ---------- Calculate Estimate ---------- */
   useEffect(() => {
     const {
+      senderPincode,
       receiverPincode,
       weightEstimate,
       deliveryMode,
       pickupRequired,
       deliveryRequired,
-      handlingCharge,
-      docketCharge,
-      senderPincode,
     } = formData;
 
-    if (!receiverPincode || weightEstimate <= 0) {
-      setEstimateCharge(0);
+    const roundedWeight = Math.ceil(weightEstimate || 0);
+
+    const isManipur = (pin: string) => pin.startsWith("795");
+    const isNCR = (pin: string) =>
+      pin.startsWith("110") || // Delhi
+      pin.startsWith("201") || // Noida / Ghaziabad
+      pin.startsWith("122") || // Gurugram
+      pin.startsWith("121") || // Faridabad / Palwal
+      pin.startsWith("124") || // Rohtak / Jhajjar belt
+      pin.startsWith("131");   // Sonipat
+
+    const manipurToNCR =
+      (isManipur(senderPincode) && isNCR(receiverPincode)) ||
+      (isNCR(senderPincode) && isManipur(receiverPincode));
+
+    // Add Rs 80 docket charge always if valid route
+    const docketCharge = 80;
+
+    if (manipurToNCR && roundedWeight > 0) {
+      const base = 150 * roundedWeight;
+      const total =
+        base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
+      setEstimateCharge(total);
       return;
     }
 
     const routeKey = `${senderPincode}-${receiverPincode}`;
     const rate: Rate | undefined = rateMap[routeKey];
-
-    if (!rate) {
+    if (!rate || roundedWeight <= 0) {
       setEstimateCharge(0);
       return;
     }
 
-    let base = 0;
-    if (weightEstimate <= 1) base = rate.upto_1kg;
-    else if (weightEstimate <= 5) base = rate.upto_5kg;
-    else base = rate.above_5kg;
+    let base =
+      roundedWeight <= 1
+        ? rate.upto_1kg
+        : roundedWeight <= 5
+          ? rate.upto_5kg
+          : rate.above_5kg;
 
     if (deliveryMode === "express") base *= 1.5;
 
-    const pickupCharge = pickupRequired ? 30 : 0;
-    const deliveryCharge = deliveryRequired ? 40 : 0;
-
-    const total = base + pickupCharge + deliveryCharge + handlingCharge + docketCharge;
-
+    const total =
+      base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
     setEstimateCharge(total);
   }, [formData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const target = e.target;
-    const name = target.name as keyof FormData;
 
-    if (target instanceof HTMLSelectElement) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: target.value,
-      }));
-    } else if (target instanceof HTMLInputElement) {
-      if (target.type === "checkbox") {
-        setFormData(prev => ({
-          ...prev,
-          [name]: target.checked as any,
-        }));
-        return;
-      }
-      if (name === "weightEstimate" || name === "handlingCharge" || name === "docketCharge") {
-        setFormData(prev => ({
-          ...prev,
-          [name]: parseFloat(target.value) || 0,
-        }));
-        return;
-      }
-      setFormData(prev => ({
-        ...prev,
-        [name]: target.value,
-      }));
-    } else if (target instanceof HTMLTextAreaElement) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: target.value,
-      }));
-    }
+
+  /* ---------- Handle Change ---------- */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, type, value, checked } = e.target as any;
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : ["weightEstimate", "handlingCharge", "docketCharge"].includes(name)
+            ? parseFloat(value) || 0
+            : value,
+    }));
   };
 
-
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
-    const fakeUrl = URL.createObjectURL(file);
-    setFormData(prev => ({ ...prev, photoUrl: fakeUrl }));
+    const url = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, photoUrl: url }));
   };
 
-const generateInvoice = (data: TrackingPopupData) => {
-  const doc = new jsPDF();
-
-  // Set font and title
-  doc.setFont("helvetica", "normal");
-
-  // Company Header (Logo/Details)
-  doc.setFontSize(14);
-  doc.text("Mateng Delivery", 20, 20); // Company name
-  doc.setFontSize(10);
-  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 25);
-  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 30);
-
-  // Add a horizontal line below the header
-  doc.setLineWidth(0.5);
-  doc.line(20, 35, 190, 35); // Horizontal line across the page
-
-  // Invoice Title
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Invoice", 20, 45);
-  
-  // Invoice Date and Tracking ID
-  const today = new Date();
-  const invoiceDate = today.toLocaleDateString(); // Format to local date
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${invoiceDate}`, 140, 45);
-  doc.text(`Tracking ID: ${data.trackingId}`, 20, 55);
-  
-  // Add a line below the invoice header
-  doc.setLineWidth(0.5);
-  doc.line(20, 60, 190, 60); 
-
-  // Sender and Receiver Details (Side by Side)
-  const senderX = 20; // X position for sender details
-  const receiverX = 110; // X position for receiver details (shifted to right side)
-
-  // Sender Details
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Sender Details", senderX, 70);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Name: ${formData.senderName}`, senderX, 80);
-  doc.text(`Phone: ${formData.senderPhone}`, senderX, 90);
-  doc.text(`Address: ${formData.senderAddress}`, senderX, 100);
-  doc.text(`Pincode: ${formData.senderPincode}`, senderX, 110);
-  doc.text(`City/State: ${formData.senderCityState || "-"}`, senderX, 120);
-
-  // Receiver Details
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Receiver Details", receiverX, 70);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Name: ${formData.receiverName}`, receiverX, 80);
-  doc.text(`Phone: ${formData.receiverPhone}`, receiverX, 90);
-  doc.text(`Address: ${formData.receiverAddress}`, receiverX, 100);
-  doc.text(`Pincode: ${formData.receiverPincode}`, receiverX, 110);
-  doc.text(`City/State: ${formData.receiverCityState || "-"}`, receiverX, 120);
-
-  // Add a line separating the details and footer
-  doc.setLineWidth(0.5);
-  doc.line(20, 130, 190, 130);
-
-  // Pricing Details
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Pricing Details", 20, 140);
-  
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Freight Charges (Estimated): ₹${estimateCharge.toFixed(2)}`, 20, 150);
-  doc.text("Handling Charge: Will be known after pickup", 20, 160);
-  doc.text("Docket Charge: Will be known after pickup", 20, 170);
-  doc.text("Packaging Charge: Will be known after pickup", 20, 180);
-  doc.text("Pickup Charges: ₹30 (if pickup is required)", 20, 190);
-  doc.text("Delivery Charges: ₹40 (if delivery required)", 20, 200);
-
-  // Add a line separating the details and footer
-  doc.setLineWidth(0.5);
-  doc.line(20, 210, 190, 210);
-
-  // Support & Notes Section
-  doc.setFontSize(10);
-  doc.text("Support: 9774795906", 20, 220);
-  doc.text("Note: Final Bill comes after pickup. Estimated charges may vary.", 20, 230);
-  doc.text("For 100kg and above, GST bill is required.", 20, 240);
-  doc.text("For medicine and electronic devices, GST bill is required.", 20, 250);
-
-  // Footer with company address and legal disclaimer
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "italic");
-  doc.text("Mateng Delivery | Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 260);
-  doc.text("Website: justmateng.com | Phone: 8787649928", 20, 265);
-  doc.text("This is a computer-generated invoice and does not require a signature.", 20, 270);
-  
-  // Save the PDF
-  doc.save(`Invoice-${data.trackingId}.pdf`);
-};
-
-
-
-
+  /* ---------- Handle Submit ---------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
-      const payload = {
-        userId: session?.user?.id || null,  // optional userId
-        ...formData,
-        estimateCharge,
-      };
-
       const response = await fetch("/api/book-cargo/fixed-delivery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...formData, userId: session?.user?.id, estimateCharge }),
       });
-
       const json = await response.json();
-
-      if (!response.ok) {
-        throw new Error(json.error || "Booking failed");
-      }
+      if (!response.ok) throw new Error(json.error || "Booking failed");
 
       setTrackingPopup({ trackingId: json.trackingId, estimateCharge });
       setSuccessMessage("Booking placed successfully!");
-
-      // Reset form
-      setFormData({
-        senderName: "",
-        senderPhone: "",
-        senderAddress: "",
-        senderPincode: "",
-        senderCityState: "",
-
-        receiverName: "",
-        receiverPhone: "",
-        receiverAddress: "",
-        receiverPincode: "",
-        receiverCityState: "",
-
-        productName: "",
-        weightEstimate: 0,
-        photoUrl: undefined,
-
-        pickupRequired: false,
-        deliveryRequired: false,
-        deliveryMode: "standard",
-        handlingCharge: 0,
-        docketCharge: 0,
-        notes: "",
-      });
-      setEstimateCharge(0);
-    } catch (error) {
-      toast.error((error as Error).message || "Booking failed. Please try again.");
+    } catch (err) {
+      toast.error((err as Error).message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /* ---------- UI ---------- */
   return (
     <div className={styles.container}>
       <Card className={styles.card}>
         <CardHeader>
           <CardTitle className="text-xl text-black">Cross State Delivery</CardTitle>
-
         </CardHeader>
+
         <CardContent>
-          {successMessage && (
-            <div className={`${styles.successMessage} mb-4 p-3 rounded`}>
-              {successMessage}
-            </div>
-          )}
+          {successMessage && <div className="bg-green-100 text-black p-3 rounded mb-4">{successMessage}</div>}
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Sender and Receiver Details */}
+            {/* Sender & Receiver */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Sender Details */}
+              {/* Sender */}
               <div className="space-y-2">
                 <h2 className={styles.subHeader}>Sender Details</h2>
-                <Input
-                  name="senderName"
-                  value={formData.senderName}
-                  onChange={handleChange}
-                  placeholder="Sender's Name"
-                  required
-                  style={{ color: 'black' }}
-                />
-
-                <Input name="senderPhone" value={formData.senderPhone} onChange={handleChange} placeholder="Sender's Phone" required style={{ color: 'black' }} />
-                <Textarea name="senderAddress" value={formData.senderAddress} onChange={handleChange} placeholder="Sender's Address" required style={{ color: 'black' }} />
-                <Input name="senderPincode" type="text" value={formData.senderPincode} onChange={handleChange} placeholder="Sender’s Pincode" required style={{ color: 'black' }} />
+                <Input name="senderName" value={formData.senderName} onChange={handleChange} placeholder="Sender's Name" required style={{ color: "black" }} />
+                <Input name="senderPhone" value={formData.senderPhone} onChange={handleChange} placeholder="Sender's Phone" required style={{ color: "black" }} />
+                <Textarea name="senderAddress" value={formData.senderAddress} onChange={handleChange} placeholder="Sender's Address" required style={{ color: "black" }} />
+                <Input name="senderPincode" value={formData.senderPincode} onChange={handleChange} placeholder="Sender’s Pincode" required style={{ color: "black" }} />
                 {formData.senderCityState && <div className="text-sm text-black">{formData.senderCityState}</div>}
               </div>
 
-              {/* Receiver Details */}
+              {/* Receiver */}
               <div className="space-y-2">
                 <h2 className={styles.subHeader}>Receiver Details</h2>
-                <Input name="receiverName" value={formData.receiverName} onChange={handleChange} placeholder="Receiver's Name" required style={{ color: 'black' }} />
-                <Input name="receiverPhone" value={formData.receiverPhone} onChange={handleChange} placeholder="Receiver's Phone" required style={{ color: 'black' }} />
-                <Textarea name="receiverAddress" value={formData.receiverAddress} onChange={handleChange} placeholder="Receiver's Address" required style={{ color: 'black' }} />
-                <Input name="receiverPincode" type="text" value={formData.receiverPincode} onChange={handleChange} placeholder="Receiver’s Pincode" required style={{ color: 'black' }} />
+                <Input name="receiverName" value={formData.receiverName} onChange={handleChange} placeholder="Receiver's Name" required style={{ color: "black" }} />
+                <Input name="receiverPhone" value={formData.receiverPhone} onChange={handleChange} placeholder="Receiver's Phone" required style={{ color: "black" }} />
+                <Textarea name="receiverAddress" value={formData.receiverAddress} onChange={handleChange} placeholder="Receiver's Address" required style={{ color: "black" }} />
+                <Input name="receiverPincode" value={formData.receiverPincode} onChange={handleChange} placeholder="Receiver’s Pincode" required style={{ color: "black" }} />
                 {formData.receiverCityState && <div className="text-sm text-black">{formData.receiverCityState}</div>}
               </div>
             </div>
 
-            {/* Product Details */}
+            {/* Product */}
             <div className="space-y-2">
               <h2 className={styles.subHeader}>Product Details</h2>
-              <Input
-  name="productName"
-  value={formData.productName}
-  onChange={handleChange}
-  placeholder="Product Name"
-  required
-  style={{ color: 'black' }}
-/>
-<Input
-  name="weightEstimate"
-  type="number"
-  min="0"
-  step="0.01"
-  value={formData.weightEstimate === 0 ? '' : formData.weightEstimate}
-  onChange={handleChange}
-  placeholder="Estimated Weight"
-  style={{ color: 'black' }}
-/>
-<Label htmlFor="photo" className="text-black font-semibold text-lg mb-2">
-  Product Photo (optional)
-</Label>
-
-
-              <Input
-                id="photo"
-                name="photo"
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                className="border rounded-md p-2 mb-4 text-black"
-              />
-              {formData.photoUrl && (
-                <img
-                  src={formData.photoUrl}
-                  alt="Product"
-                  className="max-w-full h-auto rounded-md border border-black mt-2"
-                />
-              )}
+              <Input name="productName" value={formData.productName} onChange={handleChange} placeholder="Product Name" required style={{ color: "black" }} />
+              <Input name="weightEstimate" type="number" value={formData.weightEstimate || ""} onChange={handleChange} placeholder="Weight (kg)" style={{ color: "black" }} />
+              <Label htmlFor="photo" className="text-black">Product Photo (optional)</Label>
+              <Input id="photo" type="file" accept="image/*" onChange={handlePhotoChange} className="border p-2" />
+              {formData.photoUrl && <img src={formData.photoUrl} alt="Preview" className="max-w-full h-auto mt-2 rounded border" />}
             </div>
 
             {/* Delivery Mode */}
-            {/* Delivery Mode */}
             <div className="space-y-2">
-  <h2 className={styles.subHeader}>Delivery Mode</h2>
-
-  
-  {/* Container for Delivery Mode dropdown and Pickup checkbox */}
-  <div className="flex items-center space-x-30">
-    {/* Delivery Mode Dropdown */}
-    <select
-      name="deliveryMode"
-      value={formData.deliveryMode}
-      onChange={handleChange}
-      className="border rounded-md p-2 text-black"
-    >
-      <option value="standard">Surface</option>
-      <option value="express">Express</option>
-    </select>
-    
-    {/* Pickup Charges Checkbox */}
-    <div className="flex items-center">
-      <input
-        type="checkbox"
-        name="pickupRequired"
-        checked={formData.pickupRequired}
-        onChange={handleChange}
-        id="pickupRequired"
-        style={{ transform: 'scale(1.5)' }} // Adjust the scale factor as needed
-      />
-      <Label htmlFor="pickupRequired" className="ml-2 text-black">
-        Pickup required (Extra Charges may apply)
-      </Label>
-    </div>
-  </div>
-</div>
-
-
-
-            {/* Additional Charges */}
-            <div className="space-y-2">
-              <div>
-  
-</div>
-
-              <div>
-                {/* <input type="checkbox" name="deliveryRequired" checked={formData.deliveryRequired} onChange={handleChange} id="deliveryRequired" /> */}
-                {/* <Label htmlFor="deliveryRequired" className="ml-2 text-black">Delivery to endpoint required (₹40 extra)</Label> */}
+              <h2 className={styles.subHeader}>Delivery Mode</h2>
+              <select name="deliveryMode" value={formData.deliveryMode} onChange={handleChange} className="border rounded p-2 text-black">
+                <option value="standard">Surface</option>
+                <option value="express">Express</option>
+              </select>
+              <div className="flex items-center">
+                <input type="checkbox" name="pickupRequired" checked={formData.pickupRequired} onChange={handleChange} />
+                <Label htmlFor="pickupRequired" className="ml-2 text-black">Pickup required (₹30 extra)</Label>
               </div>
-              {/* <Input name="handlingCharge" type="number" min="0" step="0.01" value={formData.handlingCharge} onChange={handleChange} placeholder="Handling Charge (optional)" />
-              <Input name="docketCharge" type="number" min="0" step="0.01" value={formData.docketCharge} onChange={handleChange} placeholder="Docket Charge (optional)" /> */}
             </div>
 
             {/* Notes */}
             <Textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Additional notes (optional)" />
 
-            {/* Route unsupported warning */}
+            {/* Estimate */}
+            {/* Estimate */}
+            {(() => {
+              const sender = formData.senderPincode;
+              const receiver = formData.receiverPincode;
 
+              const isManipur = (pin: string) => pin.startsWith("795");
+              const isNCR = (pin: string) =>
+                pin.startsWith("110") ||
+                pin.startsWith("201") ||
+                pin.startsWith("122") ||
+                pin.startsWith("121") ||
+                pin.startsWith("124") ||
+                pin.startsWith("131");
 
-            {/* Route unsupported warning */}
-            {!rateMap[`${formData.senderPincode}-${formData.receiverPincode}`] ? (
-              <div className={styles.unsupportedRoute}>
-                {/* This route ships via third-party carriers (Bluedart, Indian Post, or Delhivery). Estimated price: 130-270 per kg, plus handling, packaging, and other small charges. */}
-                Parcels between Delhi and Imphal delivered in 1-3 days, ₹130-₹270/kg. For other routes, third-party carriers (Bluedart, Indian Post, Delhivery) are used(Expected delivery timing 10-15 days). Contact 9774795906 for details. 
-              </div>
-            ) : (
-              <>
-                <div className={styles.estimateCharge}>
-                  Estimated Charges: ₹{estimateCharge.toFixed(2)}
+              const manipurToNCR =
+                (isManipur(sender) && isNCR(receiver)) ||
+                (isNCR(sender) && isManipur(receiver));
+
+              if (manipurToNCR || rateMap[`${sender}-${receiver}`]) {
+                return (
+                  <div className="text-black space-y-1">
+                    <div>Estimated Charges: ₹{estimateCharge.toFixed(2)}</div>
+                    <div className="text-sm text-gray-600">
+                      (Includes ₹80 docket charge{formData.pickupRequired ? ", ₹30 pickup" : ""}{formData.deliveryRequired ? ", ₹40 delivery" : ""})
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="text-black">
+                  Route not supported. Contact 9774795906 for assistance.
                 </div>
-                <div style={{ color: 'black' }}>
-                  This charge is an estimate and may vary after pickup based on actual weight and other factors.
-                </div>
-              </>
-            )}
+              );
+            })()}
 
 
 
@@ -563,14 +485,10 @@ const generateInvoice = (data: TrackingPopupData) => {
           <div className={styles.trackingPopup}>
             <h2 className="text-lg font-semibold mb-2">🎉 Booking Confirmed</h2>
             <p><strong>Tracking ID:</strong> {trackingPopup.trackingId}</p>
-            <p className="mt-2 text-sm text-black">
-              Our team will connect with you soon. You can also reach us at <strong>9774795906</strong>.
-            </p>
-            <p className="mt-1 text-sm text-yellow-600">
-              Note: Estimate charges (₹{trackingPopup.estimateCharge.toFixed(2)}) may vary after pickup.
-            </p>
+            <p className="mt-2 text-sm text-black">Our team will contact you soon. Support: 9774795906</p>
+            <p className="mt-1 text-sm text-yellow-600">Estimate ₹{trackingPopup.estimateCharge.toFixed(2)} (may vary)</p>
             <div className="flex justify-between mt-4">
-              <Button onClick={() => generateInvoice(trackingPopup)}>Download Reciept</Button>
+              <Button onClick={() => generateInvoice(trackingPopup, formData)}>Download Invoice</Button>
               <Button variant="outline" onClick={() => setTrackingPopup(null)}>Close</Button>
             </div>
           </div>

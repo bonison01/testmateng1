@@ -13,109 +13,118 @@ interface TrackingPopupData {
   receiverAddress: string;
   receiverPincode: string;
   receiverCityState: string;
+  productName?: string;
+  weightEstimate?: number;
+  deliveryMode?: "standard" | "express";
+  pickupRequired?: boolean;
+  deliveryRequired?: boolean;
+  notes?: string;
   estimateCharge: number;
 }
 
 const generateInvoice = (data: TrackingPopupData) => {
   const doc = new jsPDF();
 
-  // Set font and title
-  doc.setFont("helvetica", "normal");
-
-  // Company Header (Logo/Details)
-  doc.setFontSize(14);
-  doc.text("Mateng Delivery", 20, 20); // Company name
-  doc.setFontSize(10);
-  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 25);
-  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 30);
-
-  // Add a horizontal line below the header
-  doc.setLineWidth(0.5);
-  doc.line(20, 35, 190, 35); // Horizontal line across the page
-
-  // Invoice Title
+  // ---- HEADER ----
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Invoice", 20, 45);
-  
-  // Invoice Date and Tracking ID
-  const today = new Date();
-  const invoiceDate = today.toLocaleDateString(); // Format to local date
-  doc.setFontSize(12);
+  doc.text("Mateng Delivery Service", 20, 20);
+
   doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${invoiceDate}`, 140, 45);
-  doc.text(`Tracking ID: ${data.trackingId}`, 20, 55);
-  
-  // Add a line below the invoice header
-  doc.setLineWidth(0.5);
-  doc.line(20, 60, 190, 60); 
+  doc.setFontSize(10);
+  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004", 20, 26);
+  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 31);
+  doc.line(20, 35, 190, 35);
 
-  // Sender and Receiver Details (Side by Side)
-  const senderX = 20; // X position for sender details
-  const receiverX = 110; // X position for receiver details (shifted to right side)
-
-  // Sender Details
-  doc.setFontSize(12);
+  // ---- INVOICE TITLE ----
   doc.setFont("helvetica", "bold");
-  doc.text("Sender Details", senderX, 70);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Name: ${data.senderName}`, senderX, 80);
-  doc.text(`Phone: ${data.senderPhone}`, senderX, 90);
-  doc.text(`Address: ${data.senderAddress}`, senderX, 100);
-  doc.text(`Pincode: ${data.senderPincode}`, senderX, 110);
-  doc.text(`City/State: ${data.senderCityState || "-"}`, senderX, 120);
+  doc.setFontSize(14);
+  doc.text("Booking Receipt", 20, 45);
 
-  // Receiver Details
-  doc.setFontSize(12);
+  const today = new Date().toLocaleDateString();
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Date: ${today}`, 150, 45);
+  doc.text(`Tracking ID: ${data.trackingId}`, 20, 53);
+  doc.line(20, 58, 190, 58);
+
+  // ---- SENDER DETAILS ----
   doc.setFont("helvetica", "bold");
-  doc.text("Receiver Details", receiverX, 70);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Name: ${data.receiverName}`, receiverX, 80);
-  doc.text(`Phone: ${data.receiverPhone}`, receiverX, 90);
-  doc.text(`Address: ${data.receiverAddress}`, receiverX, 100);
-  doc.text(`Pincode: ${data.receiverPincode}`, receiverX, 110);
-  doc.text(`City/State: ${data.receiverCityState || "-"}`, receiverX, 120);
-
-  // Add a line separating the details and footer
-  doc.setLineWidth(0.5);
-  doc.line(20, 130, 190, 130);
-
-  // Pricing Details
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Pricing Details", 20, 140);
-  
-  doc.setFontSize(10);
+  doc.text("Sender Details", 20, 68);
   doc.setFont("helvetica", "normal");
-  doc.text(`Freight Charges (Estimated): ₹${data.estimateCharge.toFixed(2)}`, 20, 150);
-  doc.text("Handling Charge: Will be known after pickup", 20, 160);
-  doc.text("Docket Charge: Will be known after pickup", 20, 170);
-  doc.text("Packaging Charge: Will be known after pickup", 20, 180);
-  doc.text("Pickup Charges: ₹30 (if pickup is required)", 20, 190);
-  doc.text("Delivery Charges: ₹40 (if delivery required)", 20, 200);
-
-  // Add a line separating the details and footer
-  doc.setLineWidth(0.5);
-  doc.line(20, 210, 190, 210);
-
-  // Support & Notes Section
   doc.setFontSize(10);
-  doc.text("Support: 9774795906", 20, 220);
-  doc.text("Note: Final Bill comes after pickup. Estimated charges may vary.", 20, 230);
-  doc.text("For 100kg and above, GST bill is required.", 20, 240);
-  doc.text("For medicine and electronic devices, GST bill is required.", 20, 250);
+  doc.text(`Name: ${data.senderName}`, 20, 75);
+  doc.text(`Phone: ${data.senderPhone}`, 20, 81);
+  doc.text(`Address: ${data.senderAddress}`, 20, 87);
+  doc.text(`Pincode: ${data.senderPincode}`, 20, 93);
+  doc.text(`City/State: ${data.senderCityState || "-"}`, 20, 99);
 
-  // Footer with company address and legal disclaimer
-  doc.setFontSize(8);
+  // ---- RECEIVER DETAILS ----
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Receiver Details", 110, 68);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Name: ${data.receiverName}`, 110, 75);
+  doc.text(`Phone: ${data.receiverPhone}`, 110, 81);
+  doc.text(`Address: ${data.receiverAddress}`, 110, 87);
+  doc.text(`Pincode: ${data.receiverPincode}`, 110, 93);
+  doc.text(`City/State: ${data.receiverCityState || "-"}`, 110, 99);
+
+  doc.line(20, 106, 190, 106);
+
+  // ---- PRODUCT DETAILS ----
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Product & Delivery Details", 20, 116);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Product Name: ${data.productName || "-"}`, 20, 123);
+  doc.text(`Weight Estimate: ${data.weightEstimate ? data.weightEstimate + " kg" : "-"}`, 20, 129);
+  doc.text(`Delivery Mode: ${data.deliveryMode === "express" ? "Express" : "Surface"}`, 20, 135);
+  doc.text(`Pickup Required: ${data.pickupRequired ? "Yes" : "No"}`, 20, 141);
+  doc.text(`Delivery Required: ${data.deliveryRequired ? "Yes" : "No"}`, 20, 147);
+  doc.text(`Additional Notes: ${data.notes || "-"}`, 20, 153);
+
+  doc.line(20, 160, 190, 160);
+
+  // ---- CHARGES SUMMARY ----
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Charges Summary", 20, 170);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  const pickupCharge = data.pickupRequired ? 30 : 0;
+  const deliveryCharge = data.deliveryRequired ? 40 : 0;
+  const total = data.estimateCharge + pickupCharge + deliveryCharge;
+
+  doc.text(`Freight Charges (Estimated): ₹${data.estimateCharge.toFixed(2)}`, 20, 177);
+  doc.text(`Pickup Charge: ₹${pickupCharge}`, 20, 183);
+  doc.text(`Delivery Charge: ₹${deliveryCharge}`, 20, 189);
+  doc.text(`----------------------------------------------`, 20, 195);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total Estimated: ₹${total.toFixed(2)}`, 20, 202);
+
+  // ---- NOTES & SUPPORT ----
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("⚠ Note: This is a preliminary receipt. Final bill will be provided after pickup.", 20, 215);
+  doc.text("Prices may vary based on actual weight, distance, and delivery mode.", 20, 221);
+  doc.text("For 100kg+ or electronic/medical items, GST invoice is required.", 20, 227);
+  doc.text("Support: 9774795906", 20, 233);
+
+  // ---- FOOTER ----
+  doc.line(20, 240, 190, 240);
   doc.setFont("helvetica", "italic");
-  doc.text("Mateng Delivery | Sagolband Sayang Leirak, Sagolband, Imphal, Manipur -795004", 20, 260);
-  doc.text("Website: justmateng.com | Phone: 8787649928", 20, 265);
-  doc.text("This is a computer-generated invoice and does not require a signature.", 20, 270);
-  
-  // Save the PDF
-  doc.save(`Invoice-${data.trackingId}.pdf`);
+  doc.setFontSize(8);
+  doc.text("Mateng Delivery | Sagolband Sayang Leirak, Imphal, Manipur - 795004", 20, 248);
+  doc.text("Website: justmateng.com | Phone: 8787649928", 20, 253);
+  doc.text("This is a computer-generated receipt and does not require a signature.", 20, 258);
+
+  // Save the file
+  doc.save(`Receipt-${data.trackingId}.pdf`);
 };
 
 export default generateInvoice;
