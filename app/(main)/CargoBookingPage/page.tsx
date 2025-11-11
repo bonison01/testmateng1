@@ -45,157 +45,185 @@ interface TrackingPopupData {
 }
 
 /* -------------------- Invoice Generator -------------------- */
+/* -------------------- Modern Invoice Generator (Styled Like BookingDetailsPage) -------------------- */
 const generateInvoice = (data: TrackingPopupData, formData: FormData) => {
   const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Helper function for wrapping text
+  // === Colors & Helpers ===
+  const primaryColor = "#14710F";
+  const lightGray = "#F6F6F6";
+
   const addText = (text: string, x: number, y: number, maxWidth = 80) => {
     const lines = doc.splitTextToSize(text, maxWidth);
     doc.text(lines, x, y);
-    return lines.length * 5;
+    return lines.length * 4.8;
   };
 
-  // Reset letter spacing before writing any text
-  (doc as any).setCharSpace?.(0);
+  const formatCurrency = (val: number | null | undefined) => {
+    const num = val != null && !isNaN(val) ? Number(val) : 0;
+    const formatted = num.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `INR ${formatted}`;
+  };
 
-  // Header
+  // === Frame ===
+  doc.setDrawColor(primaryColor);
+  doc.setLineWidth(1.2);
+  doc.rect(10, 10, pageWidth - 20, 280, "S");
+
+  // === Header ===
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Mateng Delivery", 20, 20);
+  doc.setFontSize(22);
+  doc.setTextColor(primaryColor);
+  doc.text("mateng", pageWidth / 2, 25, { align: "center" });
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004", 20, 25);
-  doc.text("Phone: 8787649928 | Website: justmateng.com", 20, 30);
-  doc.line(20, 35, 190, 35);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004", pageWidth / 2, 31, { align: "center" });
+  doc.text("Phone: 8787649928 | Website: justmateng.com", pageWidth / 2, 36, { align: "center" });
 
-  // Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Invoice", 20, 45);
+  // === Tracking Box ===
+  doc.setFillColor("#E9F8E6");
+  doc.roundedRect(25, 44, pageWidth - 50, 9, 2, 2, "F");
+  doc.setTextColor(primaryColor);
+  doc.setFontSize(11);
+  doc.text(`Tracking ID: ${data.trackingId}`, pageWidth / 2, 50, { align: "center" });
+
+  // === Invoice Info ===
   const today = new Date();
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(`Date: ${today.toLocaleDateString()}`, 140, 45);
-  doc.text(`Tracking ID: ${data.trackingId}`, 20, 55);
-  doc.line(20, 60, 190, 60);
+  const dateStr = today.toLocaleDateString();
 
-  // Sender Details
-  let currentY = 70;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Sender Details", 20, currentY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Invoice #: ${data.trackingId.replace("MTG", "INV–")}`, 25, 62);
+  doc.text(`Date: ${dateStr}`, 25, 67);
+  doc.text("Payment: Pending", pageWidth - 60, 62);
+  doc.setTextColor(primaryColor);
+  doc.text("Status: PENDING", pageWidth - 60, 67);
+
+  // === Sender / Receiver Boxes ===
+  doc.setFillColor(lightGray);
+  doc.roundedRect(25, 75, 75, 32, 2, 2, "F");
+  doc.roundedRect(110, 75, 75, 32, 2, 2, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(primaryColor);
+  doc.text("FROM (SENDER):", 28, 82);
+  doc.text("TO (RECEIVER):", 113, 82);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(9.8);
+  doc.text(`${formData.senderName || "N/A"}`, 28, 89);
+  doc.text(`${formData.senderPhone || "N/A"}`, 28, 94);
+  addText(`${formData.senderAddress || "N/A"}`, 28, 99, 68);
+
+  doc.text(`${formData.receiverName || "N/A"}`, 113, 89);
+  doc.text(`${formData.receiverPhone || "N/A"}`, 113, 94);
+  addText(`${formData.receiverAddress || "N/A"}`, 113, 99, 68);
+
+  doc.line(25, 112, 190, 112);
+
+  // === Product Details ===
+  let currentY = 120;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(primaryColor);
+  doc.setFontSize(12);
+  doc.text("Product Details", 25, currentY);
+
+  currentY += 8;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
+
+  currentY += addText(`Product Name: ${formData.productName}`, 25, currentY, 160);
+  currentY += 5;
+  doc.text(`Weight: ${formData.weightEstimate || "N/A"} kg`, 25, currentY);
+  currentY += 5;
+  doc.text(`Delivery Mode: ${formData.deliveryMode === "express" ? "Express" : "Surface"}`, 25, currentY);
+  currentY += 5;
+  doc.text(`Pickup Required: ${formData.pickupRequired ? "Yes" : "No"}`, 25, currentY);
+  currentY += 5;
+  currentY += addText(`Notes: ${formData.notes || "-"}`, 25, currentY, 160);
+  currentY += 5;
+
+  doc.line(25, currentY, 190, currentY);
   currentY += 10;
-  doc.text(`Name: ${formData.senderName}`, 20, currentY);
-  currentY += 5;
-  doc.text(`Phone: ${formData.senderPhone}`, 20, currentY);
-  currentY += 5;
-  const senderAddressHeight = addText(`Address: ${formData.senderAddress}`, 20, currentY, 80);
-  currentY += senderAddressHeight + 2;
-  doc.text(`Pincode: ${formData.senderPincode}`, 20, currentY);
-  currentY += 5;
-  doc.text(`City/State: ${formData.senderCityState || "-"}`, 20, currentY);
 
-  // Receiver Details
-  let receiverY = 70;
+  // === Pricing Details ===
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.text("Receiver Details", 110, receiverY);
+  doc.setTextColor(primaryColor);
+  doc.text("Pricing Details", 25, currentY);
+  currentY += 8;
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  receiverY += 10;
-  doc.text(`Name: ${formData.receiverName}`, 110, receiverY);
-  receiverY += 5;
-  doc.text(`Phone: ${formData.receiverPhone}`, 110, receiverY);
-  receiverY += 5;
-  const receiverAddressHeight = addText(`Address: ${formData.receiverAddress}`, 110, receiverY, 80);
-  receiverY += receiverAddressHeight + 2;
-  doc.text(`Pincode: ${formData.receiverPincode}`, 110, receiverY);
-  receiverY += 5;
-  doc.text(`City/State: ${formData.receiverCityState || "-"}`, 110, receiverY);
+  doc.setTextColor(0, 0, 0);
 
-  const sectionBottom = Math.max(currentY, receiverY) + 10;
-  doc.line(20, sectionBottom, 190, sectionBottom);
-
-  // Product Details
-  let productY = sectionBottom + 10;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Product Details", 20, productY);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  productY += 10;
-  doc.text(`Product Name: ${formData.productName}`, 20, productY);
-  productY += 5;
-  doc.text(`Weight: ${formData.weightEstimate} kg`, 20, productY);
-  productY += 5;
-  doc.text(`Delivery Mode: ${formData.deliveryMode === "express" ? "Express" : "Surface"}`, 20, productY);
-  productY += 5;
-  doc.text(`Pickup Required: ${formData.pickupRequired ? "Yes" : "No"}`, 20, productY);
-  productY += 5;
-  const notesHeight = addText(`Notes: ${formData.notes || "-"}`, 20, productY, 160);
-  productY += notesHeight + 5;
-
-  doc.line(20, productY, 190, productY);
-  productY += 10;
-
-  // Pricing Section (Proper Table Style)
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Pricing Details", 20, productY);
-  productY += 8;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-
-  const labelX = 25;
+  const labelX = 30;
   const valueX = 110;
-  const lineHeight = 7;
+  const lineH = 7;
+
+  const docket = 80;
+  const pickup = formData.pickupRequired ? 30 : 0;
+  const delivery = formData.deliveryRequired ? 40 : 0;
+  const total = data.estimateCharge;
 
   const charges = [
-    ["Freight Charges (Estimated)", `₹${data.estimateCharge.toFixed(2)}`],
-    ["Handling Charge", "Will be confirmed after pickup"],
-    ["Docket Charge", "Will be confirmed after pickup"],
-    ["Pickup Charges", "Will be defined after the pickup(depends on location)"],
-    // ["Delivery Charges", "Will be defined after order confirmation"],
+    ["Freight Charges (Estimated)", formatCurrency(total - (docket + pickup + delivery))],
+    ["Docket Charge", formatCurrency(docket)],
+    ["Pickup Charge", pickup > 0 ? formatCurrency(pickup) : "Pcikup charges may apply if needed."],
+    ["Packaging Charge", pickup > 0 ? formatCurrency(pickup) : "Packaging charges may apply under certain conditions."],
+    ["Extra Mile Delivery Charge", delivery > 0 ? formatCurrency(delivery) : "Delivery charges may apply under certain conditions."],
   ];
 
   charges.forEach(([label, value]) => {
-    productY += lineHeight;
-    doc.text(`${label}:`, labelX, productY);
-    doc.text(value, valueX, productY);
+    currentY += lineH;
+    doc.text(`${label}:`, labelX, currentY);
+    doc.text(value, valueX, currentY);
   });
 
-  productY += 5;
-  doc.line(20, productY, 190, productY);
-  productY += 10;
+  currentY += 8;
+  doc.line(25, currentY, 190, currentY);
+  currentY += 10;
 
-  // Footer Notes
+  // === Total ===
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(primaryColor);
+  doc.text("Total Estimated Amount:", labelX, currentY);
+  doc.text(formatCurrency(total), valueX, currentY);
+  currentY += 10;
+
+  doc.line(25, currentY, 190, currentY);
+  currentY += 10;
+
+  // === Footer ===
   doc.setFontSize(9);
-  doc.text("Note: Final bill may vary after pickup. Estimated charges are indicative.", 20, productY);
-  productY += 6;
-  doc.text("For 100kg+, electronics or medicines — GST invoice is mandatory.", 20, productY);
-  productY += 6;
-  doc.text("Support: 9774795906 | www.justmateng.com/contact-us", 20, productY);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Note: Final bill may vary after pickup. Estimated charges are indicative.", 25, currentY);
+  currentY += 5;
+  doc.text("For 100kg+, electronics or medicines — GST invoice is mandatory.", 25, currentY);
+  currentY += 5;
+  doc.text("Support: 9774795906 | Website: justmateng.com", 25, currentY);
+  currentY += 8;
 
-  productY += 10;
   doc.setFontSize(8);
+  doc.setTextColor(100);
   doc.setFont("helvetica", "italic");
-  doc.text("This is a computer-generated invoice. No signature required.", 20, productY);
+  doc.text("This is a computer-generated invoice. No signature required.", 25, currentY);
 
+  // === Save ===
   doc.save(`Invoice-${data.trackingId}.pdf`);
-  // Product Image (optional)
-  // if (formData.photoUrl) {
-  //   const img = new Image();
-  //   img.src = formData.photoUrl;
-  //   img.onload = () => {
-  //     doc.addImage(img, "JPEG", 140, productY - 60, 50, 35);
-  //     doc.save(`Invoice-${data.trackingId}.pdf`);
-  //   };
-  // } else {
-  //   doc.save(`Invoice-${data.trackingId}.pdf`);
-  // }
 };
+
 
 
 
@@ -270,61 +298,79 @@ export default function CargoBookingPage() {
   /* ---------- Calculate Estimate ---------- */
   /* ---------- Calculate Estimate ---------- */
   useEffect(() => {
-    const {
-      senderPincode,
-      receiverPincode,
-      weightEstimate,
-      deliveryMode,
-      pickupRequired,
-      deliveryRequired,
-    } = formData;
+  const {
+    senderPincode,
+    receiverPincode,
+    weightEstimate,
+    deliveryMode,
+    pickupRequired,
+    deliveryRequired,
+  } = formData;
 
-    const roundedWeight = Math.ceil(weightEstimate || 0);
+  const roundedWeight = Math.ceil(weightEstimate || 0);
 
-    const isManipur = (pin: string) => pin.startsWith("795");
-    const isNCR = (pin: string) =>
-      pin.startsWith("110") || // Delhi
-      pin.startsWith("201") || // Noida / Ghaziabad
-      pin.startsWith("122") || // Gurugram
-      pin.startsWith("121") || // Faridabad / Palwal
-      pin.startsWith("124") || // Rohtak / Jhajjar belt
-      pin.startsWith("131");   // Sonipat
+  const isManipur = (pin: string) => pin.startsWith("795");
+  const isNCR = (pin: string) =>
+    pin.startsWith("110") || // Delhi
+    pin.startsWith("201") || // Noida / Ghaziabad
+    pin.startsWith("122") || // Gurugram
+    pin.startsWith("121") || // Faridabad / Palwal
+    pin.startsWith("124") || // Rohtak / Jhajjar belt
+    pin.startsWith("131");   // Sonipat
 
-    const manipurToNCR =
-      (isManipur(senderPincode) && isNCR(receiverPincode)) ||
-      (isNCR(senderPincode) && isManipur(receiverPincode));
+  const manipurToNCR =
+    (isManipur(senderPincode) && isNCR(receiverPincode)) ||
+    (isNCR(senderPincode) && isManipur(receiverPincode));
 
-    // Add Rs 80 docket charge always if valid route
-    const docketCharge = 80;
+  const manipurTomanipur =
+    (isNCR(senderPincode) && isNCR(receiverPincode)) ||
+    (isManipur(senderPincode) && isManipur(receiverPincode));
 
-    if (manipurToNCR && roundedWeight > 0) {
-      const base = 150 * roundedWeight;
-      const total =
-        base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
-      setEstimateCharge(total);
-      return;
-    }
+  const docketCharge = 80;
 
-    const routeKey = `${senderPincode}-${receiverPincode}`;
-    const rate: Rate | undefined = rateMap[routeKey];
-    if (!rate || roundedWeight <= 0) {
-      setEstimateCharge(0);
-      return;
-    }
-
-    let base =
-      roundedWeight <= 1
-        ? rate.upto_1kg
-        : roundedWeight <= 5
-          ? rate.upto_5kg
-          : rate.above_5kg;
-
-    if (deliveryMode === "express") base *= 1.5;
-
+  // ✅ Manipur ↔ NCR Route
+  if (manipurToNCR && roundedWeight > 0) {
+    const base =
+      deliveryMode === "express"
+        ? 150 * roundedWeight // express
+        : 50 * roundedWeight; // surface
     const total =
       base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
     setEstimateCharge(total);
-  }, [formData]);
+    return;
+  }
+
+  // ✅ Manipur ↔ Manipur or NCR ↔ NCR Route
+  if (manipurTomanipur && roundedWeight > 0) {
+    const base = 50 * roundedWeight;
+    const total =
+      base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
+    setEstimateCharge(total);
+    return;
+  }
+
+  // ✅ Other routes via rateMap
+  const routeKey = `${senderPincode}-${receiverPincode}`;
+  const rate: Rate | undefined = rateMap[routeKey];
+  if (!rate || roundedWeight <= 0) {
+    setEstimateCharge(0);
+    return;
+  }
+
+  let base =
+    roundedWeight <= 1
+      ? rate.upto_1kg
+      : roundedWeight <= 5
+        ? rate.upto_5kg
+        : rate.above_5kg;
+
+  if (deliveryMode === "express") base *= 1.5;
+
+  const total =
+    base + docketCharge + (pickupRequired ? 30 : 0) + (deliveryRequired ? 40 : 0);
+  setEstimateCharge(total);
+}, [formData]);
+
 
 
 

@@ -163,7 +163,7 @@ const generateInvoice = (data: BookingData) => {
   const total = freightCharge + handling + docket + packaging + pickup + extraMile;
 
   const charges = [
-    ["Freight Charges (Estimated)", formatCurrency(freightCharge)],
+    ["Freight Charges", formatCurrency(freightCharge)],
     ["Handling Charge", formatCurrency(handling)],
     ["Docket Charge", formatCurrency(docket)],
     ["Packaging Charge", formatCurrency(packaging)],
@@ -196,7 +196,7 @@ const generateInvoice = (data: BookingData) => {
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
   doc.text(
-    "Note: Final bill may vary after pickup. Estimated charges are indicative.",
+    "Note: We are not liable for any prohibited or restricted items. Please refer to our terms and conditions.",
     25,
     currentY
   );
