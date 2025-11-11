@@ -35,7 +35,7 @@ export default function Footer() {
           </Button> */}
 
           {/* Dropup Content */}
-          {/* {open && (
+          {open && (
             <div className="absolute bottom-full mb-2 right-0 bg-white border border-zinc-200 rounded-md shadow-lg py-2 z-50 w-48">
               <Link href="https://invoice-one-snowy.vercel.app">
                 <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
@@ -53,7 +53,7 @@ export default function Footer() {
                 </Button>
               </Link>
             </div>
-          )} */}
+          )}
         </div> 
       </div>
     </div>

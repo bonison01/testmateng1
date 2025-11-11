@@ -20,100 +20,108 @@ const generateInvoice = (data: BookingData) => {
   const primaryColor = "#14710F";
   const lightGray = "#F6F6F6";
 
-  // === Helpers ===
+  // Helper: wrap text
   const addText = (text: string, x: number, y: number, maxWidth = 80) => {
     const lines = doc.splitTextToSize(text, maxWidth);
     doc.text(lines, x, y);
-    return lines.length * 4.8; // compact spacing
+    return lines.length * 5;
   };
 
-  const formatCurrency = (val: number | null | undefined) => {
-    const num = val != null && !isNaN(val) ? Number(val) : 0;
-    const formatted = num.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    return `INR ${formatted}`;
-  };
+  // Helper: format currency
+// Helper: format currency using INR and Indian-style commas
+const formatCurrency = (val: number | null | undefined) => {
+  const num = val != null && !isNaN(val) ? Number(val) : 0;
+  const formatted = num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return `INR ${formatted}`;
+};
 
-  // === Frame ===
+
+
+  // Outer Border
   doc.setDrawColor(primaryColor);
-  doc.setLineWidth(1.2);
-  doc.rect(10, 10, pageWidth - 20, 280, "S");
+  doc.setLineWidth(1.5);
+  doc.rect(10, 10, pageWidth - 20, 275, "S");
 
-  // === Header ===
+  // Header: Company + Logo
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(primaryColor);
-  doc.text("mateng", pageWidth / 2, 25, { align: "center" });
+  doc.text("Mateng", pageWidth / 2, 25, { align: "center" });
 
-  doc.setFont("helvetica", "normal");
+  // Address
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   doc.text(
     "Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004",
     pageWidth / 2,
-    31,
+    32,
     { align: "center" }
   );
-  doc.text("Phone: 8787649928 | Website: justmateng.com", pageWidth / 2, 36, {
-    align: "center",
-  });
+  doc.text("Phone: 8787649928", pageWidth / 2, 37, { align: "center" });
 
-  // === Tracking Box ===
+  // Sender's Copy Button
+  doc.setFillColor(primaryColor);
+  doc.roundedRect(pageWidth / 2 - 25, 42, 50, 8, 2, 2, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text("SENDER'S COPY", pageWidth / 2, 48, { align: "center" });
+
+  // Tracking Box
   doc.setFillColor("#E9F8E6");
-  doc.roundedRect(25, 44, pageWidth - 50, 9, 2, 2, "F");
+  doc.roundedRect(25, 57, pageWidth - 50, 10, 2, 2, "F");
   doc.setTextColor(primaryColor);
   doc.setFontSize(11);
-  doc.text(`Tracking ID: ${data.tracking_id || "N/A"}`, pageWidth / 2, 50, {
+  doc.text(`Tracking ID: ${data.tracking_id || "N/A"}`, pageWidth / 2, 64, {
     align: "center",
   });
 
-  // === Invoice Info ===
+  // Invoice Info
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
   const dateStr = data.created_at
     ? new Date(data.created_at).toISOString().split("T")[0]
     : "N/A";
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
   doc.text(
     `Invoice #: ${data.tracking_id?.replace("MTG", "INV–") || "N/A"}`,
     25,
-    62
+    78
   );
-  doc.text(`Date: ${dateStr}`, 25, 67);
-  doc.text("Payment: CASH", pageWidth - 60, 62);
+  doc.text(`Date: ${dateStr}`, 25, 84);
+  doc.text("Payment: CASH", pageWidth - 60, 78);
   doc.setTextColor(primaryColor);
-  doc.text("Status: PAID", pageWidth - 60, 67);
+  doc.text("Status: PAID", pageWidth - 60, 84);
 
-  // === Sender / Receiver Boxes ===
+  // Sender / Receiver Box
   doc.setFillColor(lightGray);
-  doc.roundedRect(25, 75, 75, 32, 2, 2, "F");
-  doc.roundedRect(110, 75, 75, 32, 2, 2, "F");
+  doc.roundedRect(25, 95, 75, 35, 2, 2, "F");
+  doc.roundedRect(110, 95, 75, 35, 2, 2, "F");
 
+  // Sender / Receiver Headings
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(primaryColor);
-  doc.text("FROM (SENDER):", 28, 82);
-  doc.text("TO (RECEIVER):", 113, 82);
+  doc.text("FROM (SENDER):", 28, 102);
+  doc.text("TO (RECEIVER):", 113, 102);
 
+  // Sender / Receiver Info
   doc.setFont("helvetica", "normal");
   doc.setTextColor(0, 0, 0);
-  doc.setFontSize(9.8);
+  doc.text(`${data.sender_name || "N/A"}`, 28, 110);
+  doc.text(`${data.sender_phone || "N/A"}`, 28, 116);
+  addText(`${data.sender_address || "N/A"}`, 28, 122, 70);
 
-  doc.text(`${data.sender_name || "N/A"}`, 28, 89);
-  doc.text(`${data.sender_phone || "N/A"}`, 28, 94);
-  addText(`${data.sender_address || "N/A"}`, 28, 99, 68);
+  doc.text(`${data.receiver_name || "N/A"}`, 113, 110);
+  doc.text(`${data.receiver_phone || "N/A"}`, 113, 116);
+  addText(`${data.receiver_address || "N/A"}`, 113, 122, 70);
 
-  doc.text(`${data.receiver_name || "N/A"}`, 113, 89);
-  doc.text(`${data.receiver_phone || "N/A"}`, 113, 94);
-  addText(`${data.receiver_address || "N/A"}`, 113, 99, 68);
-
-  doc.line(25, 112, 190, 112);
+  // Divider
+  doc.line(25, 140, 190, 140);
 
   // === Product Details ===
-  let currentY = 120;
+  let currentY = 150;
   doc.setFont("helvetica", "bold");
   doc.setTextColor(primaryColor);
   doc.setFontSize(12);
@@ -153,14 +161,17 @@ const generateInvoice = (data: BookingData) => {
   const valueX = 110;
   const lineH = 7;
 
+  // Charges with default 0 fallback
   const freightCharge = data.estimate_charge || 0;
   const handling = data.handling_charge || 0;
   const docket = data.docket_charge || 0;
   const packaging = data.packaging_charge || 0;
   const pickup = data.pickup_charge || 0;
+  // const delivery = data.delivery_charge || 0;
   const extraMile = data.extra_mile_delivery || 0;
 
-  const total = freightCharge + handling + docket + packaging + pickup + extraMile;
+  const total =
+    freightCharge + handling + docket + packaging + pickup + extraMile;
 
   const charges = [
     ["Freight Charges (Estimated)", formatCurrency(freightCharge)],
@@ -168,6 +179,7 @@ const generateInvoice = (data: BookingData) => {
     ["Docket Charge", formatCurrency(docket)],
     ["Packaging Charge", formatCurrency(packaging)],
     ["Pickup Charges", formatCurrency(pickup)],
+    // ["Delivery Charges", formatCurrency(delivery)],
     ["Extra Mile Delivery", formatCurrency(extraMile)],
   ];
 
@@ -186,43 +198,30 @@ const generateInvoice = (data: BookingData) => {
   doc.setFontSize(11);
   doc.setTextColor(primaryColor);
   doc.text("Total Amount:", labelX, currentY);
+  // doc.text(`₹${total.toFixed(2)}`, valueX, currentY);
   doc.text(formatCurrency(total), valueX, currentY);
   currentY += 10;
-
   doc.line(25, currentY, 190, currentY);
   currentY += 10;
 
   // === Footer ===
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
-  doc.text(
-    "Note: Final bill may vary after pickup. Estimated charges are indicative.",
-    25,
-    currentY
-  );
-  currentY += 5;
-  doc.text(
-    "For 100kg+, electronics or medicines — GST invoice is mandatory.",
-    25,
-    currentY
-  );
-  currentY += 5;
+  doc.text("Note: Final bill may vary after pickup. Estimated charges are indicative.", 25, currentY);
+  currentY += 6;
+  doc.text("For 100kg+, electronics or medicines — GST invoice is mandatory.", 25, currentY);
+  currentY += 6;
   doc.text("Support: 9774795906 | Website: justmateng.com", 25, currentY);
-  currentY += 8;
+  currentY += 10;
 
   doc.setFontSize(8);
   doc.setTextColor(100);
   doc.setFont("helvetica", "italic");
-  doc.text(
-    "This is a computer-generated invoice. No signature required.",
-    25,
-    currentY
-  );
+  doc.text("This is a computer-generated invoice. No signature required.", 25, currentY);
 
-  // === Save ===
+  // Save PDF
   doc.save(`Invoice-${data.tracking_id}.pdf`);
 };
-
 
 
 const BookingDetailsForm = ({
