@@ -456,9 +456,16 @@ export default function CargoBookingPage() {
             <div className="space-y-2">
               <h2 className={styles.subHeader}>Product Details</h2>
               <Input name="productName" value={formData.productName} onChange={handleChange} placeholder="Product Name" required style={{ color: "black" }} />
-              <Input name="weightEstimate" type="number" value={formData.weightEstimate || ""} onChange={handleChange} placeholder="Weight (kg)" style={{ color: "black" }} />
+              <Input name="weightEstimate" type="number" value={formData.weightEstimate || ""} onChange={handleChange} placeholder="Estimated Weight (kg)" style={{ color: "black" }} />
               <Label htmlFor="photo" className="text-black">Product Photo (optional)</Label>
-              <Input id="photo" type="file" accept="image/*" onChange={handlePhotoChange} className="border p-2" />
+              <input
+  id="photo"
+  type="file"
+  accept="image/*"
+  onChange={handlePhotoChange}
+  className="border p-1 bg-white text-black file:bg-white file:text-black file:border file:border-gray-300 file:p-2 file:rounded-md cursor-pointer"
+/>
+
               {formData.photoUrl && <img src={formData.photoUrl} alt="Preview" className="max-w-full h-auto mt-2 rounded border" />}
             </div>
 
@@ -471,7 +478,7 @@ export default function CargoBookingPage() {
               </select>
               <div className="flex items-center">
                 <input type="checkbox" name="pickupRequired" checked={formData.pickupRequired} onChange={handleChange} />
-                <Label htmlFor="pickupRequired" className="ml-2 text-black">Pickup required (₹30 extra)</Label>
+                <Label htmlFor="pickupRequired" className="ml-2 text-black">Pickup required (Pickup charges will apply)</Label>
               </div>
             </div>
 
