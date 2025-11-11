@@ -60,6 +60,7 @@ function Navbar() {
         { name: "Discover", href: "/discovery" },
         { name: "Delivery Rates", href: "/delivery-rates" },
         { name: "Cargo Booking", href: "/CargoBookingPage" },
+        { name: "Track Booking", href: "/track" },
     ];
 
     const UserGreeting = () => (

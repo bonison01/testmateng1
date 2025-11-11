@@ -86,12 +86,18 @@ const generateInvoice = (data: TrackingPopupData, formData: FormData) => {
   doc.text("Sagolband Sayang Leirak, Sagolband, Imphal, Manipur - 795004", pageWidth / 2, 31, { align: "center" });
   doc.text("Phone: 8787649928 | Website: justmateng.com", pageWidth / 2, 36, { align: "center" });
 
+    doc.setFillColor(primaryColor);
+  doc.roundedRect(pageWidth / 2 - 25, 42, 50, 8, 2, 2, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text("Customer's COPY", pageWidth / 2, 48, { align: "center" });
+  
   // === Tracking Box ===
   doc.setFillColor("#E9F8E6");
-  doc.roundedRect(25, 44, pageWidth - 50, 9, 2, 2, "F");
+  // doc.roundedRect(25, 44, pageWidth - 50, 9, 2, 2, "F");
   doc.setTextColor(primaryColor);
   doc.setFontSize(11);
-  doc.text(`Tracking ID: ${data.trackingId}`, pageWidth / 2, 50, { align: "center" });
+  doc.text(`Tracking ID: ${data.trackingId}`, pageWidth / 2, 70, { align: "center" });
 
   // === Invoice Info ===
   const today = new Date();
@@ -536,14 +542,32 @@ export default function CargoBookingPage() {
       {trackingPopup && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className={styles.trackingPopup}>
-            <h2 className="text-lg font-semibold mb-2">🎉 Booking Confirmed</h2>
-            <p><strong>Tracking ID:</strong> {trackingPopup.trackingId}</p>
+            <h2 className="text-lg font-semibold mb-2 bg-white text-black p-2 rounded-md">
+  🎉 Booking Confirmed
+</h2>
+
+           <p className="bg-white text-black p-2 rounded-md">
+  <strong>Tracking ID:</strong> {trackingPopup.trackingId}
+</p>
+
             <p className="mt-2 text-sm text-black">Our team will contact you soon. Support: 9774795906</p>
             <p className="mt-1 text-sm text-yellow-600">Estimate ₹{trackingPopup.estimateCharge.toFixed(2)} (may vary)</p>
             <div className="flex justify-between mt-4">
-              <Button onClick={() => generateInvoice(trackingPopup, formData)}>Download Invoice</Button>
-              <Button variant="outline" onClick={() => setTrackingPopup(null)}>Close</Button>
-            </div>
+  <Button
+    onClick={() => generateInvoice(trackingPopup, formData)}
+    className="bg-green-700 hover:bg-green-800 text-white"
+  >
+    Download Receipt
+  </Button>
+  <Button
+    variant="outline"
+    onClick={() => setTrackingPopup(null)}
+    className="bg-green-200 hover:bg-green-300 text-green-800 border border-green-300"
+  >
+    Close
+  </Button>
+</div>
+
           </div>
         </div>
       )}

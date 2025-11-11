@@ -1,11 +1,10 @@
-// BookingDetailsPage.tsx
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import BookingDetailsForm from './BookingDetailsForm';  // Import the new form component
+import { supabase } from "@/lib/supabaseClient"; // ✅ use your own Supabase client
+import BookingDetailsForm from "./BookingDetailsForm";
 import { BookingData } from "../../../types/index";
-import styles from './BookingDetailsPage.module.css';  // Import the same styles
-import ReactDOMServer from 'react-dom/server';  // Import ReactDOMServer
+import styles from "./BookingDetailsPage.module.css";
+import ReactDOMServer from "react-dom/server";
 
 interface BookingDetailsPageProps {
   booking: BookingData;
@@ -13,107 +12,108 @@ interface BookingDetailsPageProps {
 }
 
 const BookingDetailsPage = ({ booking, onClose }: BookingDetailsPageProps) => {
-  const supabase = useSupabaseClient();
   const [selectedBooking, setSelectedBooking] = useState(booking);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Handle saving updated booking details
+  // ✅ Save Booking to Supabase
   const handleSave = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("bookings") // Replace with the actual table name
-        .update(selectedBooking)
-        .eq("tracking_id", selectedBooking.tracking_id);
+  try {
+    setIsSaving(true);
 
-      if (error) throw new Error(error.message);
+    const { data, error, status } = await supabase
+      .from("cargo_booking")
+      .update({
+        sender_name: selectedBooking.sender_name,
+        receiver_name: selectedBooking.receiver_name,
+        sender_phone: selectedBooking.sender_phone,
+        receiver_phone: selectedBooking.receiver_phone,
+        sender_address: selectedBooking.sender_address,
+        receiver_address: selectedBooking.receiver_address,
+        product_name: selectedBooking.product_name,
+        weight_estimate: selectedBooking.weight_estimate,
+        pickup_required: selectedBooking.pickup_required,
+        delivery_required: selectedBooking.delivery_required,
+        delivery_mode: selectedBooking.delivery_mode,
+        notes: selectedBooking.notes,
+        status: selectedBooking.status,
+        handling_charge: selectedBooking.handling_charge,
+        docket_charge: selectedBooking.docket_charge,
+        third_party_tracking: selectedBooking.third_party_tracking,
+        pickup_charge: selectedBooking.pickup_charge,
+        packaging_charge: selectedBooking.packaging_charge,
+        extra_mile_delivery: selectedBooking.extra_mile_delivery,
+        estimate_charge: selectedBooking.estimate_charge,
+        final_charge: selectedBooking.final_charge,
+      })
+      .eq("tracking_id", selectedBooking.tracking_id)
+      .select(); // ✅ return updated rows
 
-      toast.success("Booking details updated!");
-      onClose(); // Close the modal after successful save
-    } catch (error) {
-      toast.error((error as Error).message || "Failed to update booking details");
+    console.log("Supabase update result:", { data, error, status });
+
+    if (error) {
+      toast.error(`Save failed: ${error.message}`);
+    } else if (!data || data.length === 0) {
+      toast.error("No matching record found for this tracking_id ❌");
+    } else {
+      toast.success("Booking updated successfully ✅");
     }
-  };
+  } catch (err) {
+    console.error("Unexpected save error:", err);
+    toast.error("Unexpected error occurred ❌");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
-  // Update input and textarea values
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setSelectedBooking((prevBooking) => ({
-      ...prevBooking,
+  // ✅ Handle input change (text + checkbox)
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  const { name, value, type } = target;
+
+  // ✅ Handle checkbox toggles correctly
+  if (target instanceof HTMLInputElement && target.type === "checkbox") {
+    setSelectedBooking((prev) => ({
+      ...prev,
+      [name]: target.checked,
+    }));
+  } else {
+    setSelectedBooking((prev) => ({
+      ...prev,
       [name]: value,
     }));
-  };
+  }
+};
 
-  // Handle Invoice Download and Trigger Print
-  const handleDownloadInvoice = () => {
-    const invoiceContent = (
-      <div>
-        <h2>Invoice for {selectedBooking.product_name}</h2>
-        <p><strong>Sender:</strong> {selectedBooking.sender_name}</p>
-        <p><strong>Receiver:</strong> {selectedBooking.receiver_name}</p>
-        <p><strong>Address:</strong> {selectedBooking.sender_address} - {selectedBooking.receiver_address}</p>
-        <p><strong>Weight Estimate:</strong> {selectedBooking.weight_estimate}</p>
-        <p><strong>Delivery Mode:</strong> {selectedBooking.delivery_mode}</p>
-        <p><strong>Charges:</strong> {selectedBooking.estimate_charge}</p>
-        {/* Add other necessary fields */}
-      </div>
-    );
 
-    const invoiceContentString = ReactDOMServer.renderToStaticMarkup(invoiceContent);
 
-    // Create a temporary iframe to display the content
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
 
-    const iframeDocument = iframe.contentWindow?.document;
-    if (iframeDocument) {
-      iframeDocument.open();
-      iframeDocument.write(invoiceContentString);
-      iframeDocument.close();
-      iframe.contentWindow?.print();
-      document.body.removeChild(iframe); // Remove iframe after printing
-    }
-
-    toast.success("Printing invoice...");
-  };
-
-  // Handle Shipping Label Download and Trigger Print
+  // ✅ Label printing
   const handleDownloadLabel = () => {
     const labelContent = (
       <div>
         <h2>Shipping Label</h2>
         <p><strong>Sender:</strong> {selectedBooking.sender_name}</p>
         <p><strong>Receiver:</strong> {selectedBooking.receiver_name}</p>
-        <p><strong>Address:</strong> {selectedBooking.sender_address} - {selectedBooking.receiver_address}</p>
-        {/* Add other necessary fields */}
+        <p><strong>Address:</strong> {selectedBooking.sender_address} → {selectedBooking.receiver_address}</p>
       </div>
     );
 
-    const labelContentString = ReactDOMServer.renderToStaticMarkup(labelContent);
-
-    // Create a temporary iframe to display the content
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
+    const labelString = ReactDOMServer.renderToStaticMarkup(labelContent);
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
     document.body.appendChild(iframe);
 
-    const iframeDocument = iframe.contentWindow?.document;
-    if (iframeDocument) {
-      iframeDocument.open();
-      iframeDocument.write(labelContentString);
-      iframeDocument.close();
+    const iframeDoc = iframe.contentWindow?.document;
+    if (iframeDoc) {
+      iframeDoc.open();
+      iframeDoc.write(labelString);
+      iframeDoc.close();
       iframe.contentWindow?.print();
-      document.body.removeChild(iframe); // Remove iframe after printing
     }
 
+    setTimeout(() => document.body.removeChild(iframe), 1000);
     toast.success("Printing label...");
   };
 
@@ -123,11 +123,17 @@ const BookingDetailsPage = ({ booking, onClose }: BookingDetailsPageProps) => {
         selectedBooking={selectedBooking}
         onInputChange={handleInputChange}
         handleSave={handleSave}
-        // handleDownloadInvoice={handleDownloadInvoice}
         handleDownloadLabel={handleDownloadLabel}
         onClose={onClose}
       />
-    </div> 
+
+      {/* Optional: show overlay when saving */}
+      {isSaving && (
+        <div className={styles.savingOverlay}>
+          <div className={styles.savingText}>Saving...</div>
+        </div>
+      )}
+    </div>
   );
 };
 

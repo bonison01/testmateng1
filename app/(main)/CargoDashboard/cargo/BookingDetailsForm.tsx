@@ -6,11 +6,16 @@ import { jsPDF } from 'jspdf';
 
 interface BookingDetailsFormProps {
   selectedBooking: BookingData;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   handleSave: () => void;
   handleDownloadLabel: () => void;
   onClose: () => void;
 }
+
 
 const generateInvoice = (data: BookingData) => {
   const doc = new jsPDF();
@@ -366,14 +371,29 @@ const BookingDetailsForm = ({
 
       {/* Delivery Mode */}
       <div className={styles.formGroup}>
-        <label>Delivery Mode</label>
-        <input
-          type="text"
-          name="delivery_mode"
-          value={selectedBooking.delivery_mode}
-          onChange={onInputChange}
-        />
-      </div>
+  <label>Delivery Mode</label>
+  <select
+    name="delivery_mode"
+    value={selectedBooking.delivery_mode || ""}
+    onChange={onInputChange}
+  >
+    {/* Show current value if it’s something custom */}
+    {selectedBooking.delivery_mode &&
+      !["Standard", "Express"].includes(selectedBooking.delivery_mode) && (
+        <option value={selectedBooking.delivery_mode}>
+          {selectedBooking.delivery_mode} (current)
+        </option>
+      )}
+    
+    <option value="">Select Delivery Mode</option>
+    <option value="Standard">Standard</option>
+    <option value="Express">Express</option>
+  </select>
+</div>
+
+
+
+
 
       {/* Notes */}
       <div className={styles.formGroup}>
@@ -385,98 +405,136 @@ const BookingDetailsForm = ({
         />
       </div>
 
-      {/* Tracking ID (Read-Only) */}
-      <div className={styles.formGroup}>
-        <label>Tracking ID</label>
-        <input
-          type="text"
-          name="tracking_id"
-          value={selectedBooking.tracking_id}
-          readOnly
-        />
+      {/* === Tracking Section === */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>Tracking Information</h4>
+
+        <div className={styles.formGroup}>
+          <label>Tracking ID</label>
+          <input
+            type="text"
+            name="tracking_id"
+            value={selectedBooking.tracking_id}
+            readOnly
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Created At</label>
+          <input
+            type="date"
+            name="created_at"
+            value={selectedBooking.created_at ? selectedBooking.created_at.split("T")[0] : ""}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Third Party Tracking</label>
+          <input
+            type="text"
+            name="third_party_tracking"
+            value={selectedBooking.third_party_tracking || ""}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Status</label>
+          <select
+            name="status"
+            value={selectedBooking.status}
+            onChange={onInputChange}
+          >
+            {/* Show current value if it’s something custom */}
+    {selectedBooking.status &&
+      !["Pending", "Out for Delivery", "Delivered"].includes(selectedBooking.status) && (
+        <option value={selectedBooking.status}>
+          {selectedBooking.status} (current)
+        </option>
+      )}
+            <option value="Pending">Pending</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
       </div>
 
-      {/* Status */}
-      <div className={styles.formGroup}>
-        <label>Status</label>
-        <input
-          type="text"
-          name="status"
-          value={selectedBooking.status}
-          onChange={onInputChange}
-        />
+      {/* === Pricing Section === */}
+      <div className={styles.section}>
+        <h4 className={styles.sectionTitle}>Pricing Details</h4>
+
+        <div className={styles.formGroup}>
+          <label>Handling Charge</label>
+          <input
+            type="number"
+            name="handling_charge"
+            value={selectedBooking.handling_charge}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Docket Charge</label>
+          <input
+            type="number"
+            name="docket_charge"
+            value={selectedBooking.docket_charge}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Pickup Charge</label>
+          <input
+            type="number"
+            name="pickup_charge"
+            value={selectedBooking.pickup_charge}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Packaging Charge</label>
+          <input
+            type="number"
+            name="packaging_charge"
+            value={selectedBooking.packaging_charge}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Extra Mile Delivery</label>
+          <input
+            type="number"
+            name="extra_mile_delivery"
+            value={selectedBooking.extra_mile_delivery}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Estimate Charge</label>
+          <input
+            type="number"
+            name="estimate_charge"
+            value={selectedBooking.estimate_charge}
+            onChange={onInputChange}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Final Charge</label>
+          <input
+            type="number"
+            name="final_charge"
+            value={selectedBooking.final_charge}
+            onChange={onInputChange}
+          />
+        </div>
       </div>
 
-      {/* Pricing Details */}
-      <div className={styles.formGroup}>
-        <label>Handling Charge</label>
-        <input
-          type="number"
-          name="handling_charge"
-          value={selectedBooking.handling_charge}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Docket Charge</label>
-        <input
-          type="number"
-          name="docket_charge"
-          value={selectedBooking.docket_charge}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Pickup Charge</label>
-        <input
-          type="number"
-          name="pickup_charge"
-          value={selectedBooking.pickup_charge}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Packaging Charge</label>
-        <input
-          type="number"
-          name="packaging_charge"
-          value={selectedBooking.packaging_charge}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Extra Mile Delivery</label>
-        <input
-          type="number"
-          name="extra_mile_delivery"
-          value={selectedBooking.extra_mile_delivery}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Estimate Charge</label>
-        <input
-          type="number"
-          name="estimate_charge"
-          value={selectedBooking.estimate_charge}
-          onChange={onInputChange}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Final Charge</label>
-        <input
-          type="number"
-          name="final_charge"
-          value={selectedBooking.final_charge}
-          onChange={onInputChange}
-        />
-      </div>
 
       {/* Download Buttons */}
       <div className={styles.downloadButtons}>

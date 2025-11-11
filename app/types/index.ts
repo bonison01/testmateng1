@@ -26,6 +26,7 @@ export interface BookingData {
   sender_city_state?: string;  // Optional field
   receiver_city_state?: string;  // Optional field
   packaging_charge: number;
+  third_party_tracking?: string;
 
   // New fields
   photo_url?: string;             // Optional field for product photo URL

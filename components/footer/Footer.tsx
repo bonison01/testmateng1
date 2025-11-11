@@ -8,7 +8,9 @@ export default function Footer() {
 
   return (
     <div className='w-full h-16 bg-transparent flex flex-col justify-center items-center poppins'>
-      <CardDescription>© 2025 Mateng</CardDescription>
+      <p className="text-sm">
+        © {new Date().getFullYear()} Mateng. All rights reserved.
+      </p>
       <div className='flex flex-row gap-4 relative'>
         {/* Static Footer Links */}
         <Link href={`/about-us`}>

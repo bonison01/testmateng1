@@ -1,3 +1,4 @@
+///Users/apple/Documents/GitHub/testmateng1/app/(main)/CargoDashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -106,30 +107,39 @@ const DashboardPage = () => {
         </CardHeader>
         <CardContent>
           {/* Filters Section */}
-          <div className={styles.filters}>
-            <input
-              type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleFiltersChange}
-              placeholder="Start Date"
-            />
-            <input
-              type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleFiltersChange}
-              placeholder="End Date"
-            />
-            <input
-              type="text"
-              name="searchTerm"
-              value={filters.searchTerm}
-              onChange={handleFiltersChange}
-              placeholder="Search by name or phone"
-            />
-            <Button onClick={applyFilters}>Apply Filters</Button>
-          </div>
+          <div className="flex gap-2 items-center bg-white p-3 rounded-md">
+  <input
+    type="date"
+    name="startDate"
+    value={filters.startDate}
+    onChange={handleFiltersChange}
+    placeholder="Start Date"
+    className="p-2 rounded-md bg-white text-black border border-gray-300 placeholder-gray-500"
+  />
+  <input
+    type="date"
+    name="endDate"
+    value={filters.endDate}
+    onChange={handleFiltersChange}
+    placeholder="End Date"
+    className="p-2 rounded-md bg-white text-black border border-gray-300 placeholder-gray-500"
+  />
+  <input
+    type="text"
+    name="searchTerm"
+    value={filters.searchTerm}
+    onChange={handleFiltersChange}
+    placeholder="Search by name or phone"
+    className="p-2 rounded-md bg-white text-black border border-gray-300 placeholder-gray-500"
+  />
+  <Button
+    onClick={applyFilters}
+    className="bg-white text-black border border-gray-400 hover:bg-gray-100"
+  >
+    Apply Filters
+  </Button>
+</div>
+
 
           {/* Status Summary */}
           <div className={styles.statusSummary}>
@@ -209,8 +219,11 @@ const DashboardPage = () => {
 
       {/* Conditionally Render Booking Details Page */}
       {selectedBooking && (
-        <BookingDetailsPage booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
-      )}
+  <div className={styles.modalOverlay} onClick={() => setSelectedBooking(null)}>
+    <BookingDetailsPage booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
+  </div>
+)}
+
     </div>
   );
 };
