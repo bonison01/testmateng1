@@ -26,13 +26,13 @@ export default function Footer() {
 
         {/* Dropup Toggle Button */}
         <div className="relative">
-          {/* <Button
+          <Button
             variant="link"
             className='p-0 h-6 text-zinc-500 hover:text-green-600'
             onClick={() => setOpen(prev => !prev)}
           >
             Projects ↑
-          </Button> */}
+          </Button>
 
           {/* Dropup Content */}
           {open && (
