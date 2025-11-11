@@ -1,22 +1,10 @@
-import React from 'react';
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { BookingData } from "../../../types/index"; // Import your data type
-import styles from './BookingDetailsPage.module.css'; // Import your CSS styles
-import { jsPDF } from 'jspdf';
+import styles from "./BookingDetailsPage.module.css"; // Import your CSS styles
+import { jsPDF } from "jspdf";
 
-interface BookingDetailsFormProps {
-  selectedBooking: BookingData;
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  handleSave: () => void;
-  handleDownloadLabel: () => void;
-  onClose: () => void;
-}
-
-
+// === INVOICE GENERATOR FUNCTION ===
 const generateInvoice = (data: BookingData) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -143,7 +131,7 @@ const generateInvoice = (data: BookingData) => {
   doc.line(25, currentY, 190, currentY);
   currentY += 10;
 
-  // === Pricing Details ===
+    // === Pricing Details ===
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(primaryColor);
@@ -164,15 +152,16 @@ const generateInvoice = (data: BookingData) => {
   const packaging = data.packaging_charge || 0;
   const pickup = data.pickup_charge || 0;
   const extraMile = data.extra_mile_delivery || 0;
+  const finalCharge =
+    data.final_charge ??
+    handling + docket + pickup + packaging + extraMile; // fallback if not set
 
-  const total = freightCharge + handling + docket + packaging + pickup + extraMile;
-
+  // 🔹 Show all charge components in the PDF
   const charges = [
-    ["Freight Charges", formatCurrency(freightCharge)],
     ["Handling Charge", formatCurrency(handling)],
     ["Docket Charge", formatCurrency(docket)],
+    ["Pickup Charge", formatCurrency(pickup)],
     ["Packaging Charge", formatCurrency(packaging)],
-    ["Pickup Charges", formatCurrency(pickup)],
     ["Extra Mile Delivery", formatCurrency(extraMile)],
   ];
 
@@ -186,16 +175,17 @@ const generateInvoice = (data: BookingData) => {
   doc.line(25, currentY, 190, currentY);
   currentY += 10;
 
-  // === Total Amount ===
+  // === Final Charge (Total Amount) ===
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(primaryColor);
-  doc.text("Total Amount:", labelX, currentY);
-  doc.text(formatCurrency(total), valueX, currentY);
+  doc.text("Final Charge (Total):", labelX, currentY);
+  doc.text(formatCurrency(finalCharge), valueX, currentY);
   currentY += 10;
 
   doc.line(25, currentY, 190, currentY);
   currentY += 10;
+
 
   // === Footer ===
   doc.setFontSize(9);
@@ -228,15 +218,47 @@ const generateInvoice = (data: BookingData) => {
   doc.save(`Invoice-${data.tracking_id}.pdf`);
 };
 
-
-
+// === MAIN FORM COMPONENT ===
 const BookingDetailsForm = ({
   selectedBooking,
   onInputChange,
   handleSave,
   handleDownloadLabel,
   onClose,
-}: BookingDetailsFormProps) => {
+}: {
+  selectedBooking: BookingData;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
+  handleSave: () => void;
+  handleDownloadLabel: () => void;
+  onClose: () => void;
+}) => {
+  // ✅ Auto-calculate Final Charge
+  useEffect(() => {
+  const handling = Number(selectedBooking.handling_charge) || 0;
+  const docket = Number(selectedBooking.docket_charge) || 0;
+  const pickup = Number(selectedBooking.pickup_charge) || 0;
+  const packaging = Number(selectedBooking.packaging_charge) || 0;
+  const extra = Number(selectedBooking.extra_mile_delivery) || 0;
+
+  const total = handling + docket + pickup + packaging + extra;
+
+  if (selectedBooking.final_charge !== total) {
+    onInputChange({
+      target: { name: "final_charge", value: String(total) },
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+  }
+}, [
+  selectedBooking.handling_charge,
+  selectedBooking.docket_charge,
+  selectedBooking.pickup_charge,
+  selectedBooking.packaging_charge,
+  selectedBooking.extra_mile_delivery,
+]);
+
 
   const handleDownloadInvoice = () => {
     generateInvoice(selectedBooking);
@@ -246,7 +268,7 @@ const BookingDetailsForm = ({
     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
       <h3>Edit Booking Details</h3>
 
-      {/* Sender and Receiver Information Side by Side */}
+      {/* === Sender/Receiver Info === */}
       <div className={styles.formGroupRow}>
         <div className={styles.formGroup}>
           <label>Sender Name</label>
@@ -257,7 +279,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Receiver Name</label>
           <input
@@ -269,7 +290,6 @@ const BookingDetailsForm = ({
         </div>
       </div>
 
-      {/* Sender and Receiver Phone */}
       <div className={styles.formGroupRow}>
         <div className={styles.formGroup}>
           <label>Sender Phone</label>
@@ -280,7 +300,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Receiver Phone</label>
           <input
@@ -292,7 +311,6 @@ const BookingDetailsForm = ({
         </div>
       </div>
 
-      {/* Sender and Receiver Address */}
       <div className={styles.formGroupRow}>
         <div className={styles.formGroup}>
           <label>Sender Address</label>
@@ -303,7 +321,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Receiver Address</label>
           <input
@@ -315,7 +332,7 @@ const BookingDetailsForm = ({
         </div>
       </div>
 
-      {/* Product and Weight Estimate */}
+      {/* === Product Info === */}
       <div className={styles.formGroup}>
         <label>Product Name</label>
         <input
@@ -346,7 +363,6 @@ const BookingDetailsForm = ({
         />
       </div>
 
-      {/* Pickup and Delivery Required */}
       <div className={styles.formGroupRow}>
         <div className={styles.formGroup}>
           <label>Pickup Required</label>
@@ -357,7 +373,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Delivery Required</label>
           <input
@@ -369,33 +384,25 @@ const BookingDetailsForm = ({
         </div>
       </div>
 
-      {/* Delivery Mode */}
       <div className={styles.formGroup}>
-  <label>Delivery Mode</label>
-  <select
-    name="delivery_mode"
-    value={selectedBooking.delivery_mode || ""}
-    onChange={onInputChange}
-  >
-    {/* Show current value if it’s something custom */}
-    {selectedBooking.delivery_mode &&
-      !["Standard", "Express"].includes(selectedBooking.delivery_mode) && (
-        <option value={selectedBooking.delivery_mode}>
-          {selectedBooking.delivery_mode} (current)
-        </option>
-      )}
-    
-    <option value="">Select Delivery Mode</option>
-    <option value="Standard">Standard</option>
-    <option value="Express">Express</option>
-  </select>
-</div>
+        <label>Delivery Mode</label>
+        <select
+          name="delivery_mode"
+          value={selectedBooking.delivery_mode || ""}
+          onChange={onInputChange}
+        >
+          {selectedBooking.delivery_mode &&
+            !["Standard", "Express"].includes(selectedBooking.delivery_mode) && (
+              <option value={selectedBooking.delivery_mode}>
+                {selectedBooking.delivery_mode} (current)
+              </option>
+            )}
+          <option value="">Select Delivery Mode</option>
+          <option value="Standard">Standard</option>
+          <option value="Express">Express</option>
+        </select>
+      </div>
 
-
-
-
-
-      {/* Notes */}
       <div className={styles.formGroup}>
         <label>Notes</label>
         <textarea
@@ -408,17 +415,10 @@ const BookingDetailsForm = ({
       {/* === Tracking Section === */}
       <div className={styles.section}>
         <h4 className={styles.sectionTitle}>Tracking Information</h4>
-
         <div className={styles.formGroup}>
           <label>Tracking ID</label>
-          <input
-            type="text"
-            name="tracking_id"
-            value={selectedBooking.tracking_id}
-            readOnly
-          />
+          <input type="text" name="tracking_id" value={selectedBooking.tracking_id} readOnly />
         </div>
-
         <div className={styles.formGroup}>
           <label>Created At</label>
           <input
@@ -428,7 +428,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Third Party Tracking</label>
           <input
@@ -438,7 +437,6 @@ const BookingDetailsForm = ({
             onChange={onInputChange}
           />
         </div>
-
         <div className={styles.formGroup}>
           <label>Status</label>
           <select
@@ -446,13 +444,12 @@ const BookingDetailsForm = ({
             value={selectedBooking.status}
             onChange={onInputChange}
           >
-            {/* Show current value if it’s something custom */}
-    {selectedBooking.status &&
-      !["Pending", "Out for Delivery", "Delivered"].includes(selectedBooking.status) && (
-        <option value={selectedBooking.status}>
-          {selectedBooking.status} (current)
-        </option>
-      )}
+            {selectedBooking.status &&
+              !["Pending", "Out for Delivery", "Delivered"].includes(selectedBooking.status) && (
+                <option value={selectedBooking.status}>
+                  {selectedBooking.status} (current)
+                </option>
+              )}
             <option value="Pending">Pending</option>
             <option value="Out for Delivery">Out for Delivery</option>
             <option value="Delivered">Delivered</option>
@@ -524,42 +521,40 @@ const BookingDetailsForm = ({
           />
         </div>
 
+        {/* 🔹 Final Charge Auto Calculated */}
         <div className={styles.formGroup}>
-          <label>Final Charge</label>
+          <label>Final Charge (Auto Calculated)</label>
           <input
             type="number"
             name="final_charge"
-            value={selectedBooking.final_charge}
-            onChange={onInputChange}
+            value={selectedBooking.final_charge || 0}
+            readOnly
+            style={{ backgroundColor: "#f3f3f3", color: "black" }}
           />
         </div>
       </div>
 
-
-      {/* Download Buttons */}
+      {/* === Download Buttons === */}
       <div className={styles.downloadButtons}>
         <button className={styles.downloadButton} onClick={handleDownloadInvoice}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 3h7v7M16 12l7-7-7-7-7 7 7 7z" />
-          </svg>
           Download Invoice
         </button>
         <button className={styles.downloadButton} onClick={handleDownloadLabel}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4h16M4 8h16M4 12h16M4 16h16" />
-          </svg>
           Download Label
         </button>
       </div>
 
-      {/* Save and Cancel Buttons */}
+      {/* === Save/Cancel === */}
       <div className={styles.modalActions}>
-        <Button className={styles.buttonSave} onClick={handleSave}>Save</Button>
-        <Button className={styles.buttonCancel} onClick={onClose}>Cancel</Button>
+        <Button className={styles.buttonSave} onClick={handleSave}>
+          Save
+        </Button>
+        <Button className={styles.buttonCancel} onClick={onClose}>
+          Cancel
+        </Button>
       </div>
     </div>
   );
 };
-
 
 export default BookingDetailsForm;

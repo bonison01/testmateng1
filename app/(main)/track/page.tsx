@@ -108,9 +108,13 @@ const TrackPage = () => {
 
             <hr />
 
-            <h4 className={styles.sectionTitle}>Product & Charges</h4>
+<h4 className={styles.sectionTitle}>Product & Charges</h4>
 <p><strong>Product:</strong> {booking.product_name}</p>
-<p><strong>Estimate Charge:</strong> ₹{booking.estimate_charge}</p>
+
+{/* ✅ Hide Estimate Charge if Final Charge exists */}
+{!booking.final_charge && (
+  <p><strong>Estimate Charge:</strong> ₹{booking.estimate_charge}</p>
+)}
 
 {/* === Final Charge Section with Smart Logic === */}
 <div className={styles.finalChargeRow}>
@@ -127,7 +131,7 @@ const TrackPage = () => {
       {showPriceDetails ? "Hide Details ▲" : "Show Details ▼"}
     </button>
   ) : (
-    <span className={styles.pendingText}>Final Price details pending...</span>
+    <span className={styles.pendingText}>Pricing details pending...</span>
   )}
 </div>
 
@@ -162,6 +166,7 @@ const TrackPage = () => {
 )}
 
 <p><strong>Notes:</strong> {booking.notes || "No notes added"}</p>
+
 
 
             <div className={styles.footerNote}>
