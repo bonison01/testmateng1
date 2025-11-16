@@ -157,8 +157,68 @@ export default function page() {
             </a>
           </div> */}
         </div>
+{/* STUDENT INTEREST BANNER */}
+<div className="mt-10 w-[95vw] sm:w-[80vw] md:w-[60vw] mx-auto">
+  <div className="bg-gradient-to-br from-[#14710F]/20 via-gray-800/60 to-black border border-gray-700 rounded-2xl p-6 sm:p-10 shadow-xl backdrop-blur-xl">
+
+    <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
+      🎓 Explore Your Future with Confidence
+    </h2>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+      <div className="flex items-start gap-4">
+        <div className="text-green-500 text-3xl">💡</div>
+        <p className="text-gray-300 text-base">
+          Discover careers based on your interests — Science, Arts, Commerce & more!
+        </p>
+      </div>
+
+      <div className="flex items-start gap-4">
+        <div className="text-green-500 text-3xl">📚</div>
+        <p className="text-gray-300 text-base">
+          Meet colleges, institutions & training centres across Manipur.
+        </p>
+      </div>
+
+      <div className="flex items-start gap-4">
+        <div className="text-green-500 text-3xl">🌐</div>
+        <p className="text-gray-300 text-base">
+          Learn about scholarships, online courses & skill development programs.
+        </p>
+      </div>
+
+      <div className="flex items-start gap-4">
+  <div className="text-green-500 text-3xl">📱</div>
+  <p className="text-gray-300 text-base">
+    Stand a chance to <span className="text-green-400 font-semibold">win a brand-new Tablet</span> in our exclusive student giveaway!
+  </p>
+</div>
+
+
+    </div>
+
+    {/* REGISTER NOW BUTTON */}
+    <div className="mt-10 text-center">
+      <Link href="/applynow">
+        <button className="
+          px-10 py-4 
+          bg-gradient-to-r from-green-600 via-green-500 to-green-600
+          text-white font-semibold text-lg 
+          rounded-full shadow-[0_0_20px_rgba(20,113,15,0.5)]
+          hover:scale-105 hover:shadow-[0_0_35px_rgba(20,113,15,0.7)]
+          transition-all duration-300
+        ">
+          🎟️ Register Now for Thoubal Career Fair 2025
+        </button>
+      </Link>
+    </div>
+
+  </div>
+</div>
 
       </div>
+      
 
       <div className="w-full absolute bottom-0">
         <Footer />
