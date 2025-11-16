@@ -41,9 +41,11 @@ export default function page() {
 
 
   return (
-    <div className="w-[100vw] h-[100svh]">
+    // <div className="w-[100vw] h-[100svh]">
+    <div className="w-[100vw] min-h-screen pb-32">
 
-      <div className="h-full text-center text-5xl font-bold text-white pb-10 sm:pb-20 flex flex-col justify-center items-center gap-10">
+
+      <div className="min-h-[60vh] text-center text-5xl font-bold text-white pb-10 sm:pb-20 flex flex-col justify-center items-center gap-10">
         <div className="flex flex-col sm:flex-row gap-1 sm:gap-0 text-5xl sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text z-20 animate-fade-in">
           <span>We Drive,</span>
           <span> We Discover</span>
@@ -162,7 +164,7 @@ export default function page() {
   <div className="bg-gradient-to-br from-[#14710F]/20 via-gray-800/60 to-black border border-gray-700 rounded-2xl p-6 sm:p-10 shadow-xl backdrop-blur-xl">
 
     <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
-      🎓 Explore Your Future with Confidence
+      🎓 Thoubal Career Fair 2025
     </h2>
 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -220,9 +222,10 @@ export default function page() {
       </div>
       
 
-      <div className="w-full absolute bottom-0">
-        <Footer />
-      </div>
+      <div className="w-full mt-20">
+  <Footer />
+</div>
+
     </div>
   );
 }
