@@ -1,3 +1,4 @@
+//Users/apple/Documents/GitHub/testmateng1/app/(main)/place/[id]/CommentsSection.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import styles from "../PlaceDetail.module.css";

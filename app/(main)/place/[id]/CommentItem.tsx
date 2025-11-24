@@ -1,3 +1,5 @@
+
+//Users/apple/Documents/GitHub/testmateng1/app/(main)/place/[id]/CommentItem.tsx
 import React from "react";
 
 interface Comment {

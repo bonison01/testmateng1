@@ -1,3 +1,5 @@
+
+//Users/apple/Documents/GitHub/testmateng1/app/(main)/place/[id]/PlaceDetailClient.tsx
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
