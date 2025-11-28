@@ -332,15 +332,19 @@ export default function DiscoverPageModalVersion() {
       >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-white font-bold">
-              M
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">Mateng</span>
-              <span className="text-xs text-gray-400">Discover nearby</span>
-            </div>
-          </div>
+          <div
+  className="flex items-center gap-3 cursor-pointer"
+  onClick={() => router.push("/")}
+>
+  <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-white font-bold">
+    M
+  </div>
+  <div className="flex flex-col">
+    <span className="text-sm font-semibold">Mateng</span>
+    <span className="text-xs text-gray-400">Discover nearby</span>
+  </div>
+</div>
+
 
           {/* Search */}
           <div className="flex-1 max-w-xl">
@@ -364,7 +368,13 @@ export default function DiscoverPageModalVersion() {
 
       {/* TABS */}
       {/* TABS */}
-<div className="max-w-5xl mx-auto px-4 py-3">
+{/* <div className="max-w-5xl mx-auto px-4 py-3"> */}
+<div
+  className={`sticky top-[56px] z-30 max-w-5xl mx-auto px-4 py-3 ${
+    isDarkMode ? "bg-gray-900" : "bg-white"
+  }`}
+>
+
 
   {/* Desktop View */}
   <div className="hidden sm:flex gap-3 pb-1">
