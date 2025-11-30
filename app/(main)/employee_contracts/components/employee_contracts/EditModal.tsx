@@ -87,6 +87,7 @@ export default function EditModal({
     let employeeid: string | null = loadedContract?.employeeid ?? null;
     let custompdfurl: string | null = editState.customPDFUrl;
 
+    // Upload custom PDF file (if provided)
     if (editState.customPDFFile) {
       const filename = `${selected.formid}-${Date.now()}.pdf`;
       const { error: uploadErr } = await supabase.storage
@@ -107,6 +108,7 @@ export default function EditModal({
       }
     }
 
+    // generate employee id when approved and not present
     if (editState.application_status === "approved" && !employeeid) {
       employeeid = generateEmployeeId();
     }
@@ -116,6 +118,7 @@ export default function EditModal({
         ? editState.employment_status || null
         : null;
 
+    // Upsert employee_contracts
     const { error: upsertErr } = await supabase.from("employee_contracts").upsert(
       {
         formid: selected.formid,
@@ -133,6 +136,7 @@ export default function EditModal({
       { onConflict: "formid" }
     );
 
+    // Update employee_forms status
     if (!upsertErr) {
       await supabase
         .from("employee_forms")
@@ -141,6 +145,46 @@ export default function EditModal({
           employment_status: finalEmploymentStatus,
         })
         .eq("formid", selected.formid);
+    }
+
+    // If approved — call sendOffer API to email offer + terms + agreement link
+    if (editState.application_status === "approved") {
+      try {
+        await fetch("/api/sendOffer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: selected.email,
+            name: selected.fullname,
+            formid: selected.formid,
+            employeeid,
+            includeTerms: editState.includeTerms,
+            includeSalary: editState.includeSalary,
+            includeLeave: editState.includeLeave,
+            custompdfurl,
+          }),
+        });
+      } catch (err) {
+        console.error("sendOffer call failed", err);
+      }
+    }
+
+    // If rejected — call sendOffer with rejection (so sendOffer handles it)
+    if (editState.application_status === "rejected") {
+      try {
+        await fetch("/api/sendOffer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: selected.email,
+            name: selected.fullname,
+            formid: selected.formid,
+            rejected: true,
+          }),
+        });
+      } catch (err) {
+        console.error("sendOffer (rejected) call failed", err);
+      }
     }
 
     setSaving(false);
@@ -232,19 +276,47 @@ export default function EditModal({
             />
           </div>
 
-          <div>
-            <label className="font-medium text-sm">Assigned Position</label>
-            <input
-              className="border rounded p-2 mt-1 w-full"
-              value={editState.positionCustom}
-              onChange={(e) =>
-                setEditState((prev) => ({
-                  ...prev,
-                  positionCustom: e.target.value,
-                }))
-              }
-            />
-          </div>
+          {/* Assigned Position */}
+<div>
+  <label className="font-medium text-sm">Assigned Position</label>
+  
+  <select
+    className="border rounded p-2 mt-1 w-full"
+    value={editState.positionPreset}
+    onChange={(e) =>
+      setEditState((prev) => ({
+        ...prev,
+        positionPreset: e.target.value,
+        positionCustom: e.target.value === "others" ? "" : e.target.value,
+      }))
+    }
+  >
+    <option value="">Select Position</option>
+    <option value="Delivery">Delivery</option>
+    <option value="Operations">Operations</option>
+    <option value="Video Editor">Video Editor</option>
+    <option value="HR">HR</option>
+    <option value="Accounting">Accounting</option>
+    <option value="Sales">Sales</option>
+    <option value="others">Other (Custom)</option>
+  </select>
+
+  {/* If "Other" selected → show custom input */}
+  {editState.positionPreset === "others" && (
+    <input
+      className="border rounded p-2 mt-2 w-full"
+      placeholder="Enter custom position"
+      value={editState.positionCustom}
+      onChange={(e) =>
+        setEditState((prev) => ({
+          ...prev,
+          positionCustom: e.target.value,
+        }))
+      }
+    />
+  )}
+</div>
+
 
           <div>
             <label className="font-medium text-sm">Admin Remarks</label>

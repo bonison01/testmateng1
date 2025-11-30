@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-// Import TypeScript types
 import {
   CandidateRow,
   Counts,
@@ -11,12 +10,12 @@ import {
   ContractRow,
 } from "./types";
 
-// Import UI components
 import StatusSummary from "./components/employee_contracts/StatusSummary";
 import Filters from "./components/employee_contracts/Filters";
 import CandidateTable from "./components/employee_contracts/CandidateTable";
 import EditModal from "./components/employee_contracts/EditModal";
 import ProfileModal from "./components/employee_contracts/ProfileModal";
+import SendEmailModal from "./components/employee_contracts/SendEmailModal";
 
 export default function EmployeeContractsPage() {
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);
@@ -32,77 +31,88 @@ export default function EmployeeContractsPage() {
   const [filterAppStatus, setFilterAppStatus] = useState("all");
   const [filterEmpStatus, setFilterEmpStatus] = useState("all");
 
-  // currently selected candidate row
   const [selected, setSelected] = useState<CandidateRow | null>(null);
-
-  // profile data containers
   const [profileForm, setProfileForm] = useState<ProfileFormRow | null>(null);
-  const [profileContract, setProfileContract] = useState<ContractRow | null>(
-    null
-  );
-
-  // modal visibility
+  const [profileContract, setProfileContract] = useState<ContractRow | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
-  // =====================================================================
-  // LOAD ALL CANDIDATES + STATUS COUNTS
-  // =====================================================================
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailTarget, setEmailTarget] = useState<any>(null);
 
+  // ===============================================================
+  // LOAD CANDIDATES (updated: blood_group + agreement_ip)
+  // ===============================================================
   const loadCandidates = async () => {
-    const { data, error } = await supabase
-      .from("employee_forms")
-      .select(`
-        formid,
-        fullname,
-        email,
-        applyposition,
-        positiontype,
-        created_at,
+  const { data, error } = await supabase
+    .from("employee_forms")
+    .select(`
+      formid,
+      fullname,
+      email,
+      applyposition,
+      positiontype,
+      created_at,
+      blood_group,
+      application_status,
+      employment_status,
+      employee_contracts (
+        employeeid,
         application_status,
         employment_status,
-        employee_contracts (employeeid)
-      `)
-      .order("created_at", { ascending: false });
+        agreement_ip
+      )
+    `)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Failed to load employee_forms:", error);
-      return;
-    }
+  if (error) {
+    console.error("Load error:", error);
+    return;
+  }
 
-    const list: CandidateRow[] = data!.map((r: any) => ({
+  const list: CandidateRow[] = data!.map((r: any) => {
+    const c = r.employee_contracts ?? null;
+
+    return {
       formid: r.formid,
       fullname: r.fullname,
       email: r.email,
       applyposition: r.applyposition,
       positiontype: r.positiontype,
       appliedDate: new Date(r.created_at).toISOString().split("T")[0],
-      application_status: r.application_status ?? "pending",
-      employment_status: r.employment_status ?? null,
-      employeeid: r.employee_contracts?.employeeid ?? null,
-    }));
 
-    setCandidates(list);
+      // EXACT MATCH WITH EditModal saved values
+      application_status:
+        c?.application_status ?? r.application_status ?? "pending",
 
-    // compute summary counts
-    setCounts({
-      pending: list.filter((c) => c.application_status === "pending").length,
-      talks: list.filter((c) => c.application_status === "talks").length,
-      approved: list.filter((c) => c.application_status === "approved").length,
-      rejected: list.filter((c) => c.application_status === "rejected").length,
-      active: list.filter((c) => c.employment_status === "active").length,
-      inactive: list.filter((c) => c.employment_status === "inactive").length,
-    });
-  };
+      employment_status:
+        c?.employment_status ?? r.employment_status ?? null,
+
+      employeeid: c?.employeeid ?? null,
+      blood_group: r.blood_group ?? "—",
+      agreement_ip: c?.agreement_ip ?? null,
+    };
+  });
+
+  setCandidates(list);
+
+  // Summary counts
+  setCounts({
+    pending: list.filter((c) => c.application_status === "pending").length,
+    talks: list.filter((c) => c.application_status === "talks").length,
+    approved: list.filter((c) => c.application_status === "approved").length,
+    rejected: list.filter((c) => c.application_status === "rejected").length,
+    active: list.filter((c) => c.employment_status === "active").length,
+    inactive: list.filter((c) => c.employment_status === "inactive").length,
+  });
+};
+
 
   useEffect(() => {
     loadCandidates();
   }, []);
 
-  // =====================================================================
-  // MODAL – PROFILE
-  // =====================================================================
-
+  // OPEN PROFILE
   const openProfile = async (row: CandidateRow) => {
     setSelected(row);
 
@@ -112,57 +122,35 @@ export default function EmployeeContractsPage() {
     ]);
 
     if (!formRow) {
-      alert("Candidate profile not found");
+      alert("Profile missing");
       return;
     }
 
-    setProfileForm(formRow as ProfileFormRow);
-    setProfileContract(contractRow as ContractRow | null);
+    setProfileForm(formRow);
+    setProfileContract(contractRow);
     setShowProfile(true);
   };
 
-  // =====================================================================
-  // MODAL – EDIT
-  // =====================================================================
-
+  // OPEN EDIT MODAL
   const openEdit = (row: CandidateRow) => {
     setSelected(row);
     setShowEdit(true);
   };
 
-  // =====================================================================
-  // SEND EMAIL
-  // =====================================================================
-
-  async function sendEmail(email: string, formid: string, name: string) {
-    try {
-      const res = await fetch("/api/sendOffer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, formid, name }),
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        console.error("EMAIL ERROR:", err);
-        alert("Email sending failed");
-        return;
-      }
-
-      alert("📨 Email sent!");
-    } catch (err) {
-      alert("Network/email error");
-      console.error(err);
-    }
-  }
-
-  // =====================================================================
-  // RENDER
-  // =====================================================================
+  // OPEN EMAIL MODAL
+  const sendEmail = (
+    email: string,
+    formid: string,
+    name: string,
+    application_status: string
+  ) => {
+    setEmailTarget({ email, formid, name, application_status });
+    setShowEmailModal(true);
+  };
 
   return (
-    <div className="max-w-70xl mx-auto p-15 bg-white">
-      
+    <div className="max-w-7xl mx-auto p-6 bg-white">
+
       <StatusSummary counts={counts} />
 
       <Filters
@@ -173,14 +161,13 @@ export default function EmployeeContractsPage() {
       />
 
       <CandidateTable
-  candidates={candidates}
-  filterAppStatus={filterAppStatus}
-  filterEmpStatus={filterEmpStatus}
-  openProfile={openProfile}
-  openEdit={openEdit}
-  sendEmail={sendEmail}
-/>
-
+        candidates={candidates}
+        filterAppStatus={filterAppStatus}
+        filterEmpStatus={filterEmpStatus}
+        openProfile={openProfile}
+        openEdit={openEdit}
+        sendEmail={sendEmail}
+      />
 
       <EditModal
         showEdit={showEdit}
@@ -193,6 +180,13 @@ export default function EmployeeContractsPage() {
         showProfile={showProfile}
         setShowProfile={setShowProfile}
         selected={selected}
+      />
+
+      <SendEmailModal
+        show={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        candidate={emailTarget}
+        reload={loadCandidates}
       />
     </div>
   );

@@ -1,162 +1,110 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "");
+export const dynamic = "force-dynamic";
 
+// Supabase admin
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, formid, name } = await req.json();
+    const body = await req.json();
+    const {
+      email,
+      name,
+      formid,
+      selectedDocs = [],
+      custompdfurl = null,
+    } = body;
 
-    if (!email || !formid) {
-      return NextResponse.json(
-        { error: "Missing email or formid" },
-        { status: 400 }
-      );
-    }
+    // Create Gmail transport
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER!,
+        pass: process.env.GMAIL_PASS!,
+      },
+    });
 
-    const { data: contract, error } = await supabaseAdmin
+    // Generate agreement token
+    const token = crypto.randomUUID();
+    const sentAt = new Date().toISOString();
+
+    await supabaseAdmin
       .from("employee_contracts")
-      .select("*")
-      .eq("formid", formid)
-      .maybeSingle();
-
-    if (error || !contract) {
-      console.error("No contract row:", error);
-      return NextResponse.json(
-        { error: "No contract entry for this formid" },
-        { status: 404 }
-      );
-    }
+      .update({
+        agreement_token: token,
+        agreement_sent_at: sentAt,
+      })
+      .eq("formid", formid);
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://justmateng.com";
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXT_PUBLIC_VERCEL_URL ||
+      "http://localhost:3000";
 
-    const docs: { label: string; url: string }[] = [];
+    const agreeLink = `${baseUrl}/api/agree?token=${token}&formid=${formid}`;
 
-    if (contract.includeterms) {
-      docs.push({
-        label: "Terms & Conditions / R&Rs",
-        url: `${baseUrl}/terms.pdf`,
-      });
-    }
-    if (contract.includesalarypolicy) {
-      docs.push({
-        label: "Salary / Commission Structure",
-        url: `${baseUrl}/salary.pdf`,
-      });
-    }
-    if (contract.includeleavepolicy) {
-      docs.push({
-        label: "Leave Policy",
-        url: `${baseUrl}/leave.pdf`,
-      });
-    }
-    if (contract.custompdfurl) {
-      docs.push({
-        label: "Additional Contract Document",
-        url: contract.custompdfurl,
-      });
-    }
+    // Build attachments
+    const attachments: any[] = [];
+    const dir = path.join(process.cwd(), "public", "employee-contract-pdfs");
 
-    const docsHtml =
-      docs.length > 0
-        ? `<ul>${docs
-            .map(
-              (d) =>
-                `<li><a href="${d.url}" target="_blank">${d.label}</a></li>`
-            )
-            .join("")}</ul>`
-        : "<p>No additional documents attached.</p>";
+    for (const file of selectedDocs) {
+      if (file === "custom.pdf" && custompdfurl) {
+        const res = await fetch(custompdfurl);
+        const buf = Buffer.from(await res.arrayBuffer());
 
-    const verifyLink = `${baseUrl}/emp_verified?formID=${encodeURIComponent(
-      formid
-    )}`;
+        attachments.push({
+          filename: "Custom-Offer-Letter.pdf",
+          content: buf,
+          contentType: "application/pdf",
+        });
+      } else {
+        const filePath = path.join(dir, file);
+        const buf = await fs.readFile(filePath);
 
-    let subject = "Application Update - Justmateng";
-    let html = "";
-
-    // decide by status
-    if (contract.application_status === "rejected") {
-      subject = "Application Status - Justmateng";
-      html = `
-        <p>Dear ${name},</p>
-        <p>Thank you for your interest in joining <strong>Justmateng</strong>.</p>
-        <p>After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.</p>
-        <p>We truly appreciate the time you spent applying and wish you every success in your future endeavours.</p>
-        <br/>
-        <p>Regards,<br/>HR Team<br/>Justmateng Service</p>
-      `;
-    } else if (contract.application_status === "approved") {
-      subject = "Employment Offer - Justmateng";
-
-      const empIdPart = contract.employeeid
-        ? `<p>Your Employee ID is: <strong>${contract.employeeid}</strong></p>`
-        : "";
-
-      html = `
-        <p>Dear ${name},</p>
-        <p>Congratulations! We are pleased to inform you that your application has been <strong>APPROVED</strong> for employment at Justmateng.</p>
-        ${empIdPart}
-        <p>Please review the following employment documents:</p>
-        ${docsHtml}
-        <p>After reviewing, please confirm your acceptance by clicking the link below:</p>
-        <p><a href="${verifyLink}">I agree to the terms and conditions & confirm my employment</a></p>
-        <p>If the link does not work, copy and paste this URL into your browser:</p>
-        <p>${verifyLink}</p>
-        <br/>
-        <p>We look forward to working with you.</p>
-        <p>Regards,<br/>HR Team<br/>Justmateng Service</p>
-      `;
-    } else if (contract.employment_status === "active") {
-      subject = "Welcome Onboard - Justmateng";
-
-      const empIdPart = contract.employeeid
-        ? `<p>Your Employee ID is: <strong>${contract.employeeid}</strong></p>`
-        : "";
-
-      html = `
-        <p>Dear ${name},</p>
-        <p>Welcome to <strong>Justmateng</strong>!</p>
-        ${empIdPart}
-        <p>Your employment has been marked as <strong>Active</strong>.</p>
-        <p>Here are your employment documents for reference:</p>
-        ${docsHtml}
-        <br/>
-        <p>We are excited to have you on the team.</p>
-        <p>Regards,<br/>HR Team<br/>Justmateng Service</p>
-      `;
-    } else {
-      // pending / talks, neutral update
-      subject = "Application Status Update - Justmateng";
-      html = `
-        <p>Dear ${name},</p>
-        <p>Your application status at Justmateng is now: <strong>${contract.application_status.toUpperCase()}</strong>.</p>
-        <p>If applicable, please review any attached documents below:</p>
-        ${docsHtml}
-        <br/>
-        <p>If you have any questions, you can reply to this email.</p>
-        <p>Regards,<br/>HR Team<br/>Justmateng Service</p>
-      `;
+        attachments.push({
+          filename: file,
+          content: buf,
+          contentType: "application/pdf",
+        });
+      }
     }
 
-    await resend.emails.send({
-      from: "Justmateng HR <justmateng@gmail.com>",
+    // Send email
+    await transporter.sendMail({
+      from: `"Justmateng HR" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject,
-      html,
+      subject: "Official Offer Letter – Justmateng",
+      html: `
+        <p>Dear ${name},</p>
+        <p>Your application has been <strong>approved</strong>.</p>
+        <p>Please review the attached documents.</p>
+        <p>
+          <a href="${agreeLink}"
+            style="background:black;color:white;padding:10px 16px;
+                   border-radius:6px;text-decoration:none;">
+            Accept Offer & Agree
+          </a>
+        </p>
+        <p>If the button does not work, here is the link:</p>
+        <p>${agreeLink}</p>
+      `,
+      attachments,
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
     console.error("sendOffer error:", err);
     return NextResponse.json(
-      { error: "Internal error sending email" },
+      { error: err.message },
       { status: 500 }
     );
   }

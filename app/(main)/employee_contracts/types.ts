@@ -8,6 +8,8 @@ export interface CandidateRow {
   employment_status: "active" | "inactive" | null;
   appliedDate: string;
   employeeid: string | null;
+  blood_group: string | null;      // NEW
+  agreement_ip: string | null;     // NEW
 }
 
 export interface ProfileFormRow {
