@@ -8,61 +8,34 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-// ----------------------
-// SUPABASE ADMIN CLIENT
-// ----------------------
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// ----------------------
-// URL RESOLVER (FIXED)
-// ----------------------
-function getBaseUrl() {
-  // 1️⃣ Use manually provided domain first — MOST RELIABLE
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  }
-
-  // 2️⃣ Vercel URL (needs protocol added)
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL.replace(/\/$/, "")}`;
-  }
-
-  // 3️⃣ Localhost fallback (dev only)
-  return "http://localhost:3000";
-}
-
-// ----------------------
-// HELPERS TO LOAD PDFs
-// ----------------------
 async function loadLocalPdf(dir: string, filename: string) {
   try {
     const filePath = path.join(dir, filename);
     const buf = await fs.readFile(filePath);
     return { filename, content: buf, contentType: "application/pdf" };
-  } catch {
-    console.warn("Missing local file:", filename);
+  } catch (err) {
+    console.warn(`Attachment missing: ${filename} — ${String(err)}`);
     return null;
   }
 }
 
-async function loadRemotePdf(url: string, fallbackName: string) {
+async function loadRemotePdf(url: string, filenameFallback: string) {
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch remote PDF");
+    if (!res.ok) throw new Error(`Remote fetch ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());
-    return { filename: fallbackName, content: buf, contentType: "application/pdf" };
+    return { filename: filenameFallback, content: buf, contentType: "application/pdf" };
   } catch (err) {
-    console.warn("Remote PDF load error:", err);
+    console.warn(`Failed to fetch remote PDF ${url}: ${String(err)}`);
     return null;
   }
 }
 
-// ----------------------
-// MAIN ROUTE
-// ----------------------
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -72,11 +45,13 @@ export async function POST(req: NextRequest) {
       name,
       formid,
       rejected = false,
-      selectedDocs = null,
+      // optional: either one of these is used
+      selectedDocs = null, // expected array of filenames, e.g. ["terms.pdf","salary.pdf","custom.pdf"]
       includeTerms = false,
       includeSalary = false,
       includeLeave = false,
       custompdfurl = null,
+      // optional subject override
       subjectOverride = null,
     } = body;
 
@@ -84,7 +59,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing email or formid" }, { status: 400 });
     }
 
-    // Email transporter
+    // create transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -93,9 +68,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // -----------------------------
-    // REJECTION EMAIL
-    // -----------------------------
+    // ---------- REJECTION ----------
     if (rejected) {
       await transporter.sendMail({
         from: `"Justmateng HR" <${process.env.GMAIL_USER}>`,
@@ -103,9 +76,9 @@ export async function POST(req: NextRequest) {
         subject: subjectOverride ?? "Application Update – Justmateng",
         html: `
           <p>Dear ${name},</p>
-          <p>Thank you for your interest in <strong>Justmateng Service</strong>.</p>
-          <p>We regret to inform you that your application was not selected.</p>
-          <p>We appreciate your time and encourage you to apply again.</p>
+          <p>Thank you for applying to <strong>Justmateng Service</strong>.</p>
+          <p>After careful review, we regret to inform you that your application has not been selected at this time.</p>
+          <p>We sincerely appreciate your interest and encourage you to apply again in the future.</p>
           <p>Best regards,<br/>Justmateng HR Team</p>
         `,
       });
@@ -113,9 +86,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: "Rejection email sent." });
     }
 
-    // -----------------------------
-    // APPROVAL — GENERATE TOKEN
-    // -----------------------------
+    // ---------- APPROVAL ----------
+    // generate token & save to contracts
     const token = crypto.randomUUID();
     const sentAt = new Date().toISOString();
 
@@ -127,17 +99,20 @@ export async function POST(req: NextRequest) {
       })
       .eq("formid", formid);
 
-    const baseUrl = getBaseUrl();
-    const agreeLink = `${baseUrl}/api/agree?token=${encodeURIComponent(
-      token
-    )}&formid=${encodeURIComponent(formid)}`;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXT_PUBLIC_VERCEL_URL ||
+      "http://localhost:3000";
 
-    // -----------------------------
-    // ATTACHMENTS PREPARATION
-    // -----------------------------
+    const agreeLink = `${baseUrl}/api/agree?token=${encodeURIComponent(token)}&formid=${encodeURIComponent(formid)}`;
+
+    // prepare attachments
     const attachments: any[] = [];
     const dir = path.join(process.cwd(), "public", "employee-contract-pdfs");
 
+    // Helper: which docs to include
+    // If selectedDocs (array) is provided and non-empty, use it.
+    // Otherwise, build from boolean flags.
     let docsToAttach: string[] = [];
 
     if (Array.isArray(selectedDocs) && selectedDocs.length > 0) {
@@ -146,29 +121,36 @@ export async function POST(req: NextRequest) {
       if (includeTerms) docsToAttach.push("terms.pdf");
       if (includeSalary) docsToAttach.push("salary.pdf");
       if (includeLeave) docsToAttach.push("leave.pdf");
+      // custom.pdf is handled separately below if custompdfurl present
     }
 
-    // Local docs
+    // Load local files
     for (const filename of docsToAttach) {
+      // protect against path traversal
       const clean = path.basename(filename);
       const pdf = await loadLocalPdf(dir, clean);
       if (pdf) attachments.push(pdf);
     }
 
-    // Remote custom PDF
-    if (
-      (Array.isArray(selectedDocs) && selectedDocs.includes("custom.pdf")) ||
-      (!Array.isArray(selectedDocs) && custompdfurl)
-    ) {
+    // custompdfurl (remote or supabase public url)
+    if ((Array.isArray(selectedDocs) && selectedDocs.includes("custom.pdf")) || (!Array.isArray(selectedDocs) && custompdfurl)) {
+      // if selectedDocs contains "custom.pdf" OR custompdfurl boolean present
       if (custompdfurl) {
-        const custom = await loadRemotePdf(custompdfurl, "Custom-Offer-Letter.pdf");
+        const custom = await loadRemotePdf(custompdfurl, "Offer-Letter.pdf");
         if (custom) attachments.push(custom);
+      } else {
+        // If custom.pdf selected but no custompdfurl: try to load a file named "custom.pdf" from public folder
+        const fallback = await loadLocalPdf(dir, "custom.pdf");
+        if (fallback) attachments.push(fallback);
       }
     }
 
-    // -----------------------------
-    // SEND APPROVAL EMAIL
-    // -----------------------------
+    // If attachments empty, log it (still send email)
+    if (attachments.length === 0) {
+      console.info("No attachments found/selected — sending email without attachments");
+    }
+
+    // send email
     await transporter.sendMail({
       from: `"Justmateng HR" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -179,18 +161,11 @@ export async function POST(req: NextRequest) {
         <p>Please review the attached documents.</p>
         <p>
           <a href="${agreeLink}"
-            style="
-              background:black;
-              color:white;
-              padding:10px 16px;
-              border-radius:6px;
-              text-decoration:none;
-              font-weight:bold;
-            ">
+            style="background:black;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;">
             Accept Offer & Agree
           </a>
         </p>
-        <p>If the button doesn't work, use this link:</p>
+        <p>If the button does not work, use the link below:</p>
         <p><a href="${agreeLink}">${agreeLink}</a></p>
         <p>Regards,<br/>Justmateng HR Team</p>
       `,
