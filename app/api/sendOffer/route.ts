@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       process.env.NEXT_PUBLIC_VERCEL_URL ||
-      "http://localhost:3000";
+      "https://justmateng.com/";
 
     const agreeLink = `${baseUrl}/api/agree?token=${encodeURIComponent(token)}&formid=${encodeURIComponent(formid)}`;
 
