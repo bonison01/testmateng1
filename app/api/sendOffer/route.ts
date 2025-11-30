@@ -5,7 +5,6 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
-
 export const dynamic = "force-dynamic";
 
 // ----------------------
@@ -20,19 +19,15 @@ const supabaseAdmin = createClient(
 // URL RESOLVER (FIXED)
 // ----------------------
 function getBaseUrl() {
-  // 1️⃣ Use manually provided domain first — MOST RELIABLE
-  if (process.env.NEXT_PUBLIC_APP_URL) {
+  if (process.env.NEXT_PUBLIC_APP_URL) 
     return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  }
 
-  // 2️⃣ Vercel URL (needs protocol added)
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+  if (process.env.NEXT_PUBLIC_VERCEL_URL)
     return `https://${process.env.NEXT_PUBLIC_VERCEL_URL.replace(/\/$/, "")}`;
-  }
 
-  // 3️⃣ Localhost fallback (dev only)
   return "http://localhost:3000";
 }
+
 
 // ----------------------
 // HELPERS TO LOAD PDFs
