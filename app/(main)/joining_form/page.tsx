@@ -185,7 +185,7 @@ export default function JoiningForm() {
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-4xl mx-auto">
 
-        {/* <h2 className="text-3xl font-extrabold mb-3">Employee Onboarding Form</h2> */}
+        <h2 className="text-3xl font-extrabold mb-3">Employee Onboarding Form</h2>
         <p className="text-gray-500 mb-5">
           Your form ID: <span className="font-mono font-semibold">{formID}</span>
         </p>
@@ -200,7 +200,7 @@ export default function JoiningForm() {
 
           {/* Contact Info */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-black-800">Contact & Personal Details</h3>
+            <h3 className="font-semibold mb-2 text-gray-800">Contact & Personal Details</h3>
 
             <label className="block text-sm font-semibold mb-1">Email</label>
             <input name="email" type="email" onChange={handleChange} required className="border p-2 w-full mb-3 rounded" />
@@ -224,7 +224,7 @@ export default function JoiningForm() {
 
           {/* Motivation */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-black-800">Motivation</h3>
+            <h3 className="font-semibold mb-2 text-gray-800">Motivation</h3>
 
             <label className="block text-sm font-semibold mb-1">Why do you want to join us?</label>
             <textarea name="reason" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
