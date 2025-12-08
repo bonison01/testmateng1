@@ -49,7 +49,7 @@ function Navbar() {
         {
             name: "Delivery Service",
             children: [
-                { name: "Delivery Rates", href: "/delivery-rates" },
+                { name: "Instant Deliveries", href: "/delivery-rates" },
                 { name: "Cargo Booking", href: "/CargoBookingPage" },
                 { name: "Track Booking", href: "/track" },
             ],
