@@ -6,6 +6,7 @@ import Link from 'next/link';
 export default function Footer() {
   // const [open, setOpen] = useState(false);
   const [openTerms, setOpenTerms] = useState(false);
+  const [aboutus, setabout] = useState(false);
   const [openProjects, setOpenProjects] = useState(false);
 
 
@@ -16,18 +17,56 @@ export default function Footer() {
       </p>
       <div className='flex flex-row gap-4 relative'>
         {/* Static Footer Links */}
-        <Link href={`/about-us`}>
+        {/* <Link href={`/about-us`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>About Us</Button>
         </Link>
         <Link href={`/contact-us`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Contact Us</Button>
-        </Link>
+        </Link> */}
         {/* <Link href={`/terms`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Terms of Use</Button>
         </Link>
         <Link href={`/privacy_policy`}>
           <Button variant="link" className='p-0 h-6 text-zinc-500 hover:text-green-600'>Privacy Policy</Button>
         </Link> */}
+
+        <div className="relative">
+  <Button
+  variant="link"
+  className='p-0 h-6 text-zinc-500 hover:text-green-600'
+  onClick={() => {
+    setabout(prev => !prev);
+    setOpenTerms(false);
+    setOpenProjects(false);
+  }}
+>
+  About Us
+</Button>
+
+
+  {aboutus && (
+    <div className="absolute bottom-full mb-2 right-0 bg-white border border-zinc-200 rounded-md shadow-lg py-2 z-50 w-48">
+      <Link href="/about-us">
+        <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
+          About Us
+        </Button>
+      </Link>
+      <Link href="/contact-us">
+        <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
+          Contact Us
+        </Button>
+      </Link>
+      <Link href="/joining_form">
+        <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
+          Join Us
+        </Button>
+      </Link>
+    </div>
+  )}
+</div>
+
+
+
 <div className="relative">
   <Button
     variant="link"

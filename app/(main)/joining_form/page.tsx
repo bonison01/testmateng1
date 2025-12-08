@@ -182,11 +182,11 @@ export default function JoiningForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white text-black p-6">
       <div className="max-w-4xl mx-auto">
 
         <h2 className="text-3xl font-extrabold mb-3">Employee Onboarding Form</h2>
-        <p className="text-gray-500 mb-5">
+        <p className="text-black mb-5">
           Your form ID: <span className="font-mono font-semibold">{formID}</span>
         </p>
 
@@ -200,41 +200,41 @@ export default function JoiningForm() {
 
           {/* Contact Info */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-gray-800">Contact & Personal Details</h3>
+            <h3 className="font-semibold mb-2 text-black">Contact & Personal Details</h3>
 
-            <label className="block text-sm font-semibold mb-1">Email</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Email</label>
             <input name="email" type="email" onChange={handleChange} required className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">Full Name</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Full Name</label>
             <input name="fullName" onChange={handleChange} required className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">Mobile Number</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Mobile Number</label>
             <input name="mobile" onChange={handleChange} required className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">Alternative Contact</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Alternative Contact</label>
             <input name="altMobile" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">Permanent Address</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Permanent Address</label>
             <input name="permanentAddress" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">Residential Address</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Residential Address</label>
             <input name="residentialAddress" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
           </section>
 
           {/* Motivation */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-gray-800">Motivation</h3>
+            <h3 className="font-semibold mb-2 text-black">Motivation</h3>
 
-            <label className="block text-sm font-semibold mb-1">Why do you want to join us?</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Why do you want to join us?</label>
             <textarea name="reason" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
           </section>
 
           {/* Position */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-gray-800">Position</h3>
+            <h3 className="font-semibold mb-2 text-black">Position</h3>
 
-            <label className="block text-sm font-semibold mb-1">Applying for</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Applying for</label>
             <select name="positionType" value={formData.positionType} onChange={handleChange} className="border p-2 w-full mb-3 rounded">
               <option value="delivery">Delivery Role</option>
               <option value="other">Other Position</option>
@@ -242,30 +242,29 @@ export default function JoiningForm() {
 
             {formData.positionType === "delivery" && (
               <>
-                <label className="block text-sm font-semibold mb-1">Vehicle Type</label>
+                <label className="block text-sm font-semibold mb-1 text-black">Vehicle Type</label>
                 <input name="vehicleType" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-                <label className="block text-sm font-semibold mb-1">Driver License</label>
+                <label className="block text-sm font-semibold mb-1 text-black">Driver License</label>
                 <input name="license" type="file" onChange={handleFile} className="border p-2 w-full mb-3 rounded" />
 
-                <label className="block text-sm font-semibold mb-1">Vehicle Documents (Smart Card / Insurance / NOC)</label>
+                <label className="block text-sm font-semibold mb-1 text-black">Vehicle Documents (Smart Card / Insurance / NOC)</label>
                 <input name="vehicleDocs" type="file" multiple onChange={handleFile} className="border p-2 w-full mb-3 rounded" />
-
               </>
             )}
 
             {formData.positionType === "other" && (
               <>
-                <label className="block text-sm font-semibold mb-1">Position Applied</label>
+                <label className="block text-sm font-semibold mb-1 text-black">Position Applied</label>
                 <input name="applyPos" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-                <label className="block text-sm font-semibold mb-1">Strengths & Weakness</label>
+                <label className="block text-sm font-semibold mb-1 text-black">Strengths & Weakness</label>
                 <textarea name="strengthWeakness" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-                <label className="block text-sm font-semibold mb-1">5 Year Goal</label>
+                <label className="block text-sm font-semibold mb-1 text-black">5 Year Goal</label>
                 <textarea name="goal5" onChange={handleChange} className="border p-2 w-full mb-3 rounded" />
 
-                <label className="block text-sm font-semibold mb-1">CV / Resume</label>
+                <label className="block text-sm font-semibold mb-1 text-black">CV / Resume</label>
                 <input name="cv" type="file" onChange={handleFile} className="border p-2 w-full mb-3 rounded" />
               </>
             )}
@@ -274,12 +273,12 @@ export default function JoiningForm() {
 
           {/* ID Documents */}
           <section className="mb-6">
-            <h3 className="font-semibold mb-2 text-gray-800">ID & Verification Documents</h3>
+            <h3 className="font-semibold mb-2 text-black">ID & Verification Documents</h3>
 
-            <label className="block text-sm font-semibold mb-1">Aadhar Card (Front & Back)</label>
+            <label className="block text-sm font-semibold mb-1 text-black">Aadhar Card (Front & Back)</label>
             <input name="aadhar" type="file" multiple onChange={handleFile} className="border p-2 w-full mb-3 rounded" />
 
-            <label className="block text-sm font-semibold mb-1">PAN Card</label>
+            <label className="block text-sm font-semibold mb-1 text-black">PAN Card</label>
             <input name="pan" type="file" onChange={handleFile} className="border p-2 w-full mb-3 rounded" />
           </section>
 
@@ -297,7 +296,7 @@ export default function JoiningForm() {
       {/* SUCCESS MODAL */}
       {successModal && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full text-center">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full text-center text-black">
             <h3 className="text-xl font-bold mb-2">🎉 Successfully Submitted!</h3>
             <p className="text-sm mb-2">Your form ID is:</p>
             <p className="font-mono text-lg mb-4">{formID}</p>
