@@ -1,0 +1,33 @@
+
+> mateng@0.1.0 build
+> prisma generate && next build
+
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.5.0) to ./node_modules/@prisma/client in 212ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+   ▲ Next.js 15.2.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+Error: supabaseUrl is required.
+    at new ax (.next/server/chunks/3008.js:21:81297)
+    at aB (.next/server/chunks/3008.js:21:85583)
+    at 84698 (.next/server/app/api/agree/route.js:1:1182)
+    at t (.next/server/webpack-runtime.js:1:128)
+    at t (.next/server/app/api/agree/route.js:11:660)
+    at <unknown> (.next/server/app/api/agree/route.js:11:697)
+    at t.X (.next/server/webpack-runtime.js:1:1206)
+    at <unknown> (.next/server/app/api/agree/route.js:11:673)
+    at Object.<anonymous> (.next/server/app/api/agree/route.js:11:725)
+
+> Build error occurred
+[Error: Failed to collect page data for /api/agree] { type: 'Error' }
