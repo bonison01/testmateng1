@@ -2,14 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
+
   images: {
-    domains: [
-      'mdxeolqfiosscdommyhc.supabase.co',
-      'uqtcgvxrcztaffzpxsql.supabase.co', // ✅ Add this line
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "mdxeolqfiosscdommyhc.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "uqtcgvxrcztaffzpxsql.supabase.co",
+      },
     ],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 

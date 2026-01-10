@@ -49,9 +49,10 @@ const generateInvoice = (data: BookingData) => {
     31,
     { align: "center" }
   );
-  doc.text("Phone: 8787649928 | Website: justmateng.com", pageWidth / 2, 36, {
+  doc.text("Phone: 8787649928 | Website: justmateng.com | GSTIN: 14AAGCJ5156M1ZA", pageWidth / 2, 36, {
     align: "center",
   });
+  
 
   // === Tracking Box ===
   doc.setFillColor("#E9F8E6");
@@ -77,8 +78,9 @@ const generateInvoice = (data: BookingData) => {
   );
   doc.text(`Date: ${dateStr}`, 25, 67);
   doc.text("Payment: CASH", pageWidth - 60, 62);
+  // doc.text("SAC: 996812", pageWidth - 60, 62);
   doc.setTextColor(primaryColor);
-  doc.text("Status: PAID", pageWidth - 60, 67);
+  doc.text("SAC: 996812", pageWidth - 60, 67);
 
   // === Sender / Receiver Boxes ===
   doc.setFillColor(lightGray);
@@ -152,9 +154,17 @@ const generateInvoice = (data: BookingData) => {
   const packaging = data.packaging_charge || 0;
   const pickup = data.pickup_charge || 0;
   const extraMile = data.extra_mile_delivery || 0;
-  const finalCharge =
-    data.final_charge ??
-    handling + docket + pickup + packaging + extraMile; // fallback if not set
+  const estimate = data.estimate_charge || 0;
+
+const finalCharge =
+  data.final_charge ??
+  estimate +
+    handling +
+    docket +
+    pickup +
+    packaging +
+    extraMile;
+
 
   // 🔹 Show all charge components in the PDF
   const charges = [
@@ -163,6 +173,7 @@ const generateInvoice = (data: BookingData) => {
     ["Pickup Charge", formatCurrency(pickup)],
     ["Packaging Charge", formatCurrency(packaging)],
     ["Extra Mile Delivery", formatCurrency(extraMile)],
+    ["Freight", formatCurrency(estimate)], // ✅ ADD THIS
   ];
 
   charges.forEach(([label, value]) => {
@@ -243,8 +254,15 @@ const BookingDetailsForm = ({
   const pickup = Number(selectedBooking.pickup_charge) || 0;
   const packaging = Number(selectedBooking.packaging_charge) || 0;
   const extra = Number(selectedBooking.extra_mile_delivery) || 0;
+  const estimate = Number(selectedBooking.estimate_charge) || 0;
 
-  const total = handling + docket + pickup + packaging + extra;
+  const total =
+    estimate +
+    handling +
+    docket +
+    pickup +
+    packaging +
+    extra;
 
   if (selectedBooking.final_charge !== total) {
     onInputChange({
@@ -252,12 +270,14 @@ const BookingDetailsForm = ({
     } as unknown as React.ChangeEvent<HTMLInputElement>);
   }
 }, [
+  selectedBooking.estimate_charge,
   selectedBooking.handling_charge,
   selectedBooking.docket_charge,
   selectedBooking.pickup_charge,
   selectedBooking.packaging_charge,
   selectedBooking.extra_mile_delivery,
 ]);
+
 
 
   const handleDownloadInvoice = () => {
@@ -512,7 +532,7 @@ const BookingDetailsForm = ({
         </div>
 
         <div className={styles.formGroup}>
-          <label>Estimate Charge</label>
+          <label>Frieght Charge</label>
           <input
             type="number"
             name="estimate_charge"

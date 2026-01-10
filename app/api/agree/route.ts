@@ -3,12 +3,23 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-// MUST use service role key for DB writes
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+/* -------------------------------------------------------
+   SAFE Supabase Admin Factory
+------------------------------------------------------- */
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error("supabaseUrl is required");
+  }
+
+  return createClient(supabaseUrl, serviceKey);
+}
+
+/* -------------------------------------------------------
+   GET Handler
+------------------------------------------------------- */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,7 +30,9 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Invalid link", { status: 400 });
     }
 
-    // 1. Retrieve contract by token + formid
+    const supabase = getSupabaseAdmin();
+
+    // 1️⃣ Fetch contract
     const { data: contract, error: fetchErr } = await supabase
       .from("employee_contracts")
       .select("*")
@@ -36,14 +49,14 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Invalid or expired link", { status: 404 });
     }
 
-    // 2. Prepare acceptance fields
+    // 2️⃣ Prepare acceptance info
     const now = new Date().toISOString();
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    // 3. Update DB
+    // 3️⃣ Update DB
     const { error: updateErr } = await supabase
       .from("employee_contracts")
       .update({
@@ -58,7 +71,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Error updating agreement", { status: 500 });
     }
 
-    // 4. Return success HTML
+    // 4️⃣ Success HTML
     return new NextResponse(
       `
       <html>

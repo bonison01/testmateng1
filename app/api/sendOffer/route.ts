@@ -1,4 +1,3 @@
-// app/api/sendOffer/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import fs from "fs/promises";
@@ -8,19 +7,29 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-// Supabase Admin Client
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+/* -------------------------------------------------------
+   SAFE Supabase Admin Factory (NO top-level execution)
+------------------------------------------------------- */
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Helpers
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error("supabaseUrl is required");
+  }
+
+  return createClient(supabaseUrl, serviceKey);
+}
+
+/* -------------------------------------------------------
+   Helpers
+------------------------------------------------------- */
 async function loadLocalPdf(dir: string, filename: string) {
   try {
     const filePath = path.join(dir, filename);
     const buf = await fs.readFile(filePath);
     return { filename, content: buf, contentType: "application/pdf" };
-  } catch (err) {
+  } catch {
     console.warn(`Local PDF missing: ${filename}`);
     return null;
   }
@@ -32,12 +41,15 @@ async function loadRemotePdf(url: string, filename: string) {
     if (!res.ok) throw new Error("Failed to fetch remote PDF");
     const buf = Buffer.from(await res.arrayBuffer());
     return { filename, content: buf, contentType: "application/pdf" };
-  } catch (err) {
+  } catch {
     console.warn(`Remote PDF failed: ${url}`);
     return null;
   }
 }
 
+/* -------------------------------------------------------
+   POST Handler
+------------------------------------------------------- */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -56,32 +68,34 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!email || !formid) {
-      return NextResponse.json({ error: "Missing email or formid" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing email or formid" },
+        { status: 400 }
+      );
     }
 
-    // --------------------------------------------------------
-    // BASE URL (Local vs Production)
-    // --------------------------------------------------------
-    const isLocal = process.env.NODE_ENV === "development";
+    /* -------------------------------------------------------
+       Base URL
+    ------------------------------------------------------- */
+    const baseUrl =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000"
+        : "https://justmateng.com";
 
-    const baseUrl = isLocal
-      ? "http://localhost:3000"
-      : "https://justmateng.com";
-
-    // --------------------------------------------------------
-    // MAIL TRANSPORT
-    // --------------------------------------------------------
+    /* -------------------------------------------------------
+       Mail Transport
+    ------------------------------------------------------- */
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.GMAIL_USER!,
-        pass: process.env.GMAIL_PASS!,
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
       },
     });
 
-    // --------------------------------------------------------
-    // CASE 1 — REJECTION
-    // --------------------------------------------------------
+    /* -------------------------------------------------------
+       REJECTION CASE
+    ------------------------------------------------------- */
     if (rejected) {
       await transporter.sendMail({
         from: `"Justmateng HR" <${process.env.GMAIL_USER}>`,
@@ -96,16 +110,16 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      return NextResponse.json({ success: true, message: "Rejection email sent." });
+      return NextResponse.json({ success: true });
     }
 
-    // --------------------------------------------------------
-    // CASE 2 — APPROVAL
-    // --------------------------------------------------------
-
-    // Generate agreement token
+    /* -------------------------------------------------------
+       APPROVAL CASE
+    ------------------------------------------------------- */
     const token = crypto.randomUUID();
     const sentAt = new Date().toISOString();
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     await supabaseAdmin
       .from("employee_contracts")
@@ -119,13 +133,14 @@ export async function POST(req: NextRequest) {
       token
     )}&formid=${encodeURIComponent(formid)}`;
 
-    // Attachments
+    /* -------------------------------------------------------
+       Attachments
+    ------------------------------------------------------- */
     const attachments: any[] = [];
     const dir = path.join(process.cwd(), "public", "employee-contract-pdfs");
 
     let docsToAttach: string[] = [];
 
-    // Use selectedDocs if provided
     if (Array.isArray(selectedDocs) && selectedDocs.length > 0) {
       docsToAttach = selectedDocs;
     } else {
@@ -134,22 +149,23 @@ export async function POST(req: NextRequest) {
       if (includeLeave) docsToAttach.push("leave.pdf");
     }
 
-    // Load local PDFs
     for (const filename of docsToAttach) {
       const clean = path.basename(filename);
       const pdf = await loadLocalPdf(dir, clean);
       if (pdf) attachments.push(pdf);
     }
 
-    // Custom PDF (remote Supabase URL)
     if (custompdfurl && docsToAttach.includes("custom.pdf")) {
-      const custom = await loadRemotePdf(custompdfurl, "Custom-Offer-Letter.pdf");
+      const custom = await loadRemotePdf(
+        custompdfurl,
+        "Custom-Offer-Letter.pdf"
+      );
       if (custom) attachments.push(custom);
     }
 
-    // --------------------------------------------------------
-    // SEND APPROVAL EMAIL
-    // --------------------------------------------------------
+    /* -------------------------------------------------------
+       SEND APPROVAL EMAIL
+    ------------------------------------------------------- */
     await transporter.sendMail({
       from: `"Justmateng HR" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -160,14 +176,8 @@ export async function POST(req: NextRequest) {
         <p>Please find the attached documents.</p>
         <p>
           <a href="${agreeLink}"
-            style="
-              background:black;
-              color:white;
-              padding:10px 16px;
-              border-radius:6px;
-              text-decoration:none;
-              font-weight:bold;
-            ">
+            style="background:black;color:white;padding:10px 16px;
+                   border-radius:6px;text-decoration:none;font-weight:bold;">
             Accept Offer & Agree
           </a>
         </p>
@@ -178,11 +188,11 @@ export async function POST(req: NextRequest) {
       attachments,
     });
 
-    return NextResponse.json({ success: true, message: "Approval email sent." });
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("sendOffer error:", err);
     return NextResponse.json(
-      { error: err?.message ?? String(err) },
+      { error: err?.message ?? "Internal Server Error" },
       { status: 500 }
     );
   }
