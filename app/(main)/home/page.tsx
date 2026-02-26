@@ -57,7 +57,7 @@ export default function Page() {
 
         {/* BOOK FAIR REGISTRATION POSTER */}
         <div className="w-full flex justify-center px-4 mt-10 z-20">
-          <div className="relative w-full sm:w-[85vw] md:w-[70vw] rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#0f2e1d] via-[#123d27] to-[#0a1f15] shadow-xl">
+          {/* <div className="relative w-full sm:w-[85vw] md:w-[70vw] rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#0f2e1d] via-[#123d27] to-[#0a1f15] shadow-xl">
 
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-transparent to-emerald-500/10 blur-2xl" />
 
@@ -78,7 +78,7 @@ export default function Page() {
                 </button>
               </Link>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* HERO SECTION */}
