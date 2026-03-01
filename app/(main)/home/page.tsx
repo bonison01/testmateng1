@@ -80,7 +80,39 @@ export default function Page() {
             </div>
           </div> */}
         </div>
+{/* MATENG EDUFEST BANNER */}
+<div className="w-full flex justify-center px-4 mt-8">
+  <Link href="/matengfest">
+    <div className="relative w-full sm:w-[90vw] md:w-[75vw] rounded-2xl overflow-hidden cursor-pointer
+                    bg-gradient-to-r from-[#14710f] via-[#1f8c17] to-[#0f550c]
+                    shadow-lg hover:scale-[1.01] transition-all duration-300">
 
+      {/* Glow Effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 blur-2xl opacity-30" />
+
+      <div className="relative px-6 py-5 sm:px-10 sm:py-6 flex flex-col sm:flex-row 
+                      items-center justify-between gap-4 text-white">
+
+        <div className="text-center sm:text-left">
+          <h2 className="text-lg sm:text-2xl font-bold tracking-wide">
+            Mateng Edu Fest 2026
+          </h2>
+          <p className="text-sm sm:text-base opacity-90">
+            Pre-NEET • Mathematics • Quiz • Innovation Challenge
+          </p>
+          <p className="text-xs sm:text-sm mt-1 font-semibold text-yellow-300">
+            🚀 First Pre-NEET Structured Platform in Manipur
+          </p>
+        </div>
+
+        <div className="px-6 py-2 rounded-full bg-white text-[#14710f] font-semibold text-sm sm:text-base shadow-md">
+          Explore →
+        </div>
+
+      </div>
+    </div>
+  </Link>
+</div>
         {/* HERO SECTION */}
         {/* <div className="min-h-[70svh] text-center font-bold text-white flex flex-col justify-center items-center gap-10"> */}
         <div className="text-center font-bold text-white flex flex-col justify-center items-center gap-10 py-20">
@@ -110,7 +142,7 @@ export default function Page() {
 
           {/* CTA BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
-            <Link href="/discovery">
+            <Link href="https://www.instagram.com/mateng.discovery/">
               <button className="px-8 py-3 rounded-full font-semibold text-teal-50 bg-gradient-to-tr from-amber-200/60 via-amber-300/70 to-amber-300/80 ring-4 ring-amber-200/25 hover:opacity-95 transition">
                 Discover Now →
               </button>

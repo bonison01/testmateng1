@@ -1,0 +1,270 @@
+.container {
+  font-family: 'Inter', sans-serif;
+  color: #111;
+  background: #ffffff;
+}
+
+/* HERO */
+
+/* HERO */
+
+.hero {
+  min-height: 100vh;               /* Full screen height */
+  display: flex;
+  align-items: center;             /* Vertical center */
+  justify-content: center;         /* Horizontal center */
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.heroInner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;             /* Ensures logo + text are centered */
+  justify-content: center;
+}
+
+.heroInner img {
+  display: block;
+  margin: 0 auto;                  /* Hard center the logo */
+}
+
+.heroTitle {
+  margin-top: 50px;
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.heroSub {
+  margin-top: 20px;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.heroButtons {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  padding: 14px 36px;
+  background: #14710f;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.primaryBtn:hover {
+  background: #0f550c;
+}
+
+.secondaryBtn {
+  padding: 14px 36px;
+  border: 2px solid #14710f;
+  color: #14710f;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.secondaryBtn:hover {
+  background: #14710f;
+  color: white;
+}
+
+
+/* FEATURE */
+
+.feature {
+  padding: 120px 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 60px;
+}
+
+.feature h2 {
+  font-size: 2.5rem;
+}
+
+.highlight {
+  margin: 20px 0;
+  font-weight: 600;
+  color: #14710f;
+}
+
+.meta {
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+.prizeCard {
+  padding: 40px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+}
+
+.prizeCard ul {
+  margin-top: 20px;
+  line-height: 1.8;
+}
+
+
+/* SEGMENTS */
+
+.segments {
+  padding: 120px 20px;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.segmentGrid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+}
+
+.segmentCard {
+  padding: 40px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.segmentCard:hover {
+  border-color: #14710f;
+}
+
+.segmentCardBold {
+  padding: 40px;
+  background: #14710f;
+  color: white;
+  border-radius: 8px;
+}
+
+
+/* REACH */
+
+.reach {
+  padding: 120px 20px;
+  text-align: center;
+}
+
+.reachGrid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 40px;
+}
+
+.reachGrid h3 {
+  font-size: 2.5rem;
+  color: #14710f;
+}
+
+
+/* FOOTER */
+
+.footer {
+  padding: 40px;
+  text-align: center;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+}
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #14710f;
+}
+.dateBox {
+  margin-top: 30px;
+  padding: 20px;
+  border-left: 4px solid #14710f;
+  background: #f6fff4;
+  border-radius: 6px;
+}
+
+.dateBox h4 {
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #14710f;
+}
+
+.dateBox ul {
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+/* MODAL OVERLAY */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;   /* VERY IMPORTANT */
+}
+
+/* MODAL BOX */
+.modalBox {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.phone {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 20px 0;
+  color: #14710f;
+}
+
+.closeBtn {
+  padding: 10px 30px;
+  background: #14710f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
