@@ -63,7 +63,7 @@ export default function MatengFestPage() {
             <h2>Pre-NEET Competition</h2>
 
             <p className={styles.highlight}>
-              First Structured Pre-NEET Platform in Manipur
+              First Structured Pre-NEET Platform in Manipur. A Real-Time NEET Performance Experience.”
             </p>
 
             <p>
