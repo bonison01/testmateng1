@@ -3,16 +3,16 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { motion } from "framer-motion";
-import { useState } from "react";   // ✅ IMPORT THIS
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function MatengFestPage() {
-
-  // ✅ MOVE STATE INSIDE COMPONENT
   const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
 
   return (
     <div className={styles.container}>
-
+      
       {/* HERO */}
       <section className={styles.hero}>
         <motion.div
@@ -38,12 +38,12 @@ export default function MatengFestPage() {
           </p>
 
           <div className={styles.heroButtons}>
-            <button
+            {/* <button
               onClick={() => setShowModal(true)}
               className={styles.primaryBtn}
             >
               Register Now
-            </button>
+            </button> */}
 
             <button
               onClick={() => setShowModal(true)}
@@ -63,7 +63,8 @@ export default function MatengFestPage() {
             <h2>Pre-NEET Competition</h2>
 
             <p className={styles.highlight}>
-              First Structured Pre-NEET Platform in Manipur. A Real-Time NEET Performance Experience.”
+              First Structured Pre-NEET Platform in Manipur. 
+              A Real-Time NEET Performance Experience.
             </p>
 
             <p>
@@ -72,6 +73,25 @@ export default function MatengFestPage() {
             </p>
 
             <p className={styles.meta}>Registration Fee: ₹250</p>
+
+            {/* ✅ WORKING BUTTON */}
+            <button
+              type="button"
+              onClick={() => router.push("/preneet")}
+              style={{
+                marginTop: "16px",
+                padding: "12px 22px",
+                backgroundColor: "#14710F",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "600",
+                cursor: "pointer",
+                fontSize: "15px"
+              }}
+            >
+              Register for Pre-NEET
+            </button>
 
             <div className={styles.dateBox}>
               <h4>Important Dates</h4>
@@ -100,6 +120,7 @@ export default function MatengFestPage() {
       {/* SEGMENTS */}
       <section className={styles.segments}>
         <h2 className={styles.sectionTitle}>Championship Segments</h2>
+        <h4>Registration links for other upcoming events will be available soon.</h4>
 
         <div className={styles.segmentGrid}>
           <div className={styles.segmentCard}>
@@ -146,7 +167,6 @@ export default function MatengFestPage() {
           </div>
         </div>
       )}
-
 
       {/* FOOTER */}
       <footer className={styles.footer}>

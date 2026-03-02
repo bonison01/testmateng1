@@ -268,3 +268,19 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.preNeetBtn {
+  margin-top: 16px;
+  padding: 12px 22px;
+  background-color: #14710F;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.preNeetBtn:hover {
+  background-color: #0f5c0c;
+  transform: translateY(-2px);
+}

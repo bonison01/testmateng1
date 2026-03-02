@@ -1,18 +1,62 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import QRCode from "react-qr-code";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Loader2, Upload, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 
-export default function BookFairRegistrationPage() {
-  const REGISTRATION_FEE = 300;
+const REGISTRATION_FEE = 300;
+const API_BASE_URL = "https://api.justmateng.info";
 
-  const [formData, setFormData] = useState({
+interface FormData {
+  candidate_name: string;
+  father_name: string;
+  mother_name: string;
+  dob: string;
+  age: number;
+  gender: string;
+  nationality: string;
+  category: string;
+  address: string;
+  city: string;
+  state: string;
+  pin_code: string;
+  mobile: string;
+  alternate_mobile: string;
+  email: string;
+  highest_qualification: string;
+  passing_year: number;
+  school_name: string;
+}
+
+export default function PreeNeetRegistrationForm() {
+  const [formData, setFormData] = useState<FormData>({
     candidate_name: "",
     father_name: "",
     mother_name: "",
     dob: "",
-    age: "",
+    age: 0,
     gender: "",
     nationality: "Indian",
     category: "",
@@ -23,450 +67,740 @@ export default function BookFairRegistrationPage() {
     mobile: "",
     alternate_mobile: "",
     email: "",
-    qualifying_exam: "",
-    passing_year: "",
-    school_name_address: "",
+    highest_qualification: "",
+    passing_year: new Date().getFullYear(),
+    school_name: "",
   });
 
-  const [registrationNo, setRegistrationNo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [registrationNo, setRegistrationNo] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
 
-  /* ================= FILE STATES ================= */
+  // File states + refs
   const [passportPhoto, setPassportPhoto] = useState<File | null>(null);
   const [passportPreview, setPassportPreview] = useState<string | null>(null);
-  const [passportPhotoUrl, setPassportPhotoUrl] = useState<string | null>(null);
+  const passportInputRef = useRef<HTMLInputElement>(null);
 
   const [signature, setSignature] = useState<File | null>(null);
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
-  const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+  const signatureInputRef = useRef<HTMLInputElement>(null);
 
-  const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
-
-  const inputStyle =
-    "border border-black p-2 w-full text-black focus:outline-none";
-  const labelStyle = "text-sm font-medium text-black mb-1 block";
-
-  const generateRegNo = () =>
-    `BF-${Math.floor(100000 + Math.random() * 900000)}`;
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [paymentPreview, setPaymentPreview] = useState<string | null>(null);
+  const paymentInputRef = useRef<HTMLInputElement>(null);
 
   const upiLink = `upi://pay?pa=khumbongmayumbonison@icici&pn=BookFair2026&am=${REGISTRATION_FEE}&cu=INR`;
 
-  /* ================= AGE CALCULATION ================= */
-  const handleChange = (e: any) => {
-    const { name, value } = e.target;
+  // ────────────────────────────────────────────────
+  // Handlers
+  // ────────────────────────────────────────────────
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     if (name === "dob") {
       const birthDate = new Date(value);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-
-      setFormData((prev) => ({
-        ...prev,
-        dob: value,
-        age: age.toString(),
-      }));
+      setFormData((prev) => ({ ...prev, dob: value, age }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  /* ================= FILE UPLOAD FUNCTION ================= */
-  const uploadFile = async (
-    file: File,
-    bucket: string,
-    setUrl: any
-  ) => {
-    const fileName = `${bucket}-${Date.now()}.jpg`;
-
-    const { error } = await supabase.storage
-      .from(bucket)
-      .upload(fileName, file);
-
-    if (error) {
-      alert("Upload failed");
-      return false;
-    }
-
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(fileName);
-
-    setUrl(data.publicUrl);
-    return true;
+  const handleSelectChange = (name: keyof FormData) => (value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
-const [photoStatus, setPhotoStatus] = useState("");
-const [signatureStatus, setSignatureStatus] = useState("");
-const [paymentStatusMsg, setPaymentStatusMsg] = useState("");
+  const handleNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: Number(value) || 0 }));
+  };
 
-const uploadFileDirect = async (
-  file: File,
-  bucket: string,
-  setUrl: any,
-  setStatus: any
-) => {
-  if (file.size > MAX_FILE_SIZE) {
-    setStatus("❌ File must be under 2MB");
-    return;
-  }
+  const handleFileChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    setter: (file: File | null) => void,
+    previewSetter: (url: string | null) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  setStatus("Uploading...");
-
-  const fileName = `${bucket}-${Date.now()}.${file.name.split(".").pop()}`;
-
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(fileName, file);
-
-  if (error) {
-    setStatus("❌ Upload failed");
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(fileName);
-
-  setUrl(data.publicUrl);
-  setStatus("✅ Uploaded Successfully");
-};
-  /* ================= SUBMIT ================= */
-  const submitForm = async (e: any) => {
-    e.preventDefault();
-
-    if (!passportPhoto || !signature || !screenshot) {
-      alert("Upload Photo, Signature and Payment Proof");
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be under 10MB");
       return;
     }
 
-    if (passportPhoto.size > 51200) {
-      alert("Passport photo must be under 50KB");
+    setter(file);
+    previewSetter(URL.createObjectURL(file));
+  };
+
+  const clearFile = (
+    setter: (file: File | null) => void,
+    previewSetter: (url: string | null) => void,
+    inputRef: React.RefObject<HTMLInputElement | null>  // ← Fixed: allow null
+  ) => {
+    setter(null);
+    previewSetter(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!passportPhoto || !signature || !paymentScreenshot) {
+      setSubmitError("Please upload passport photo, signature, and payment screenshot.");
+      setShowDialog(true);
       return;
     }
 
     setLoading(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
 
-    const regNo = generateRegNo();
+    try {
+      // 1. Create candidate
+      const candidateRes = await fetch(`${API_BASE_URL}/candidates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    const photoUploaded = await uploadFile(
-      passportPhoto,
-      "passport-photos",
-      setPassportPhotoUrl
-    );
+      if (!candidateRes.ok) {
+        const errorData = await candidateRes.json();
+        throw new Error(errorData.detail?.[0]?.msg || "Failed to create candidate");
+      }
 
-    const signatureUploaded = await uploadFile(
-      signature,
-      "signatures",
-      setSignatureUrl
-    );
+      const { id: candidate_id } = await candidateRes.json();
 
-    const paymentUploaded = await uploadFile(
-      screenshot,
-      "payment-screenshots",
-      setScreenshotUrl
-    );
+      // 2. Upload documents
+      const uploadDocument = async (
+        file: File,
+        document_type: "passport_photo" | "candidate_signature" | "payment_screenshot"
+      ) => {
+        const fd = new FormData();
+        fd.append("document_type", document_type);
+        fd.append("file", file);
 
-    if (!photoUploaded || !signatureUploaded || !paymentUploaded) {
-      setLoading(false);
-      return;
-    }
+        const res = await fetch(`${API_BASE_URL}/candidates/${candidate_id}/documents`, {
+          method: "POST",
+          body: fd,
+        });
 
-    const { error } = await supabase
-      .from("book_fair_registrations")
-      .insert([
-        {
-          ...formData,
-          registration_no: regNo,
-          amount: REGISTRATION_FEE,
-          payment_status: "pending_verification",
-          passport_photo_url: passportPhotoUrl,
-          signature_url: signatureUrl,
-          payment_screenshot_url: screenshotUrl,
-        },
+        if (!res.ok) throw new Error(`Failed to upload ${document_type}`);
+        return res.json();
+      };
+
+      await Promise.all([
+        uploadDocument(passportPhoto, "passport_photo"),
+        uploadDocument(signature, "candidate_signature"),
+        uploadDocument(paymentScreenshot, "payment_screenshot"),
       ]);
 
-    if (error) {
-      alert("Registration Failed");
-      setLoading(false);
-      return;
-    }
+      setRegistrationNo(`BF-${String(candidate_id).padStart(6, "0")}`);
+      setSubmitSuccess(true);
+      setShowDialog(true);
 
-    setRegistrationNo(regNo);
-    setLoading(false);
+      // Reset form
+      setFormData({
+        candidate_name: "",
+        father_name: "",
+        mother_name: "",
+        dob: "",
+        age: 0,
+        gender: "",
+        nationality: "Indian",
+        category: "",
+        address: "",
+        city: "",
+        state: "",
+        pin_code: "",
+        mobile: "",
+        alternate_mobile: "",
+        email: "",
+        highest_qualification: "",
+        passing_year: new Date().getFullYear(),
+        school_name: "",
+      });
+
+      clearFile(setPassportPhoto, setPassportPreview, passportInputRef);
+      clearFile(setSignature, setSignaturePreview, signatureInputRef);
+      clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef);
+    } catch (err: any) {
+      setSubmitError(err.message || "Registration failed. Please try again.");
+      setShowDialog(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setShowDialog(false);
+    if (submitSuccess) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 py-10 text-black">
-      <div className="max-w-4xl mx-auto bg-white border border-black p-8">
+    <div className="min-h-screen py-10 px-4">
+      <div className="max-w-4xl mx-auto">
+        <Card className="border-2 border-gray-800 shadow-2xl bg-white overflow-hidden py-0">
+          <CardHeader className="text-center border-b border-gray-200 py-6 bg-gradient-to-r from-gray-100 to-gray-50">
+            <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
+              PREE-NEET REGISTRATION FORM – 2026
+            </CardTitle>
+            <p className="text-muted-foreground mt-3 text-lg">
+              Organized by Mateng Group | Registration Fee: ₹{REGISTRATION_FEE}
+            </p>
+          </CardHeader>
 
-        <div className="text-center border-b border-black pb-4 mb-6">
-          <h1 className="text-2xl font-bold">
-            BOOK FAIR REGISTRATION FORM – 2026
-          </h1>
-          <p className="text-sm mt-2">
-            Organized by Mateng Group | Registration Fee: ₹300
-          </p>
-        </div>
+          <CardContent className="pt-10 pb-12 px-6 md:px-10">
+            <form onSubmit={handleSubmit} className="space-y-10">
+              {/* Personal Details */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
+                  Personal Details
+                </h2>
 
-        <form onSubmit={submitForm} className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Candidate Name *
+                    </label>
+                    <Input
+                      name="candidate_name"
+                      value={formData.candidate_name}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Father's Name *
+                    </label>
+                    <Input
+                      name="father_name"
+                      value={formData.father_name}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                </div>
 
-          {/* ALL YOUR EXISTING FIELDS REMAIN UNCHANGED */}
-          {/* (I am keeping everything exactly same structure) */}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Mother's Name *
+                    </label>
+                    <Input
+                      name="mother_name"
+                      value={formData.mother_name}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Nationality *
+                    </label>
+                    <Input
+                      name="nationality"
+                      value={formData.nationality}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                </div>
 
-          {/* Candidate Name */}
-          <div>
-            <label className={labelStyle}>Candidate Name</label>
-            <input name="candidate_name" required className={inputStyle}
-              value={formData.candidate_name} onChange={handleChange}/>
-          </div>
+                <div className="grid gap-4 sm:grid-cols-4">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Date of Birth *
+                    </label>
+                    <Input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Age</label>
+                    <Input
+                      type="number"
+                      value={formData.age}
+                      readOnly
+                      className="bg-gray-100 border-gray-300 !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Gender *
+                    </label>
+                    <Select value={formData.gender} onValueChange={handleSelectChange("gender")} required>
+                      <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent className="!text-black !bg-white">
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Category *
+                    </label>
+                    <Select value={formData.category} onValueChange={handleSelectChange("category")} required>
+                      <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent className="!text-black !bg-white">
+                        <SelectItem value="General">General</SelectItem>
+                        <SelectItem value="OBC">OBC</SelectItem>
+                        <SelectItem value="SC">SC</SelectItem>
+                        <SelectItem value="ST">ST</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
 
-          {/* Father & Mother */}
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className={labelStyle}>Father's Name</label>
-              <input name="father_name" required className={inputStyle}
-                value={formData.father_name} onChange={handleChange}/>
-            </div>
-            <div>
-              <label className={labelStyle}>Mother's Name</label>
-              <input name="mother_name" required className={inputStyle}
-                value={formData.mother_name} onChange={handleChange}/>
-            </div>
-          </div>
+              <Separator className="my-8" />
 
-          {/* DOB / Age / Gender / Category */}
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <label className={labelStyle}>Date of Birth</label>
-              <input type="date" name="dob" required className={inputStyle}
-                value={formData.dob} onChange={handleChange}/>
-            </div>
-            <div>
-              <label className={labelStyle}>Age</label>
-              <input name="age" readOnly className={inputStyle}
-                value={formData.age}/>
-            </div>
-            <div>
-              <label className={labelStyle}>Gender</label>
-              <select name="gender" required className={inputStyle}
-                value={formData.gender} onChange={handleChange}>
-                <option value="">Select</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelStyle}>Category</label>
-              <select name="category" required className={inputStyle}
-                value={formData.category} onChange={handleChange}>
-                <option value="">Select</option>
-                <option>General</option>
-                <option>OBC</option>
-                <option>SC</option>
-                <option>ST</option>
-              </select>
-            </div>
-          </div>
+              {/* Contact & Address */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold text-gray-500 border-b pb-2">
+                  Contact & Address
+                </h2>
 
-          {/* CONTACT */}
-          <div className="grid grid-cols-2 gap-6">
-            <input name="mobile" placeholder="Mobile" required className={inputStyle}
-              value={formData.mobile} onChange={handleChange}/>
-            <input name="alternate_mobile" placeholder="Alternate Mobile"
-              className={inputStyle}
-              value={formData.alternate_mobile} onChange={handleChange}/>
-            <input name="email" placeholder="Email" required className={inputStyle}
-              value={formData.email} onChange={handleChange}/>
-            <input name="nationality" placeholder="Nationality" required className={inputStyle}
-              value={formData.nationality} onChange={handleChange}/>
-          </div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Mobile Number *
+                    </label>
+                    <Input
+                      name="mobile"
+                      value={formData.mobile}
+                      onChange={handleInputChange}
+                      required
+                      maxLength={10}
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Alternate Mobile
+                    </label>
+                    <Input
+                      name="alternate_mobile"
+                      value={formData.alternate_mobile}
+                      onChange={handleInputChange}
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                </div>
 
-          {/* ADDRESS */}
-          <textarea name="address" placeholder="Full Address" required className={inputStyle}
-            value={formData.address} onChange={handleChange}/>
-          <div className="grid grid-cols-3 gap-6">
-            <input name="city" placeholder="City" required className={inputStyle}
-              value={formData.city} onChange={handleChange}/>
-            <input name="state" placeholder="State" required className={inputStyle}
-              value={formData.state} onChange={handleChange}/>
-            <input name="pin_code" placeholder="Pin Code" required className={inputStyle}
-              value={formData.pin_code} onChange={handleChange}/>
-          </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                    Email Address *
+                  </label>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                  />
+                </div>
 
-          {/* QUALIFICATION */}
-          <div className="grid grid-cols-2 gap-6">
-            <input name="qualifying_exam" placeholder="Highest Qualification" required className={inputStyle}
-              value={formData.qualifying_exam} onChange={handleChange}/>
-            <input name="passing_year" placeholder="Year of Passing" required className={inputStyle}
-              value={formData.passing_year} onChange={handleChange}/>
-          </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                    Full Address *
+                  </label>
+                  <Textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows={3}
+                    required
+                    className="border-gray-300 focus:ring-2 focus:ring-primary !text-black !bg-white"
+                  />
+                </div>
 
-          <textarea name="school_name_address" placeholder="School/College" required className={inputStyle}
-            value={formData.school_name_address} onChange={handleChange}/>
+                <div className="grid gap-6 sm:grid-cols-3">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      City *
+                    </label>
+                    <Input
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      State *
+                    </label>
+                    <Input
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      PIN Code *
+                    </label>
+                    <Input
+                      name="pin_code"
+                      value={formData.pin_code}
+                      onChange={handleInputChange}
+                      maxLength={6}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* ================= DOCUMENT UPLOAD SECTION ================= */}
-<div className="border border-black p-6 space-y-8">
+              <Separator className="my-8" />
 
-  <h2 className="text-lg font-semibold border-b border-black pb-2">
-    Document Upload Section
-  </h2>
+              {/* Educational Details */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
+                  Educational Details
+                </h2>
 
-  <div className="grid md:grid-cols-2 gap-10">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Highest Qualification *
+                    </label>
+                    <Input
+                      name="highest_qualification"
+                      value={formData.highest_qualification}
+                      onChange={handleInputChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                      Year of Passing *
+                    </label>
+                    <Input
+                      type="number"
+                      name="passing_year"
+                      value={formData.passing_year}
+                      onChange={handleNumberChange}
+                      required
+                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                    />
+                  </div>
+                </div>
 
-    {/* ================= PASSPORT PHOTO ================= */}
-    <div>
-      <label className="block font-medium mb-2">
-        Passport Size Photograph (≤50KB)
-      </label>
+                <div>
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
+                    School / College Name *
+                  </label>
+                  <Textarea
+                    name="school_name"
+                    value={formData.school_name}
+                    onChange={handleInputChange}
+                    rows={2}
+                    required
+                    className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black"
+                  />
+                </div>
+              </div>
 
-      <div className="border border-black w-40 h-48 flex items-center justify-center mb-3 bg-gray-50">
-        {passportPreview ? (
-          <img
-            src={passportPreview}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-xs text-center px-2">
-            Photo Preview
-          </span>
+              <Separator className="my-8" />
+
+              {/* Documents & Payment */}
+              <div className="space-y-8">
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
+                  Documents & Payment
+                </h2>
+
+                <div className="grid gap-10 md:grid-cols-2">
+                  {/* Passport Photo */}
+                  <div className="relative">
+                    <label
+                      htmlFor="passport-photo-input"
+                      className={`
+                        block border-2 border-dashed rounded-xl p-8 text-center 
+                        transition-all duration-300 min-h-[220px] flex items-center justify-center
+                        cursor-pointer
+                        ${passportPreview
+                          ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
+                          : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
+                      `}
+                    >
+                      {passportPreview ? (
+                        <img
+                          src={passportPreview}
+                          alt="Passport preview"
+                          className="max-h-52 mx-auto object-cover rounded-lg shadow-md"
+                        />
+                      ) : (
+                        <div className="text-muted-foreground">
+                          <Upload className="mx-auto h-14 w-14 mb-4 opacity-70" />
+                          <p className="text-lg">Click to select passport photo</p>
+                          <p className="text-sm mt-1">(max 10MB, jpg/png)</p>
+                        </div>
+                      )}
+                    </label>
+
+                    <Input
+                      ref={passportInputRef}
+                      id="passport-photo-input"
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      onChange={(e) => handleFileChange(e, setPassportPhoto, setPassportPreview)}
+                      className="hidden"
+                    />
+
+                    {passportPreview && (
+                      <button
+                        type="button"
+                        onClick={() => clearFile(setPassportPhoto, setPassportPreview, passportInputRef)}
+                        className="
+                          absolute top-3 right-3 
+                          bg-red-500 hover:bg-red-600 
+                          text-white rounded-full p-2 
+                          shadow-md transition-all
+                          hover:scale-110 active:scale-95
+                        "
+                        title="Remove photo"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Signature */}
+                  <div className="relative">
+                    <label
+                      htmlFor="signature-input"
+                      className={`
+                        block border-2 border-dashed rounded-xl p-8 text-center 
+                        transition-all duration-300 min-h-[220px] flex items-center justify-center
+                        cursor-pointer
+                        ${signaturePreview
+                          ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
+                          : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
+                      `}
+                    >
+                      {signaturePreview ? (
+                        <img
+                          src={signaturePreview}
+                          alt="Signature preview"
+                          className="max-h-40 mx-auto object-contain rounded shadow-md"
+                        />
+                      ) : (
+                        <div className="text-muted-foreground">
+                          <Upload className="mx-auto h-14 w-14 mb-4 opacity-70" />
+                          <p className="text-lg">Click to select signature</p>
+                          <p className="text-sm mt-1">(max 10MB, jpg/png)</p>
+                        </div>
+                      )}
+                    </label>
+
+                    <Input
+                      ref={signatureInputRef}
+                      id="signature-input"
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      onChange={(e) => handleFileChange(e, setSignature, setSignaturePreview)}
+                      className="hidden"
+                    />
+
+                    {signaturePreview && (
+                      <button
+                        type="button"
+                        onClick={() => clearFile(setSignature, setSignaturePreview, signatureInputRef)}
+                        className="
+                          absolute top-3 right-3 
+                          bg-red-500 hover:bg-red-600 
+                          text-white rounded-full p-2 
+                          shadow-md transition-all
+                          hover:scale-110 active:scale-95
+                        "
+                        title="Remove signature"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Payment Section */}
+                <div className="border rounded-xl p-8 bg-gray-50/70 shadow-inner">
+                  <h3 className="text-xl font-semibold mb-6 text-gray-800">
+                    Payment (₹{REGISTRATION_FEE})
+                  </h3>
+
+                  <div className="grid gap-10 md:grid-cols-2 items-center">
+                    <div className="flex flex-col items-center">
+                      <p className="text-base font-medium mb-5 text-gray-500">
+                        Scan to Pay via UPI
+                      </p>
+                      <div className="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
+                        <QRCode value={upiLink} size={200} />
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <label
+                        htmlFor="payment-screenshot-input"
+                        className={`
+                          block border-2 border-dashed rounded-xl p-6 text-center 
+                          transition-all duration-300 min-h-[180px] flex items-center justify-center
+                          cursor-pointer
+                          ${paymentPreview
+                            ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
+                            : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
+                        `}
+                      >
+                        {paymentPreview ? (
+                          <img
+                            src={paymentPreview}
+                            alt="Payment proof"
+                            className="max-h-40 mx-auto object-contain rounded shadow-md"
+                          />
+                        ) : (
+                          <div className="text-muted-foreground">
+                            <Upload className="mx-auto h-12 w-12 mb-4 opacity-70" />
+                            <p>Click to upload payment screenshot</p>
+                            <p className="text-sm mt-1">(max 10MB, jpg/png/pdf)</p>
+                          </div>
+                        )}
+                      </label>
+
+                      <Input
+                        ref={paymentInputRef}
+                        id="payment-screenshot-input"
+                        type="file"
+                        accept="image/jpeg,image/png,application/pdf"
+                        onChange={(e) => handleFileChange(e, setPaymentScreenshot, setPaymentPreview)}
+                        className="hidden"
+                      />
+
+                      {paymentPreview && (
+                        <button
+                          type="button"
+                          onClick={() => clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef)}
+                          className="
+                            absolute top-3 right-3 
+                            bg-red-500 hover:bg-red-600 
+                            text-white rounded-full p-2 
+                            shadow-md transition-all
+                            hover:scale-110 active:scale-95
+                          "
+                          title="Remove screenshot"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full text-lg text-white py-7 mt-8 bg-gradient-to-t from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 shadow-lg transition-all duration-300"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Complete Registration"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dialog */}
+      <AnimatePresence>
+        {showDialog && (
+          <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+            <DialogContent className="sm:max-w-md bg-white">
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <DialogHeader>
+                  {submitSuccess ? (
+                    <>
+                      <div className="flex items-center justify-center mb-4">
+                        <CheckCircle2 className="h-16 w-16 text-green-600" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-green-700">
+                        Registration Successful!
+                      </DialogTitle>
+                      <DialogDescription className="text-center text-lg mt-3">
+                        Your registration number is
+                        <br />
+                        <span className="font-bold text-xl text-green-800 mt-1 block">
+                          {registrationNo}
+                        </span>
+                      </DialogDescription>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center mb-4">
+                        <XCircle className="h-16 w-16 text-red-600" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-red-700">
+                        Submission Failed
+                      </DialogTitle>
+                      <DialogDescription className="text-center text-base mt-3 text-gray-500">
+                        {submitError || "An unexpected error occurred. Please try again."}
+                      </DialogDescription>
+                    </>
+                  )}
+                </DialogHeader>
+
+                <DialogFooter className="sm:justify-center mt-6">
+                  <Button
+                    onClick={handleDialogClose}
+                    className={submitSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
+                  >
+                    {submitSuccess ? "Continue" : "Try Again"}
+                  </Button>
+                </DialogFooter>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
         )}
-      </div>
-
-      <input
-        type="file"
-        accept="image/*"
-        className="block w-full text-sm border border-black p-2"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const MAX_PHOTO_SIZE = 2 * 1024 * 1024; // 2MB
-
-if (file.size > MAX_PHOTO_SIZE) {
-  alert("Photo must be under 2MB");
-  return;
-}
-          setPassportPhoto(file);
-          setPassportPreview(URL.createObjectURL(file));
-        }}
-      />
-    </div>
-
-    {/* ================= SIGNATURE ================= */}
-    <div>
-      <label className="block font-medium mb-2">
-        Candidate Signature
-      </label>
-
-      <div className="border border-black w-60 h-24 flex items-center justify-center mb-3 bg-gray-50">
-        {signaturePreview ? (
-          <img
-            src={signaturePreview}
-            className="w-full h-full object-contain"
-          />
-        ) : (
-          <span className="text-xs text-center px-2">
-            Signature Preview
-          </span>
-        )}
-      </div>
-
-      <input
-  type="file"
-  accept="image/*"
-  className="block w-full text-sm border border-black p-2"
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const MAX_PHOTO_SIZE = 2 * 1024 * 1024; // 2MB
-
-    if (file.size > MAX_PHOTO_SIZE) {
-      setPhotoStatus("❌ Photo must be under 2MB");
-      return;
-    }
-
-    setPassportPhoto(file);
-    setPassportPreview(URL.createObjectURL(file));
-    setPhotoStatus("✅ Photo Selected Successfully");
-  }}
-/>
-
-{photoStatus && (
-  <p className="text-sm mt-2">{photoStatus}</p>
-)}
-    </div>
-
-  </div>
-
-  {/* ================= PAYMENT SECTION ================= */}
-  <div className="border-t border-black pt-6">
-
-    <h3 className="font-semibold mb-4">
-      Payment Section (₹300 Registration Fee)
-    </h3>
-
-    <div className="grid md:grid-cols-2 gap-8 items-start">
-
-      {/* QR Code */}
-      <div className="flex flex-col items-center border border-black p-4 bg-gray-50">
-        <p className="text-sm font-medium mb-3">
-          Scan QR Code to Pay
-        </p>
-        <QRCode value={upiLink} size={150} />
-      </div>
-
-      {/* Upload Payment Screenshot */}
-      <div>
-        <label className="block font-medium mb-2">
-          Upload Payment Screenshot
-        </label>
-
-        <div className="border border-black w-full h-32 flex items-center justify-center mb-3 bg-gray-50">
-          {screenshotPreview ? (
-            <img
-              src={screenshotPreview}
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <span className="text-xs">
-              Payment Screenshot Preview
-            </span>
-          )}
-        </div>
-
-        <input
-          type="file"
-          accept="image/*"
-          className="block w-full text-sm border border-black p-2"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setScreenshot(file);
-            setScreenshotPreview(URL.createObjectURL(file));
-          }}
-        />
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-          <button type="submit"
-            disabled={loading}
-            className="w-full border border-black py-2 mt-6 font-semibold">
-            {loading ? "Submitting..." : "Submit Application"}
-          </button>
-
-        </form>
-
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
