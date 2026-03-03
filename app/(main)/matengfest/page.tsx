@@ -38,13 +38,6 @@ export default function MatengFestPage() {
           </p>
 
           <div className={styles.heroButtons}>
-            {/* <button
-              onClick={() => setShowModal(true)}
-              className={styles.primaryBtn}
-            >
-              Register Now
-            </button> */}
-
             <button
               onClick={() => setShowModal(true)}
               className={styles.secondaryBtn}
@@ -55,15 +48,54 @@ export default function MatengFestPage() {
         </motion.div>
       </section>
 
+      {/* CO-POWERED SECTION (Reduced Gap) */}
+      <div className="w-full flex justify-center px-4 mt-10">
+  <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] 
+                  rounded-2xl border border-gray-200 
+                  bg-white shadow-sm">
 
-      {/* PRE-NEET FEATURE BLOCK */}
+    <div className="px-10 py-12 
+                    flex flex-col md:flex-row 
+                    items-center justify-between 
+                    gap-10">
+
+      {/* Left Content */}
+      <div className="text-center md:text-left max-w-xl">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
+          Co-Powered By
+        </h1>
+
+        <p className="text-base md:text-lg text-gray-600 mt-3">
+          In Academic Collaboration With
+        </p>
+
+        <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
+          Empowering Students Through Structured Competitive Platforms
+        </p>
+      </div>
+
+      {/* Logo */}
+      <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md">
+        <Image
+          src="/kanglei.png"
+          alt="Kanglei Career Solutions"
+          width={260}
+          height={120}
+        />
+      </div>
+
+    </div>
+  </div>
+</div>
+
+      {/* PRE-NEET FEATURE */}
       <section className={styles.feature}>
         <div className={styles.featureGrid}>
           <div>
             <h2>Pre-NEET Competition</h2>
 
             <p className={styles.highlight}>
-              First Structured Pre-NEET Platform in Manipur. 
+              First Structured Pre-NEET Platform in Manipur.
               A Real-Time NEET Performance Experience.
             </p>
 
@@ -74,7 +106,6 @@ export default function MatengFestPage() {
 
             <p className={styles.meta}>Registration Fee: ₹250</p>
 
-            {/* ✅ WORKING BUTTON */}
             <button
               type="button"
               onClick={() => router.push("/preneet")}
@@ -116,39 +147,97 @@ export default function MatengFestPage() {
         </div>
       </section>
 
-
-      {/* SEGMENTS */}
+      {/* CHAMPIONSHIP SEGMENTS (CTA Buttons) */}
       <section className={styles.segments}>
         <h2 className={styles.sectionTitle}>Championship Segments</h2>
         <h4>Registration links for other upcoming events will be available soon.</h4>
 
         <div className={styles.segmentGrid}>
-          <div className={styles.segmentCard}>
+
+          <button
+            className={styles.segmentCard}
+            onClick={() => router.push("/preneet")}
+          >
             <h3>Pre-NEET Competition</h3>
             <p>UG-Neet Aspirants</p>
             <p>₹250 Registration</p>
-          </div>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              Last Date of Registration: 25th March 2026.
+            </p>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+Exam Date: 29th March 2026
+            </p>
+          </button>
 
-          <div className={styles.segmentCard}>
+          <button
+            className={styles.segmentCard}
+            // onClick={() => router.push("/maths")}
+            onClick={() => setShowModal(true)}
+          >
             <h3>Mathematics Championship</h3>
             <p>Class 3–8</p>
             <p>₹200 Registration</p>
-          </div>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              April last week / May first week.
+              Venue & exact date will be announced soon.
+            </p>
+          </button>
 
-          <div className={styles.segmentCard}>
+          <button
+            className={styles.segmentCard}
+            // onClick={() => router.push("/quiz")}
+            onClick={() => setShowModal(true)}
+          >
             <h3>Quiz Championship</h3>
             <p>Class 6–10</p>
             <p>₹300 Registration</p>
-          </div>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              June 2026.
+              Venue & exact date will be announced soon.
+            </p>
+          </button>
 
-          <div className={styles.segmentCard}>
+          <button
+            className={styles.segmentCard}
+            // onClick={() => router.push("/innovators")}
+              onClick={() => setShowModal(true)}
+
+          >
             <h3>Young Innovators Challenge</h3>
             <p>Science • Technology • Research</p>
             <p>Class 9–12</p>
-          </div>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              June 2026.
+              Venue & exact date will be announced soon.
+            </p>
+          </button>
+
         </div>
       </section>
 
+      {/* GRAND FINAL */}
+      <section className={styles.grandFinal}>
+        <h2 className={styles.sectionTitle}>Grand Final Event – June 2026</h2>
+
+        <div className={styles.grandCard}>
+          <p>
+            The Grand Final Event will be conducted in June 2026.
+            Venue and exact time will be announced soon.
+          </p>
+
+          <h4>On-Spot Competitions:</h4>
+          <ul>
+            <li>Grand Final Quiz Competition</li>
+            <li>Painting Competition</li>
+            <li>Young Innovators Challenge</li>
+          </ul>
+
+          <p>
+            The Grand Final will also include the Prize Distribution Ceremony
+            for all Mateng EduFest 2026 championship segments.
+          </p>
+        </div>
+      </section>
 
       {/* MODAL */}
       {showModal && (
