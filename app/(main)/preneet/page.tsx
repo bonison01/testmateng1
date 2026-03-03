@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Upload, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 
-const REGISTRATION_FEE = 300;
+const REGISTRATION_FEE = 250;
 const API_BASE_URL = "https://api.justmateng.info";
 
 interface FormData {
@@ -251,10 +251,10 @@ export default function PreeNeetRegistrationForm() {
         <Card className="border-2 border-gray-800 shadow-2xl bg-white overflow-hidden py-0">
           <CardHeader className="text-center border-b border-gray-200 py-6 bg-gradient-to-r from-gray-100 to-gray-50">
             <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
-              PREE-NEET REGISTRATION FORM – 2026
+              PRE-NEET REGISTRATION FORM – 2026
             </CardTitle>
             <p className="text-muted-foreground mt-3 text-lg">
-              Organized by Mateng Group | Registration Fee: ₹{REGISTRATION_FEE}
+              Organized by Justmateng Service Pvt. Ltd | Registration Fee: ₹{REGISTRATION_FEE}
             </p>
           </CardHeader>
 
@@ -401,7 +401,7 @@ export default function PreeNeetRegistrationForm() {
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Alternate Mobile
+                      Alternate Mobile Number
                     </label>
                     <Input
                       name="alternate_mobile"
