@@ -37,14 +37,14 @@ export default function MatengFestPage() {
             Competitive • Structured • Scholarship Driven
           </p>
 
-          <div className={styles.heroButtons}>
-            <button
-              onClick={() => setShowModal(true)}
-              className={styles.secondaryBtn}
-            >
-              Download Brochure
-            </button>
-          </div>
+<div className={styles.heroButtons}>
+  <button
+    onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
+    className={styles.secondaryBtn}
+  >
+    Download Brochure
+  </button>
+</div>
         </motion.div>
       </section>
 
