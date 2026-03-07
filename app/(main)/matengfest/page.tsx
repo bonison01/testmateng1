@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function MatengFestPage() {
   const [showModal, setShowModal] = useState(false);
@@ -12,7 +13,7 @@ export default function MatengFestPage() {
 
   return (
     <div className={styles.container}>
-      
+
       {/* HERO */}
       <section className={styles.hero}>
         <motion.div
@@ -37,56 +38,59 @@ export default function MatengFestPage() {
             Competitive • Structured • Scholarship Driven
           </p>
 
-<div className={styles.heroButtons}>
-  <button
-    onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
-    className={styles.secondaryBtn}
-  >
-    Download Brochure
-  </button>
-</div>
+          <div className={styles.heroButtons}>
+            <button
+              onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
+              className={styles.secondaryBtn}
+            >
+              Download Brochure
+            </button>
+          </div>
         </motion.div>
       </section>
 
       {/* CO-POWERED SECTION (Reduced Gap) */}
       <div className="w-full flex justify-center px-4 mt-10">
-  <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] 
-                  rounded-2xl border border-gray-200 
-                  bg-white shadow-sm">
 
-    <div className="px-10 py-12 
-                    flex flex-col md:flex-row 
-                    items-center justify-between 
-                    gap-10">
+        <Link
+          href="https://kangleicareersolution.co.in/index"
+          target="_blank"
+          className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw]"
+        >
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition">
 
-      {/* Left Content */}
-      <div className="text-center md:text-left max-w-xl">
-        <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
-          Co-Powered By
-        </h1>
+            <div className="px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-10">
 
-        <p className="text-base md:text-lg text-gray-600 mt-3">
-          In Academic Collaboration With
-        </p>
+              {/* Left Content */}
+              <div className="text-center md:text-left max-w-xl">
+                <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
+                  Co-Powered By
+                </h1>
 
-        <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
-          Empowering Students Through Structured Competitive Platforms
-        </p>
+                <p className="text-base md:text-lg text-gray-600 mt-3">
+                  In Strategic Partnership With
+                </p>
+
+                <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
+                  Empowering Students Through Structured Competitive Platforms
+                </p>
+              </div>
+
+              {/* Logo */}
+              <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md">
+                <Image
+                  src="/kanglei.png"
+                  alt="Kanglei Career Solutions"
+                  width={260}
+                  height={120}
+                />
+              </div>
+
+            </div>
+          </div>
+        </Link>
+
       </div>
-
-      {/* Logo */}
-      <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md">
-        <Image
-          src="/kanglei.png"
-          alt="Kanglei Career Solutions"
-          width={260}
-          height={120}
-        />
-      </div>
-
-    </div>
-  </div>
-</div>
 
       {/* PRE-NEET FEATURE */}
       <section className={styles.feature}>
@@ -147,6 +151,52 @@ export default function MatengFestPage() {
         </div>
       </section>
 
+      {/* ACADEMIC PARTNER SECTION */}
+<div className="w-full flex justify-center px-4 mt-6">
+  <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] 
+            rounded-2xl border border-gray-200 
+            bg-white shadow-sm">
+
+    <div className="px-10 py-12 
+              flex flex-col md:flex-row 
+              items-center justify-between 
+              gap-10">
+
+      {/* Left Content */}
+      <div className="text-center md:text-left max-w-xl">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
+          Academic Partner
+        </h1>
+
+        <p className="text-base md:text-lg text-gray-600 mt-3">
+          In Collaboration With
+        </p>
+
+        <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
+          Supporting Educational Growth Through Strategic Academic Partnership
+        </p>
+      </div>
+
+      {/* Logo */}
+      <a 
+  href="https://www.facebook.com/khan.sarori" 
+  target="_blank" 
+  rel="noopener noreferrer"
+>
+  <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md cursor-pointer hover:shadow-lg transition">
+    <Image
+      src="/nefsa.png"
+      alt="Academic Partner"
+      width={260}
+      height={120}
+    />
+  </div>
+</a>
+
+    </div>
+  </div>
+</div>
+
       {/* CHAMPIONSHIP SEGMENTS (CTA Buttons) */}
       <section className={styles.segments}>
         <h2 className={styles.sectionTitle}>Championship Segments</h2>
@@ -165,7 +215,7 @@ export default function MatengFestPage() {
               Last Date of Registration: 25th March 2026.
             </p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-Exam Date: 29th March 2026
+              Exam Date: 29th March 2026
             </p>
           </button>
 
@@ -200,7 +250,7 @@ Exam Date: 29th March 2026
           <button
             className={styles.segmentCard}
             // onClick={() => router.push("/innovators")}
-              onClick={() => setShowModal(true)}
+            onClick={() => setShowModal(true)}
 
           >
             <h3>Young Innovators Challenge</h3>
