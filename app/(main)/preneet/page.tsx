@@ -165,15 +165,22 @@ export default function PreeNeetRegistrationForm() {
     try {
       // 1. Create candidate
       const candidateRes = await fetch(`${API_BASE_URL}/candidates`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(formData),
+});
 
-      if (!candidateRes.ok) {
-        const errorData = await candidateRes.json();
-        throw new Error(errorData.detail?.[0]?.msg || "Failed to create candidate");
-      }
+if (!candidateRes.ok) {
+  const errorData = await candidateRes.json();
+
+  let message = errorData.detail?.[0]?.msg || "Registration failed.";
+
+  if (message.includes("String should have at least")) {
+    message = "Please enter valid data in all fields.";
+  }
+
+  throw new Error(message);
+}
 
       const { id: candidate_id } = await candidateRes.json();
 
