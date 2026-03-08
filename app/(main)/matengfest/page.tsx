@@ -138,13 +138,23 @@ export default function MatengFestPage() {
             </div>
           </div>
 
-          <div className={styles.prizeCard}>
+          {/* <div className={styles.prizeCard}>
             <h3>Top Rewards</h3>
             <ul>
               <li><strong>1st Prize:</strong> ₹30,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
               <li><strong>2nd Prize:</strong> ₹15,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
               <li><strong>3rd Prize:</strong> ₹10,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
               <li><strong>10 Consolation Prizes:</strong> Cash Prize + Certificate + Book worth ₹2,000 + T-shirt</li>
+              <li><strong>Best Institute Award</strong></li>
+            </ul>
+          </div> */}
+          <div className={styles.prizeCard}>
+            <h3>Top Rewards</h3>
+            <ul>
+              <li><strong>1st Prize:</strong> ₹30,000</li>
+              <li><strong>2nd Prize:</strong> ₹15,000</li>
+              <li><strong>3rd Prize:</strong> ₹10,000</li>
+              <li><strong>10 Consolation Prizes:</strong> Cash Prize</li>
               <li><strong>Best Institute Award</strong></li>
             </ul>
           </div>
