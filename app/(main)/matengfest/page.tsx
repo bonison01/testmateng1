@@ -133,7 +133,7 @@ export default function MatengFestPage() {
               <ul>
                 <li><strong>Last Date:</strong> 25 March 2026</li>
                 <li><strong>Admit Card:</strong> 27 March 2026</li>
-                <li><strong>Exam Date:</strong> 30th March 2026 (Sunday)</li>
+                <li><strong>Exam Date:</strong> 30th March 2026 (Monday)</li>
               </ul>
             </div>
           </div>
@@ -141,10 +141,10 @@ export default function MatengFestPage() {
           <div className={styles.prizeCard}>
             <h3>Top Rewards</h3>
             <ul>
-              <li>₹30,000 – 1st Prize</li>
-              <li>₹15,000 – 2nd Prize</li>
-              <li>₹10,000 – 3rd Prize</li>
-              <li>10 Consolations</li>
+              <li><strong>1st Prize:</strong> ₹30,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
+              <li><strong>2nd Prize:</strong> ₹15,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
+              <li><strong>3rd Prize:</strong> ₹10,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
+              <li><strong>10 Consolation Prizes:</strong> Cash Prize + Certificate + Book worth ₹2,000 + T-shirt</li>
               <li><strong>Best Institute Award</strong></li>
             </ul>
           </div>
@@ -152,50 +152,50 @@ export default function MatengFestPage() {
       </section>
 
       {/* ACADEMIC PARTNER SECTION */}
-<div className="w-full flex justify-center px-4 mt-6">
-  <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] 
+      <div className="w-full flex justify-center px-4 mt-6">
+        <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] 
             rounded-2xl border border-gray-200 
             bg-white shadow-sm">
 
-    <div className="px-10 py-12 
+          <div className="px-10 py-12 
               flex flex-col md:flex-row 
               items-center justify-between 
               gap-10">
 
-      {/* Left Content */}
-      <div className="text-center md:text-left max-w-xl">
-        <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
-          Academic Partner
-        </h1>
+            {/* Left Content */}
+            <div className="text-center md:text-left max-w-xl">
+              <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">
+                Academic Partner
+              </h1>
 
-        <p className="text-base md:text-lg text-gray-600 mt-3">
-          In Collaboration With
-        </p>
+              <p className="text-base md:text-lg text-gray-600 mt-3">
+                In Collaboration With
+              </p>
 
-        <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
-          Supporting Educational Growth Through Strategic Academic Partnership
-        </p>
+              <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
+                Supporting Educational Growth Through Strategic Academic Partnership
+              </p>
+            </div>
+
+            {/* Logo */}
+            <a
+              href="https://www.facebook.com/khan.sarori"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md cursor-pointer hover:shadow-lg transition">
+                <Image
+                  src="/nefsa.png"
+                  alt="Academic Partner"
+                  width={260}
+                  height={120}
+                />
+              </div>
+            </a>
+
+          </div>
+        </div>
       </div>
-
-      {/* Logo */}
-      <a 
-  href="https://www.facebook.com/khan.sarori" 
-  target="_blank" 
-  rel="noopener noreferrer"
->
-  <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md cursor-pointer hover:shadow-lg transition">
-    <Image
-      src="/nefsa.png"
-      alt="Academic Partner"
-      width={260}
-      height={120}
-    />
-  </div>
-</a>
-
-    </div>
-  </div>
-</div>
 
       {/* CHAMPIONSHIP SEGMENTS (CTA Buttons) */}
       <section className={styles.segments}>
