@@ -133,7 +133,7 @@ export default function MatengFestPage() {
               <ul>
                 <li><strong>Last Date:</strong> 25 March 2026</li>
                 <li><strong>Admit Card:</strong> 27 March 2026</li>
-                <li><strong>Exam Date:</strong> 29 March 2026 (Sunday)</li>
+                <li><strong>Exam Date:</strong> 30th March 2026 (Sunday)</li>
               </ul>
             </div>
           </div>
