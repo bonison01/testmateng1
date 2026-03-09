@@ -1,168 +1,333 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 import Footer from "@/components/footer/Footer";
 
 export default function Page() {
+
   const [parcels, setParcels] = useState(0);
   const [merchants, setMerchants] = useState(0);
   const [businesses, setBusinesses] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+
     const targetParcels = 100;
     const targetMerchants = 300;
     const targetBusinesses = 130;
 
-    const startParcels = 10;
-    const startMerchants = 50;
-    const startBusinesses = 10;
-
-    const stepsParcels = targetParcels - startParcels;
-    const stepsMerchants = targetMerchants - startMerchants;
-    const stepsBusinesses = targetBusinesses - startBusinesses;
-
-    const maxSteps = Math.max(
-      stepsParcels / 750,
-      stepsMerchants / 5,
-      stepsBusinesses / 2
-    );
-
-    const parcelIncrement = Math.ceil(stepsParcels / maxSteps);
-    const merchantIncrement = Math.ceil(stepsMerchants / maxSteps);
-    const businessIncrement = Math.ceil(stepsBusinesses / maxSteps);
-
     const interval = setInterval(() => {
-      setParcels((prev) =>
-        prev < targetParcels ? prev + parcelIncrement : targetParcels
-      );
-      setMerchants((prev) =>
-        prev < targetMerchants ? prev + merchantIncrement : targetMerchants
-      );
-      setBusinesses((prev) =>
-        prev < targetBusinesses ? prev + businessIncrement : targetBusinesses
-      );
-    }, 50);
+
+      setParcels(prev => prev < targetParcels ? prev + 2 : targetParcels);
+      setMerchants(prev => prev < targetMerchants ? prev + 5 : targetMerchants);
+      setBusinesses(prev => prev < targetBusinesses ? prev + 3 : targetBusinesses);
+
+    }, 40);
 
     return () => clearInterval(interval);
+
   }, []);
 
   return (
-    // <div className="w-[100vw] min-h-[100svh] flex flex-col overflow-hidden">
+
     <div className="w-[100vw] min-h-[calc(100svh-64px)] flex flex-col">
 
-
-      {/* MAIN CONTENT */}
       <div className="flex-grow">
 
-        {/* BOOK FAIR REGISTRATION POSTER */}
-        <div className="w-full flex justify-center px-4 mt-10 z-20">
-          {/* <div className="relative w-full sm:w-[85vw] md:w-[70vw] rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#0f2e1d] via-[#123d27] to-[#0a1f15] shadow-xl">
 
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-transparent to-emerald-500/10 blur-2xl" />
+        {/* HERO */}
 
-            <div className="relative p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="text-left">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white">
-                  📚 Book Fair 2026
-                </h2>
-                <p className="text-gray-300 mt-2 max-w-md">
-                  Register now to participate in competitions, discussions, and
-                  special book fair events.
-                </p>
-              </div>
+        <section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
 
-              <Link href="/book_fair_registration">
-                <button className="px-8 py-3 rounded-full font-semibold text-white bg-gradient-to-tr from-green-500 to-emerald-600 ring-4 ring-green-500/20 hover:opacity-90 transition">
-                  Register Now
-                </button>
-              </Link>
-            </div>
-          </div> */}
-        </div>
-{/* MATENG EDUFEST BANNER */}
-<div className="w-full flex justify-center px-4 mt-8">
-  <Link href="/matengfest">
-    <div className="relative w-full sm:w-[90vw] md:w-[75vw] rounded-2xl overflow-hidden cursor-pointer
-                    bg-gradient-to-r from-[#14710f] via-[#1f8c17] to-[#0f550c]
-                    shadow-lg hover:scale-[1.01] transition-all duration-300">
-
-      {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 blur-2xl opacity-30" />
-
-      <div className="relative px-6 py-5 sm:px-10 sm:py-6 flex flex-col sm:flex-row 
-                      items-center justify-between gap-4 text-white">
-
-        <div className="text-center sm:text-left">
-          <h2 className="text-lg sm:text-2xl font-bold tracking-wide">
-            Mateng Edu Fest 2026
-          </h2>
-          <p className="text-sm sm:text-base opacity-90">
-            Pre-NEET • Mathematics • Quiz • Innovation Challenge
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
+  Discover • Deliver • Events
+</h1>
+          <br />
+          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
+            Mateng connects people with local businesses, delivers essentials quickly,
+            and creates opportunities for youths through competitions and events.
           </p>
-          <p className="text-xs sm:text-sm mt-1 font-semibold text-yellow-300">
-            🚀 First Pre-NEET Structured Platform in Manipur
-          </p>
-        </div>
 
-        <div className="px-6 py-2 rounded-full bg-white text-[#14710f] font-semibold text-sm sm:text-base shadow-md">
-          Explore →
-        </div>
+          <div className="flex flex-col sm:flex-row gap-6 mt-10">
 
-      </div>
-    </div>
-  </Link>
-</div>
-        {/* HERO SECTION */}
-        {/* <div className="min-h-[70svh] text-center font-bold text-white flex flex-col justify-center items-center gap-10"> */}
-        <div className="text-center font-bold text-white flex flex-col justify-center items-center gap-10 py-20">
-
-
-          <div className="flex flex-col sm:flex-row gap-1 text-5xl sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
-            <span>We Drive,</span>
-            <span> We Discover</span>
-          </div>
-
-          {/* STATS */}
-          <div className="w-full">
-            <div className="flex flex-row justify-center gap-2 md:gap-10 text-[#b5b6be] text-base md:text-lg lg:text-[1.3rem] w-[95vw] sm:w-fit mx-auto">
-              <div>
-                Delivered <span className="text-green-600">{parcels}K</span> parcels
-              </div>
-              <div className="w-[2px] h-7 bg-gray-200/40 rounded" />
-              <div>
-                Merchants <span className="text-green-600">{merchants}+</span>
-              </div>
-              <div className="w-[2px] h-7 bg-gray-200/40 rounded" />
-              <div>
-                Discovered <span className="text-green-600">{businesses}+</span> businesses
-              </div>
-            </div>
-          </div>
-
-          {/* CTA BUTTONS */}
-          <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
-            <Link href="https://www.instagram.com/mateng.discovery/">
-              <button className="px-8 py-3 rounded-full font-semibold text-teal-50 bg-gradient-to-tr from-amber-200/60 via-amber-300/70 to-amber-300/80 ring-4 ring-amber-200/25 hover:opacity-95 transition">
-                Discover Now →
+            <Link href="/matengfest">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
+              ring-4 ring-green-500/20 hover:opacity-90 transition">
+                Explore Events →
               </button>
             </Link>
 
             <Link href="/delivery-rates">
-              <button className="px-8 py-3 rounded-full font-semibold text-teal-50 bg-gradient-to-tr from-teal-900/40 via-teal-900/70 to-teal-900/40 ring-4 ring-teal-900/20 hover:opacity-90 transition">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-gray-800 to-gray-900
+              ring-4 ring-gray-700/30 hover:opacity-90 transition">
                 Book Delivery →
               </button>
             </Link>
+
+          </div>
+
+        </section>
+
+
+
+        {/* APPLE STYLE EVENTS */}
+
+        <section className="w-full flex flex-col items-center px-4 mt-10">
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+            Upcoming Events
+          </h2>
+
+          <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+
+            {/* FEATURED EVENT */}
+
+            <Link href="/matengfest" className="lg:col-span-2">
+
+              <div className="relative rounded-3xl overflow-hidden group cursor-pointer shadow-2xl">
+
+                <Image
+                  src="/edufest.png"
+                  alt="Mateng Edu Fest"
+                  width={1200}
+                  height={700}
+                  className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition duration-500"
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                <div className="absolute bottom-0 p-8 text-white">
+
+                  <h3 className="text-2xl sm:text-3xl font-semibold">
+                    Mateng Edu Fest 2026
+                  </h3>
+
+                  <p className="text-sm sm:text-base opacity-90 mt-2">
+                    Pre-NEET • Mathematics • Quiz • Innovation Challenge
+                  </p>
+
+                  <p className="text-yellow-300 mt-3 font-semibold">
+                    Explore Event →
+                  </p>
+
+                </div>
+
+              </div>
+
+            </Link>
+
+
+
+            {/* SECOND EVENT */}
+
+            <div
+              onClick={() => setShowModal(true)}
+              className="relative rounded-3xl overflow-hidden cursor-pointer group shadow-xl"
+            >
+
+              <Image
+                src="/g15-festival.png"
+                alt="G15 Festival"
+                width={600}
+                height={700}
+                className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition duration-500"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+              <div className="absolute bottom-0 p-6 text-white">
+
+                <h3 className="text-xl font-semibold">
+                  G15 Music Festival + Art Fair
+                </h3>
+
+                <p className="text-sm opacity-90">
+                  Music • Art • Nature
+                </p>
+
+                <p className="text-pink-400 mt-2 font-semibold">
+                  Tickets Coming Soon
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        {/* WHAT WE DO */}
+
+        <section className="mt-24 px-6 flex flex-col items-center">
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-12">
+            What We Do
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl">
+
+            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
+
+              <h3 className="text-lg font-semibold text-white">
+                Events & Competitions
+              </h3>
+
+              <p className="text-gray-400 text-sm mt-3">
+                Structured competitions and events helping students
+                showcase their skills.
+              </p>
+
+            </div>
+
+            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
+
+              <h3 className="text-lg font-semibold text-white">
+                Business Discovery
+              </h3>
+
+              <p className="text-gray-400 text-sm mt-3">
+                Helping local businesses become discoverable and connect
+                with customers.
+              </p>
+
+            </div>
+
+            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
+
+              <h3 className="text-lg font-semibold text-white">
+                Delivery
+              </h3>
+
+              <p className="text-gray-400 text-sm mt-3">
+                {/* Reliable hyperlocal delivery and porter services helping businesses move and deliver products quickly and efficiently. */}
+                Reliable hyperlocal delivery and porter services helping businesses move and deliver goods quickly.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        {/* STATS */}
+
+        <section className="mt-24 flex flex-col items-center text-center">
+
+<h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+Our Impact
+</h2>
+
+<div className="flex flex-row justify-center gap-6 md:gap-16 text-gray-400 text-lg">
+
+<div>
+Delivered <span className="text-green-500 font-semibold">
+{Math.floor(parcels)}K
+</span> parcels
+</div>
+
+<div className="w-[2px] h-7 bg-gray-500/30" />
+
+<div>
+Merchants <span className="text-green-500 font-semibold">
+{Math.floor(merchants)}+
+</span>
+</div>
+
+<div className="w-[2px] h-7 bg-gray-500/30" />
+
+<div>
+Discovered <span className="text-green-500 font-semibold">
+{Math.floor(businesses)}+
+</span> businesses
+</div>
+
+</div>
+
+</section>
+
+
+
+        {/* DELIVERY CTA */}
+
+        <section className="mt-24 px-6 flex justify-center">
+
+          <div className="bg-gradient-to-r from-[#14710f] to-[#0f550c]
+          p-10 rounded-2xl text-white text-center max-w-3xl shadow-xl">
+
+            <h2 className="text-2xl font-bold">
+              Need Something Delivered?
+            </h2>
+
+            <p className="text-sm opacity-90 mt-3">
+              Book a fast and reliable local delivery with Mateng.
+            </p>
+
+            <Link href="/delivery-rates">
+
+              <button className="mt-6 px-8 py-3 rounded-full bg-white text-[#14710f] font-semibold shadow-md hover:scale-105 transition">
+                Book Delivery
+              </button>
+
+            </Link>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+
+      {/* MODAL */}
+
+      {showModal && (
+
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
+
+          <div className="bg-[#0f172a] p-8 rounded-2xl max-w-md w-full text-center shadow-xl">
+
+            <h3 className="text-xl font-semibold text-white">
+              Tickets Coming Soon
+            </h3>
+
+            <p className="text-gray-400 mt-3 text-sm">
+              Online ticket booking for this event will be available soon.
+              Stay tuned for updates.
+            </p>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-6 px-6 py-2 rounded-full bg-[#14710f] text-white font-semibold"
+            >
+              Close
+            </button>
+
           </div>
 
         </div>
-      </div>
 
-      {/* FOOTER (REAL FOOTER) */}
-      <footer className="w-full">
+      )}
+
+
+
+      {/* FOOTER */}
+
+      <footer className="w-full mt-20">
         <Footer />
       </footer>
 
     </div>
+
   );
+
 }
