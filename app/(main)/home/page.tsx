@@ -42,8 +42,8 @@ export default function Page() {
         <section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
-  Discover • Deliver • Events
-</h1>
+            Discover • Deliver • Events
+          </h1>
           <br />
           <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
             Mateng connects people with local businesses, delivers essentials quickly,
@@ -124,40 +124,39 @@ export default function Page() {
 
 
             {/* SECOND EVENT */}
+            <Link href="/g15-festival">
+              <div
+                className="relative rounded-3xl overflow-hidden cursor-pointer group shadow-xl"
+              >
 
-            <div
-              onClick={() => setShowModal(true)}
-              className="relative rounded-3xl overflow-hidden cursor-pointer group shadow-xl"
-            >
+                <Image
+                  src="/g15-festival.png"
+                  alt="G15 Festival"
+                  width={600}
+                  height={700}
+                  className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition duration-500"
+                />
 
-              <Image
-                src="/g15-festival.png"
-                alt="G15 Festival"
-                width={600}
-                height={700}
-                className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition duration-500"
-              />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 p-6 text-white">
 
-              <div className="absolute bottom-0 p-6 text-white">
+                  <h3 className="text-xl font-semibold">
+                    G15 Music Festival + Art Fair
+                  </h3>
 
-                <h3 className="text-xl font-semibold">
-                  G15 Music Festival + Art Fair
-                </h3>
+                  <p className="text-sm opacity-90">
+                    Music • Art • Nature
+                  </p>
 
-                <p className="text-sm opacity-90">
-                  Music • Art • Nature
-                </p>
+                  <p className="text-pink-400 mt-2 font-semibold">
+                    Tickets Coming Soon
+                  </p>
 
-                <p className="text-pink-400 mt-2 font-semibold">
-                  Tickets Coming Soon
-                </p>
+                </div>
 
               </div>
-
-            </div>
-
+            </Link>
           </div>
 
         </section>
@@ -223,37 +222,37 @@ export default function Page() {
 
         <section className="mt-24 flex flex-col items-center text-center">
 
-<h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
-Our Impact
-</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+            Our Impact
+          </h2>
 
-<div className="flex flex-row justify-center gap-6 md:gap-16 text-gray-400 text-lg">
+          <div className="flex flex-row justify-center gap-6 md:gap-16 text-gray-400 text-lg">
 
-<div>
-Delivered <span className="text-green-500 font-semibold">
-{Math.floor(parcels)}K
-</span> parcels
-</div>
+            <div>
+              Delivered <span className="text-green-500 font-semibold">
+                {Math.floor(parcels)}K
+              </span> parcels
+            </div>
 
-<div className="w-[2px] h-7 bg-gray-500/30" />
+            <div className="w-[2px] h-7 bg-gray-500/30" />
 
-<div>
-Merchants <span className="text-green-500 font-semibold">
-{Math.floor(merchants)}+
-</span>
-</div>
+            <div>
+              Merchants <span className="text-green-500 font-semibold">
+                {Math.floor(merchants)}+
+              </span>
+            </div>
 
-<div className="w-[2px] h-7 bg-gray-500/30" />
+            <div className="w-[2px] h-7 bg-gray-500/30" />
 
-<div>
-Discovered <span className="text-green-500 font-semibold">
-{Math.floor(businesses)}+
-</span> businesses
-</div>
+            <div>
+              Discovered <span className="text-green-500 font-semibold">
+                {Math.floor(businesses)}+
+              </span> businesses
+            </div>
 
-</div>
+          </div>
 
-</section>
+        </section>
 
 
 
