@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useRef, ChangeEvent, FormEvent } from "react";
+import { useState, useRef, ChangeEvent, FormEvent, useCallback, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Loader2, Upload, CheckCircle2, XCircle, Trash2, AlertTriangle } from "lucide-react";
 
 const REGISTRATION_FEE = 250;
 const API_BASE_URL = "https://api.justmateng.info";
+// const API_BASE_URL = "http://127.0.0.1:8000";
 
 interface FormData {
   candidate_name: string;
@@ -49,6 +50,16 @@ interface FormData {
   passing_year: number;
   school_name: string;
 }
+
+type DialogState =
+  | { type: "success"; registrationNo: string }
+  | { type: "error"; message: string }
+  | { type: "duplicate"; candidateId: number; candidateName: string }
+  | null;
+
+// ── Validation helpers ──────────────────────────────────────────────────────
+const isValidPhone = (v: string) => /^\d{10}$/.test(v);
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 export default function PreeNeetRegistrationForm() {
   const [formData, setFormData] = useState<FormData>({
@@ -73,12 +84,27 @@ export default function PreeNeetRegistrationForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [registrationNo, setRegistrationNo] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
+  const [dialogState, setDialogState] = useState<DialogState>(null);
 
-  // File states + refs
+  // ── Phone validation ────────────────────────────────────────────────────
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const phoneValid = isValidPhone(formData.mobile);
+
+  // ── Email validation with debounce ──────────────────────────────────────
+  const [emailValidated, setEmailValidated] = useState<boolean | null>(null);
+  const emailDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEmailChange = useCallback((val: string) => {
+    setFormData((prev) => ({ ...prev, email: val }));
+    if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current);
+    emailDebounceRef.current = setTimeout(() => {
+      setEmailValidated(val.length > 0 ? isValidEmail(val) : null);
+    }, 500);
+  }, []);
+
+  useEffect(() => () => { if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current); }, []);
+
+  // ── File states ─────────────────────────────────────────────────────────
   const [passportPhoto, setPassportPhoto] = useState<File | null>(null);
   const [passportPreview, setPassportPreview] = useState<string | null>(null);
   const passportInputRef = useRef<HTMLInputElement>(null);
@@ -93,12 +119,21 @@ export default function PreeNeetRegistrationForm() {
 
   const upiLink = `upi://pay?pa=khumbongmayumbonison@icici&pn=BookFair2026&am=${REGISTRATION_FEE}&cu=INR`;
 
-  // ────────────────────────────────────────────────
-  // Handlers
-  // ────────────────────────────────────────────────
+  // ── Handlers ────────────────────────────────────────────────────────────
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === "email") {
+      handleEmailChange(value);
+      return;
+    }
+    if (name === "mobile" || name === "alternate_mobile") {
+      // Only digits, max 10
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      if (name === "mobile") setPhoneTouched(true);
+      setFormData((prev) => ({ ...prev, [name]: digits }));
+      return;
+    }
     if (name === "dob") {
       const birthDate = new Date(value);
       const today = new Date();
@@ -106,9 +141,9 @@ export default function PreeNeetRegistrationForm() {
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
       setFormData((prev) => ({ ...prev, dob: value, age }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      return;
     }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: keyof FormData) => (value: string) => {
@@ -127,12 +162,7 @@ export default function PreeNeetRegistrationForm() {
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be under 10MB");
-      return;
-    }
-
+    if (file.size > 10 * 1024 * 1024) { alert("File size must be under 10MB"); return; }
     setter(file);
     previewSetter(URL.createObjectURL(file));
   };
@@ -140,117 +170,139 @@ export default function PreeNeetRegistrationForm() {
   const clearFile = (
     setter: (file: File | null) => void,
     previewSetter: (url: string | null) => void,
-    inputRef: React.RefObject<HTMLInputElement | null>  // ← Fixed: allow null
+    inputRef: React.RefObject<HTMLInputElement | null>
   ) => {
     setter(null);
     previewSetter(null);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
+    if (inputRef.current) inputRef.current.value = "";
   };
 
+  const resetForm = () => {
+    setFormData({
+      candidate_name: "", father_name: "", mother_name: "", dob: "", age: 0,
+      gender: "", nationality: "Indian", category: "", address: "", city: "",
+      state: "", pin_code: "", mobile: "", alternate_mobile: "", email: "",
+      highest_qualification: "", passing_year: new Date().getFullYear(), school_name: "",
+    });
+    setPhoneTouched(false);
+    setEmailValidated(null);
+    clearFile(setPassportPhoto, setPassportPreview, passportInputRef);
+    clearFile(setSignature, setSignaturePreview, signatureInputRef);
+    clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef);
+  };
+
+  // ── Core upload helper ──────────────────────────────────────────────────
+  const uploadDocument = async (
+    candidateId: number,
+    file: File,
+    document_type: "passport_photo" | "candidate_signature" | "payment_screenshot"
+  ) => {
+    const fd = new FormData();
+    fd.append("document_type", document_type);
+    fd.append("file", file);
+    const res = await fetch(`${API_BASE_URL}/candidates/${candidateId}/documents`, {
+      method: "POST",
+      body: fd,
+    });
+    if (!res.ok) throw new Error(`Failed to upload ${document_type}`);
+    return res.json();
+  };
+
+  // ── Submit ──────────────────────────────────────────────────────────────
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!passportPhoto || !signature || !paymentScreenshot) {
-      setSubmitError("Please upload passport photo, signature, and payment screenshot.");
-      setShowDialog(true);
+      setDialogState({ type: "error", message: "Please upload passport photo, signature, and payment screenshot." });
       return;
     }
 
     setLoading(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
 
     try {
-      // 1. Create candidate
-      const candidateRes = await fetch(`${API_BASE_URL}/candidates`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(formData),
-});
-
-if (!candidateRes.ok) {
-  const errorData = await candidateRes.json();
-
-  let message = errorData.detail?.[0]?.msg || "Registration failed.";
-
-  if (message.includes("String should have at least")) {
-    message = "Please enter valid data in all fields.";
-  }
-
-  throw new Error(message);
-}
-
-      const { id: candidate_id } = await candidateRes.json();
-
-      // 2. Upload documents
-      const uploadDocument = async (
-        file: File,
-        document_type: "passport_photo" | "candidate_signature" | "payment_screenshot"
-      ) => {
-        const fd = new FormData();
-        fd.append("document_type", document_type);
-        fd.append("file", file);
-
-        const res = await fetch(`${API_BASE_URL}/candidates/${candidate_id}/documents`, {
-          method: "POST",
-          body: fd,
-        });
-
-        if (!res.ok) throw new Error(`Failed to upload ${document_type}`);
-        return res.json();
-      };
-
-      await Promise.all([
-        uploadDocument(passportPhoto, "passport_photo"),
-        uploadDocument(signature, "candidate_signature"),
-        uploadDocument(paymentScreenshot, "payment_screenshot"),
-      ]);
-
-      setRegistrationNo(`BF-${String(candidate_id).padStart(6, "0")}`);
-      setSubmitSuccess(true);
-      setShowDialog(true);
-
-      // Reset form
-      setFormData({
-        candidate_name: "",
-        father_name: "",
-        mother_name: "",
-        dob: "",
-        age: 0,
-        gender: "",
-        nationality: "Indian",
-        category: "",
-        address: "",
-        city: "",
-        state: "",
-        pin_code: "",
-        mobile: "",
-        alternate_mobile: "",
-        email: "",
-        highest_qualification: "",
-        passing_year: new Date().getFullYear(),
-        school_name: "",
+      // ── STEP 1: Validate — check for existing candidate ──────────────────
+      const validateRes = await fetch(`${API_BASE_URL}/candidates/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ email: formData.email, mobile: formData.mobile }),
       });
 
-      clearFile(setPassportPhoto, setPassportPreview, passportInputRef);
-      clearFile(setSignature, setSignaturePreview, signatureInputRef);
-      clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef);
+      if (!validateRes.ok) throw new Error("Validation check failed. Please try again.");
+
+      const validateData = await validateRes.json();
+
+      let candidateId: number;
+
+      if (validateData.exists && validateData.candidate) {
+        // ── Candidate already exists — skip creation, go straight to uploads ─
+        candidateId = validateData.candidate.id;
+      } else {
+        // ── STEP 2: Create new candidate ─────────────────────────────────────
+        const candidateRes = await fetch(`${API_BASE_URL}/candidates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        if (!candidateRes.ok) {
+          const errorData = await candidateRes.json();
+          let message = errorData.detail?.[0]?.msg || "Registration failed.";
+          if (message.includes("String should have at least")) {
+            message = "Please enter valid data in all fields.";
+          }
+          throw new Error(message);
+        }
+
+        const created = await candidateRes.json();
+        candidateId = created.id;
+      }
+
+      // ── STEP 3: Upload all documents (same whether new or existing) ──────
+      await Promise.all([
+        uploadDocument(candidateId, passportPhoto, "passport_photo"),
+        uploadDocument(candidateId, signature, "candidate_signature"),
+        uploadDocument(candidateId, paymentScreenshot, "payment_screenshot"),
+      ]);
+
+      const registrationNo = `BF-${String(candidateId).padStart(6, "0")}`;
+      setDialogState({ type: "success", registrationNo });
+      resetForm();
+
     } catch (err: any) {
-      setSubmitError(err.message || "Registration failed. Please try again.");
-      setShowDialog(true);
+      setDialogState({ type: "error", message: err.message || "Registration failed. Please try again." });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDialogClose = () => {
-    setShowDialog(false);
-    if (submitSuccess) {
+    setDialogState(null);
+    if (dialogState?.type === "success") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
+  // ── Validation icon component ───────────────────────────────────────────
+  const ValidationIcon = ({ valid, show }: { valid: boolean; show: boolean }) => (
+    <AnimatePresence>
+      {show && (
+        <motion.span
+          key={valid ? "ok" : "err"}
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          transition={{ duration: 0.2 }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+        >
+          {valid ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-red-500" />
+          )}
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="min-h-screen py-10 px-4">
@@ -267,95 +319,46 @@ if (!candidateRes.ok) {
 
           <CardContent className="pt-10 pb-12 px-6 md:px-10">
             <form onSubmit={handleSubmit} className="space-y-10">
-              {/* Personal Details */}
+
+              {/* ── Personal Details ── */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
-                  Personal Details
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Personal Details</h2>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Candidate Name *
-                    </label>
-                    <Input
-                      name="candidate_name"
-                      value={formData.candidate_name}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Candidate Name *</label>
+                    <Input name="candidate_name" value={formData.candidate_name} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Father's Name *
-                    </label>
-                    <Input
-                      name="father_name"
-                      value={formData.father_name}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Father's Name *</label>
+                    <Input name="father_name" value={formData.father_name} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Mother's Name *
-                    </label>
-                    <Input
-                      name="mother_name"
-                      value={formData.mother_name}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Mother's Name *</label>
+                    <Input name="mother_name" value={formData.mother_name} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Nationality *
-                    </label>
-                    <Input
-                      name="nationality"
-                      value={formData.nationality}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Nationality *</label>
+                    <Input name="nationality" value={formData.nationality} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Date of Birth *
-                    </label>
-                    <Input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Date of Birth *</label>
+                    <Input type="date" name="dob" value={formData.dob} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1.5 text-gray-500">Age</label>
-                    <Input
-                      type="number"
-                      value={formData.age}
-                      readOnly
-                      className="bg-gray-100 border-gray-300 !text-black"
-                    />
+                    <Input type="number" value={formData.age} readOnly className="bg-gray-100 border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Gender *
-                    </label>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Gender *</label>
                     <Select value={formData.gender} onValueChange={handleSelectChange("gender")} required>
-                      <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black">
+                      <SelectTrigger className="border-gray-300 !bg-white !text-black w-full">
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent className="!text-black !bg-white">
@@ -366,11 +369,9 @@ if (!candidateRes.ok) {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Category *
-                    </label>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Category *</label>
                     <Select value={formData.category} onValueChange={handleSelectChange("category")} required>
-                      <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black">
+                      <SelectTrigger className="border-gray-300 !bg-white !text-black w-full">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent className="!text-black !bg-white">
@@ -386,187 +387,150 @@ if (!candidateRes.ok) {
 
               <Separator className="my-8" />
 
-              {/* Contact & Address */}
+              {/* ── Contact & Address ── */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-500 border-b pb-2">
-                  Contact & Address
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-500 border-b pb-2">Contact & Address</h2>
 
                 <div className="grid gap-6 sm:grid-cols-2">
+                  {/* Mobile */}
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Mobile Number *
-                    </label>
-                    <Input
-                      name="mobile"
-                      value={formData.mobile}
-                      onChange={handleInputChange}
-                      required
-                      maxLength={10}
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Mobile Number *</label>
+                    <div className="relative">
+                      <Input
+                        name="mobile"
+                        inputMode="numeric"
+                        value={formData.mobile}
+                        onChange={handleInputChange}
+                        required
+                        maxLength={10}
+                        className={`border-gray-300 !text-black pr-10 transition-colors ${
+                          phoneTouched && !phoneValid
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : phoneTouched && phoneValid
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : ""
+                        }`}
+                      />
+                      <ValidationIcon valid={phoneValid} show={phoneTouched} />
+                    </div>
+                    <AnimatePresence>
+                      {phoneTouched && !phoneValid && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="text-xs text-red-500 mt-1 overflow-hidden"
+                        >
+                          Mobile must be exactly 10 digits.
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                   </div>
+
+                  {/* Alternate mobile */}
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Alternate Mobile Number
-                    </label>
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Alternate Mobile Number</label>
                     <Input
                       name="alternate_mobile"
+                      inputMode="numeric"
                       value={formData.alternate_mobile}
                       onChange={handleInputChange}
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
+                      maxLength={10}
+                      className="border-gray-300 !text-black"
                     />
                   </div>
                 </div>
 
+                {/* Email */}
                 <div>
-                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                    Email Address *
-                  </label>
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                  />
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">Email Address *</label>
+                  <div className="relative">
+                    <Input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className={`border-gray-300 !text-black pr-10 transition-colors ${
+                        emailValidated === false
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : emailValidated === true
+                          ? "border-green-500 focus-visible:ring-green-500"
+                          : ""
+                      }`}
+                    />
+                    <ValidationIcon valid={emailValidated === true} show={emailValidated !== null} />
+                  </div>
+                  <AnimatePresence>
+                    {emailValidated === false && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="text-xs text-red-500 mt-1 overflow-hidden"
+                      >
+                        Please enter a valid email address.
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                    Full Address *
-                  </label>
-                  <Textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    rows={3}
-                    required
-                    className="border-gray-300 focus:ring-2 focus:ring-primary !text-black !bg-white"
-                  />
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">Full Address *</label>
+                  <Textarea name="address" value={formData.address} onChange={handleInputChange} rows={3} required className="border-gray-300 !text-black !bg-white" />
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-3">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      City *
-                    </label>
-                    <Input
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">City *</label>
+                    <Input name="city" value={formData.city} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      State *
-                    </label>
-                    <Input
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">State *</label>
+                    <Input name="state" value={formData.state} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      PIN Code *
-                    </label>
-                    <Input
-                      name="pin_code"
-                      value={formData.pin_code}
-                      onChange={handleInputChange}
-                      maxLength={6}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">PIN Code *</label>
+                    <Input name="pin_code" value={formData.pin_code} onChange={handleInputChange} maxLength={6} required className="border-gray-300 !text-black" />
                   </div>
                 </div>
               </div>
 
               <Separator className="my-8" />
 
-              {/* Educational Details */}
+              {/* ── Educational Details ── */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
-                  Educational Details
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Educational Details</h2>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Highest Qualification *
-                    </label>
-                    <Input
-                      name="highest_qualification"
-                      value={formData.highest_qualification}
-                      onChange={handleInputChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Highest Qualification *</label>
+                    <Input name="highest_qualification" value={formData.highest_qualification} onChange={handleInputChange} required className="border-gray-300 !text-black" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                      Year of Passing *
-                    </label>
-                    <Input
-                      type="number"
-                      name="passing_year"
-                      value={formData.passing_year}
-                      onChange={handleNumberChange}
-                      required
-                      className="border-gray-300 focus:ring-2 focus:ring-primary !text-black"
-                    />
+                    <label className="text-sm font-medium block mb-1.5 text-gray-500">Year of Passing *</label>
+                    <Input type="number" name="passing_year" value={formData.passing_year} onChange={handleNumberChange} required className="border-gray-300 !text-black" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium block mb-1.5 text-gray-500">
-                    School / College Name *
-                  </label>
-                  <Textarea
-                    name="school_name"
-                    value={formData.school_name}
-                    onChange={handleInputChange}
-                    rows={2}
-                    required
-                    className="border-gray-300 focus:ring-2 focus:ring-primary !bg-white !text-black"
-                  />
+                  <label className="text-sm font-medium block mb-1.5 text-gray-500">School / College Name *</label>
+                  <Textarea name="school_name" value={formData.school_name} onChange={handleInputChange} rows={2} required className="border-gray-300 !bg-white !text-black" />
                 </div>
               </div>
 
               <Separator className="my-8" />
 
-              {/* Documents & Payment */}
+              {/* ── Documents & Payment ── */}
               <div className="space-y-8">
-                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">
-                  Documents & Payment
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Documents & Payment</h2>
 
                 <div className="grid gap-10 md:grid-cols-2">
                   {/* Passport Photo */}
                   <div className="relative">
-                    <label
-                      htmlFor="passport-photo-input"
-                      className={`
-                        block border-2 border-dashed rounded-xl p-8 text-center 
-                        transition-all duration-300 min-h-[220px] flex items-center justify-center
-                        cursor-pointer
-                        ${passportPreview
-                          ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
-                          : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
-                      `}
-                    >
+                    <label htmlFor="passport-photo-input" className={`block border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 min-h-[220px] flex items-center justify-center cursor-pointer ${passportPreview ? "border-primary/50 bg-white shadow-sm hover:shadow-md" : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}`}>
                       {passportPreview ? (
-                        <img
-                          src={passportPreview}
-                          alt="Passport preview"
-                          className="max-h-52 mx-auto object-cover rounded-lg shadow-md"
-                        />
+                        <img src={passportPreview} alt="Passport preview" className="max-h-52 mx-auto object-cover rounded-lg shadow-md" />
                       ) : (
                         <div className="text-muted-foreground">
                           <Upload className="mx-auto h-14 w-14 mb-4 opacity-70" />
@@ -575,29 +539,9 @@ if (!candidateRes.ok) {
                         </div>
                       )}
                     </label>
-
-                    <Input
-                      ref={passportInputRef}
-                      id="passport-photo-input"
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      onChange={(e) => handleFileChange(e, setPassportPhoto, setPassportPreview)}
-                      className="hidden"
-                    />
-
+                    <Input ref={passportInputRef} id="passport-photo-input" type="file" accept="image/jpeg,image/png" onChange={(e) => handleFileChange(e, setPassportPhoto, setPassportPreview)} className="hidden" />
                     {passportPreview && (
-                      <button
-                        type="button"
-                        onClick={() => clearFile(setPassportPhoto, setPassportPreview, passportInputRef)}
-                        className="
-                          absolute top-3 right-3 
-                          bg-red-500 hover:bg-red-600 
-                          text-white rounded-full p-2 
-                          shadow-md transition-all
-                          hover:scale-110 active:scale-95
-                        "
-                        title="Remove photo"
-                      >
+                      <button type="button" onClick={() => clearFile(setPassportPhoto, setPassportPreview, passportInputRef)} className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-md transition-all hover:scale-110 active:scale-95">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     )}
@@ -605,23 +549,9 @@ if (!candidateRes.ok) {
 
                   {/* Signature */}
                   <div className="relative">
-                    <label
-                      htmlFor="signature-input"
-                      className={`
-                        block border-2 border-dashed rounded-xl p-8 text-center 
-                        transition-all duration-300 min-h-[220px] flex items-center justify-center
-                        cursor-pointer
-                        ${signaturePreview
-                          ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
-                          : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
-                      `}
-                    >
+                    <label htmlFor="signature-input" className={`block border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 min-h-[220px] flex items-center justify-center cursor-pointer ${signaturePreview ? "border-primary/50 bg-white shadow-sm hover:shadow-md" : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}`}>
                       {signaturePreview ? (
-                        <img
-                          src={signaturePreview}
-                          alt="Signature preview"
-                          className="max-h-40 mx-auto object-contain rounded shadow-md"
-                        />
+                        <img src={signaturePreview} alt="Signature preview" className="max-h-40 mx-auto object-contain rounded shadow-md" />
                       ) : (
                         <div className="text-muted-foreground">
                           <Upload className="mx-auto h-14 w-14 mb-4 opacity-70" />
@@ -630,29 +560,9 @@ if (!candidateRes.ok) {
                         </div>
                       )}
                     </label>
-
-                    <Input
-                      ref={signatureInputRef}
-                      id="signature-input"
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      onChange={(e) => handleFileChange(e, setSignature, setSignaturePreview)}
-                      className="hidden"
-                    />
-
+                    <Input ref={signatureInputRef} id="signature-input" type="file" accept="image/jpeg,image/png" onChange={(e) => handleFileChange(e, setSignature, setSignaturePreview)} className="hidden" />
                     {signaturePreview && (
-                      <button
-                        type="button"
-                        onClick={() => clearFile(setSignature, setSignaturePreview, signatureInputRef)}
-                        className="
-                          absolute top-3 right-3 
-                          bg-red-500 hover:bg-red-600 
-                          text-white rounded-full p-2 
-                          shadow-md transition-all
-                          hover:scale-110 active:scale-95
-                        "
-                        title="Remove signature"
-                      >
+                      <button type="button" onClick={() => clearFile(setSignature, setSignaturePreview, signatureInputRef)} className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-md transition-all hover:scale-110 active:scale-95">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     )}
@@ -661,38 +571,19 @@ if (!candidateRes.ok) {
 
                 {/* Payment Section */}
                 <div className="border rounded-xl p-8 bg-gray-50/70 shadow-inner">
-                  <h3 className="text-xl font-semibold mb-6 text-gray-800">
-                    Payment (₹{REGISTRATION_FEE})
-                  </h3>
-
+                  <h3 className="text-xl font-semibold mb-6 text-gray-800">Payment (₹{REGISTRATION_FEE})</h3>
                   <div className="grid gap-10 md:grid-cols-2 items-center">
                     <div className="flex flex-col items-center">
-                      <p className="text-base font-medium mb-5 text-gray-500">
-                        Scan to Pay via UPI
-                      </p>
+                      <p className="text-base font-medium mb-5 text-gray-500">Scan to Pay via UPI</p>
                       <div className="bg-white p-5 rounded-2xl shadow-lg border border-gray-200">
                         <QRCode value={upiLink} size={200} />
                       </div>
                     </div>
 
                     <div className="relative">
-                      <label
-                        htmlFor="payment-screenshot-input"
-                        className={`
-                          block border-2 border-dashed rounded-xl p-6 text-center 
-                          transition-all duration-300 min-h-[180px] flex items-center justify-center
-                          cursor-pointer
-                          ${paymentPreview
-                            ? "border-primary/50 bg-white shadow-sm hover:shadow-md"
-                            : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}
-                        `}
-                      >
+                      <label htmlFor="payment-screenshot-input" className={`block border-2 border-dashed rounded-xl p-6 text-center transition-all duration-300 min-h-[180px] flex items-center justify-center cursor-pointer ${paymentPreview ? "border-primary/50 bg-white shadow-sm hover:shadow-md" : "border-gray-400 hover:border-primary/70 bg-gray-50/50"}`}>
                         {paymentPreview ? (
-                          <img
-                            src={paymentPreview}
-                            alt="Payment proof"
-                            className="max-h-40 mx-auto object-contain rounded shadow-md"
-                          />
+                          <img src={paymentPreview} alt="Payment proof" className="max-h-40 mx-auto object-contain rounded shadow-md" />
                         ) : (
                           <div className="text-muted-foreground">
                             <Upload className="mx-auto h-12 w-12 mb-4 opacity-70" />
@@ -701,29 +592,9 @@ if (!candidateRes.ok) {
                           </div>
                         )}
                       </label>
-
-                      <Input
-                        ref={paymentInputRef}
-                        id="payment-screenshot-input"
-                        type="file"
-                        accept="image/jpeg,image/png,application/pdf"
-                        onChange={(e) => handleFileChange(e, setPaymentScreenshot, setPaymentPreview)}
-                        className="hidden"
-                      />
-
+                      <Input ref={paymentInputRef} id="payment-screenshot-input" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => handleFileChange(e, setPaymentScreenshot, setPaymentPreview)} className="hidden" />
                       {paymentPreview && (
-                        <button
-                          type="button"
-                          onClick={() => clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef)}
-                          className="
-                            absolute top-3 right-3 
-                            bg-red-500 hover:bg-red-600 
-                            text-white rounded-full p-2 
-                            shadow-md transition-all
-                            hover:scale-110 active:scale-95
-                          "
-                          title="Remove screenshot"
-                        >
+                        <button type="button" onClick={() => clearFile(setPaymentScreenshot, setPaymentPreview, paymentInputRef)} className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-md transition-all hover:scale-110 active:scale-95">
                           <Trash2 className="h-5 w-5" />
                         </button>
                       )}
@@ -752,10 +623,10 @@ if (!candidateRes.ok) {
         </Card>
       </div>
 
-      {/* Dialog */}
+      {/* ── Dialog ── */}
       <AnimatePresence>
-        {showDialog && (
-          <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+        {dialogState && (
+          <Dialog open={!!dialogState} onOpenChange={handleDialogClose}>
             <DialogContent className="sm:max-w-md bg-white">
               <motion.div
                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -764,7 +635,7 @@ if (!candidateRes.ok) {
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <DialogHeader>
-                  {submitSuccess ? (
+                  {dialogState.type === "success" && (
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <CheckCircle2 className="h-16 w-16 text-green-600" />
@@ -776,11 +647,13 @@ if (!candidateRes.ok) {
                         Your registration number is
                         <br />
                         <span className="font-bold text-xl text-green-800 mt-1 block">
-                          {registrationNo}
+                          {dialogState.registrationNo}
                         </span>
                       </DialogDescription>
                     </>
-                  ) : (
+                  )}
+
+                  {dialogState.type === "error" && (
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <XCircle className="h-16 w-16 text-red-600" />
@@ -789,7 +662,7 @@ if (!candidateRes.ok) {
                         Submission Failed
                       </DialogTitle>
                       <DialogDescription className="text-center text-base mt-3 text-gray-500">
-                        {submitError || "An unexpected error occurred. Please try again."}
+                        Something went wrong! Please try again.
                       </DialogDescription>
                     </>
                   )}
@@ -798,9 +671,13 @@ if (!candidateRes.ok) {
                 <DialogFooter className="sm:justify-center mt-6">
                   <Button
                     onClick={handleDialogClose}
-                    className={submitSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
+                    className={
+                      dialogState.type === "success"
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-red-600 hover:bg-red-700 text-white"
+                    }
                   >
-                    {submitSuccess ? "Continue" : "Try Again"}
+                    {dialogState.type === "success" ? "Continue" : "Try Again"}
                   </Button>
                 </DialogFooter>
               </motion.div>
