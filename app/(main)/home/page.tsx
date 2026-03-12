@@ -149,8 +149,8 @@ export default function Page() {
                     Music • Art • Nature
                   </p>
 
-                  <p className="text-pink-400 mt-2 font-semibold">
-                    Tickets Coming Soon
+                  <p className="text-green-400 mt-2 font-semibold hover:underline">
+                    Book Your Ticket Now →
                   </p>
 
                 </div>
