@@ -163,7 +163,7 @@ export default function TicketRegistrationPage() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] text-white flex items-center justify-center px-4 py-6 md:py-10">
-      <div className="w-full max-w-7xl grid md:grid-cols-2 gap-8 lg:gap-16">
+      <div className="w-full max-w-7xl grid md:grid-cols-2 gap-8 items-start lg:gap-16">
 
         {/* LEFT SECTION */}
         <motion.div
@@ -173,13 +173,13 @@ export default function TicketRegistrationPage() {
           transition={{ duration: 0.6 }}
         >
           <div className="mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-[#50C273] to-[#E2DE59] bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl xl:text-5xl font-bold tracking-tight bg-gradient-to-r from-[#50C273] to-[#E2DE59] bg-clip-text text-transparent">
               G15 Festival 2026
             </h1>
-            <p className="mt-2 text-zinc-300 text-lg">Experience the ultimate vibe</p>
+            <p className="mt-2 text-zinc-300 text-sm md:text-base xl:text-lg">Experience the ultimate vibe</p>
           </div>
 
-          <div className="relative w-full max-w-lg h-full rounded-xl overflow-hidden border border-zinc-800 shadow-2xl shadow-stone-900/20">
+          <div className="relative w-full max-w-lg aspect-5/7 rounded-xl overflow-hidden border border-zinc-800 shadow-2xl shadow-stone-900/20">
             <Image
               src="/g15-festival.png"
               alt="G15 Festival Poster"
@@ -191,7 +191,7 @@ export default function TicketRegistrationPage() {
 
           <div className="mt-6 text-zinc-200 text-sm space-y-1">
             <p>
-              Early Bird ends: <span className="text-green-300">30 March 2026</span>
+              Early Bird ends: <span className="text-green-300">20 March 2026</span>
             </p>
             <p>Limited passes available — grab yours now!</p>
           </div>

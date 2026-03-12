@@ -27,6 +27,13 @@ function Page() {
 
   const downloadTicket = useCallback(async () => {
     if (!cardRef.current) return
+    
+    // Check if payment is successful before downloading
+    if (order?.payment_status !== 'success') {
+      console.log('Download blocked: Payment not successful')
+      return
+    }
+
     try {
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
@@ -67,8 +74,8 @@ function Page() {
   useEffect(() => {
     if (!order) return
 
-    // Auto-download once card has rendered
-    if (!hasAutoDownloaded.current) {
+    // Auto-download once card has rendered (only if payment is successful)
+    if (!hasAutoDownloaded.current && order.payment_status === 'success') {
       hasAutoDownloaded.current = true
       // Small delay to ensure card is fully painted before capture
       setTimeout(() => { downloadTicket() }, 800)
@@ -120,6 +127,9 @@ function Page() {
     )
   }
 
+  // Check if payment is successful
+  const isPaymentSuccessful = order.payment_status === 'success'
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-6 p-4">
 
@@ -130,31 +140,41 @@ function Page() {
         transition={{ duration: 0.4, delay: 0.3 }}
         className="flex flex-col items-center gap-2"
       >
-        <p className="text-sm text-zinc-300 text-center max-w-md">
-          Confirmation details and your ticket with QR code have been sent to your email.
-          Please check your inbox or junk folder.
-        </p>
-        <p className="text-sm text-zinc-400">
-          Redirecting to festival page in{' '}
-          <span className="font-semibold text-white">{countdown}s</span>
-        </p>
+        {isPaymentSuccessful ? (
+          <>
+            <p className="text-sm text-zinc-300 text-center max-w-md">
+              Confirmation details and your ticket with QR code have been sent to your email.
+              Please check your inbox or junk folder.
+            </p>
+            <p className="text-sm text-zinc-400">
+              Redirecting to festival page in{' '}
+              <span className="font-semibold text-white">{countdown}s</span>
+            </p>
 
-        {/* Progress bar */}
-        <div className="h-1 w-48 rounded-full bg-zinc-800 overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-green-500"
-            initial={{ width: '100%' }}
-            animate={{ width: '0%' }}
-            transition={{ duration: 10, ease: 'linear' }}
-          />
-        </div>
+            {/* Progress bar */}
+            <div className="h-1 w-48 rounded-full bg-zinc-800 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-green-500"
+                initial={{ width: '100%' }}
+                animate={{ width: '0%' }}
+                transition={{ duration: 10, ease: 'linear' }}
+              />
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-red-400 text-center max-w-md">
+            Payment was not successful. Please try again or contact support.
+          </p>
+        )}
       </motion.div>
 
-      {/* Download Button */}
-      <Button className="bg-green-500 text-white" onClick={downloadTicket}>
-        <Download size={16} />
-        Download Ticket
-      </Button>
+      {/* Download Button - Only show if payment is successful */}
+      {isPaymentSuccessful && (
+        <Button className="bg-green-500 text-white" onClick={downloadTicket}>
+          <Download size={16} />
+          Download Ticket
+        </Button>
+      )}
 
       {/* Ticket */}
       <div ref={cardRef}>
