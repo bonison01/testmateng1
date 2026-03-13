@@ -39,13 +39,22 @@ export default function MatengFestPage() {
           </p>
 
           <div className={styles.heroButtons}>
-            <button
-              onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
-              className={styles.secondaryBtn}
-            >
-              Download Brochure
-            </button>
-          </div>
+
+  <button
+    onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
+    className={styles.secondaryBtn}
+  >
+    Download Brochure
+  </button>
+
+  <button
+    onClick={() => router.push("/preneet")}
+    className={styles.primaryBtn}
+  >
+    Register for Pre-NEET
+  </button>
+
+</div>
         </motion.div>
       </section>
 
@@ -91,6 +100,65 @@ export default function MatengFestPage() {
         </Link>
 
       </div>
+
+
+      {/* TIMELINE */}
+<section className={styles.timelineSection}>
+
+  <h2 className={styles.sectionTitle}>EduFest Timeline</h2>
+
+  <div className={styles.timelineWrapper}>
+
+    <div className={styles.timelineLine}></div>
+
+    {/* Event 1 */}
+    <motion.div 
+      className={styles.timelineItem}
+      initial={{ opacity:0, y:40 }}
+      whileInView={{ opacity:1, y:0 }}
+      transition={{ duration:0.6 }}
+    >
+      <div className={styles.timelineCircle}></div>
+      <h4>30 March 2026</h4>
+      <p>Pre-NEET Competition</p>
+    </motion.div>
+
+    {/* Event 2 */}
+    <motion.div 
+      className={styles.timelineItem}
+      initial={{ opacity:0, y:40 }}
+      whileInView={{ opacity:1, y:0 }}
+      transition={{ duration:0.6, delay:0.1 }}
+    >
+      <div className={styles.timelineCircle}></div>
+      <h4>26 April 2026</h4>
+      <p>Mathematics Championship</p>
+    </motion.div>
+
+    {/* Event 3 */}
+    {/* Event 3 */}
+<motion.div 
+  className={styles.timelineItem}
+  initial={{ opacity:0, y:40 }}
+  whileInView={{ opacity:1, y:0 }}
+  transition={{ duration:0.6, delay:0.2 }}
+>
+  <div className={styles.timelineCircle}></div>
+
+  <h4>May 2026</h4>
+  <p className={styles.grandLabel}>Grand Final</p>
+
+  <div className={styles.eventGroup}>
+    <p>Painting Competition</p>
+    <p>Quiz Championship</p>
+    <p>Young Innovators Challenge</p>
+    <p>Prize Distribution Ceremony</p>
+  </div>
+</motion.div>
+
+  </div>
+
+</section>
 
       {/* PRE-NEET FEATURE */}
       <section className={styles.feature}>

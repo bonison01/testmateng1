@@ -230,7 +230,7 @@ export default function TicketRegistrationPage() {
                         </p>
                         {passType === 'early_bird' && (
                           <p className="text-xs text-stone-400">
-                            Early bird discount valid until 30 March 2026
+                            Early bird discount valid until 20 March 2026
                           </p>
                         )}
                       </div>
