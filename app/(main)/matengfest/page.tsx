@@ -162,72 +162,83 @@ export default function MatengFestPage() {
 
       {/* PRE-NEET FEATURE */}
       <section className={styles.feature}>
-        <div className={styles.featureGrid}>
-          <div>
-            <h2>Pre-NEET Competition</h2>
+  <div className={styles.featureGrid}>
+    <div>
+      <h2>Pre-NEET Competition</h2>
 
-            <p className={styles.highlight}>
-              First Structured Pre-NEET Platform in Manipur.
-              A Real-Time NEET Performance Experience.
-            </p>
+      <p className={styles.highlight}>
+        First Structured Pre-NEET Platform in Manipur.
+        A Real-Time NEET Performance Experience.
+      </p>
 
-            <p>
-              All participants will be eligible for a ₹1,00,000 scholarship
-              if they choose to pursue MBBS abroad through Mateng Events.
-            </p>
+      <p>
+        All participants will be eligible for a ₹1,00,000 scholarship
+        if they choose to pursue MBBS abroad through Mateng Events.
+      </p>
 
-            <p className={styles.meta}>Registration Fee: ₹250</p>
+      <p className={styles.meta}>Registration Fee: ₹250</p>
 
-            <button
-              type="button"
-              onClick={() => router.push("/preneet")}
-              style={{
-                marginTop: "16px",
-                padding: "12px 22px",
-                backgroundColor: "#14710F",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer",
-                fontSize: "15px"
-              }}
-            >
-              Register for Pre-NEET
-            </button>
+      {/* Register Button */}
+      <button
+        type="button"
+        onClick={() => router.push("/preneet")}
+        style={{
+          marginTop: "16px",
+          padding: "12px 22px",
+          backgroundColor: "#14710F",
+          color: "#ffffff",
+          border: "none",
+          borderRadius: "8px",
+          fontWeight: "600",
+          cursor: "pointer",
+          fontSize: "15px",
+          marginRight: "10px"
+        }}
+      >
+        Register for Pre-NEET
+      </button>
 
-            <div className={styles.dateBox}>
-              <h4>Important Dates</h4>
-              <ul>
-                <li><strong>Last Date:</strong> 25 March 2026</li>
-                <li><strong>Admit Card:</strong> 27 March 2026</li>
-                <li><strong>Exam Date:</strong> 30th March 2026 (Monday)</li>
-              </ul>
-            </div>
-          </div>
+      {/* Rules Button */}
+      <button
+        type="button"
+        onClick={() => router.push("/preneetrules")}
+        style={{
+          marginTop: "16px",
+          padding: "12px 22px",
+          backgroundColor: "#ffffff",
+          color: "#14710F",
+          border: "2px solid #14710F",
+          borderRadius: "8px",
+          fontWeight: "600",
+          cursor: "pointer",
+          fontSize: "15px"
+        }}
+      >
+        Rules & Regulations
+      </button>
 
-          {/* <div className={styles.prizeCard}>
-            <h3>Top Rewards</h3>
-            <ul>
-              <li><strong>1st Prize:</strong> ₹30,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
-              <li><strong>2nd Prize:</strong> ₹15,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
-              <li><strong>3rd Prize:</strong> ₹10,000 + Certificate + Book worth ₹1,000 + T-shirt</li>
-              <li><strong>10 Consolation Prizes:</strong> Cash Prize + Certificate + Book worth ₹2,000 + T-shirt</li>
-              <li><strong>Best Institute Award</strong></li>
-            </ul>
-          </div> */}
-          <div className={styles.prizeCard}>
-            <h3>Top Rewards</h3>
-            <ul>
-              <li><strong>1st Prize:</strong> ₹30,000</li>
-              <li><strong>2nd Prize:</strong> ₹15,000</li>
-              <li><strong>3rd Prize:</strong> ₹10,000</li>
-              <li><strong>10 Consolation Prizes:</strong> Cash Prize</li>
-              <li><strong>Best Institute Award</strong></li>
-            </ul>
-          </div>
-        </div>
-      </section>
+      <div className={styles.dateBox}>
+        <h4>Important Dates</h4>
+        <ul>
+          <li><strong>Last Date:</strong> 25 March 2026</li>
+          <li><strong>Admit Card:</strong> 27 March 2026</li>
+          <li><strong>Exam Date:</strong> 30th March 2026 (Monday)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div className={styles.prizeCard}>
+      <h3>Top Rewards</h3>
+      <ul>
+        <li><strong>1st Prize:</strong> ₹30,000</li>
+        <li><strong>2nd Prize:</strong> ₹15,000</li>
+        <li><strong>3rd Prize:</strong> ₹10,000</li>
+        <li><strong>10 Consolation Prizes:</strong> Cash Prize</li>
+        <li><strong>Best Institute Award</strong></li>
+      </ul>
+    </div>
+  </div>
+</section>
 
       {/* ACADEMIC PARTNER SECTION */}
       <div className="w-full flex justify-center px-4 mt-6">
