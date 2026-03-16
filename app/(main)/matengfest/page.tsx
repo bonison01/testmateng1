@@ -324,6 +324,20 @@ export default function MatengFestPage() {
 
           <button
             className={styles.segmentCard}
+            // onClick={() => router.push("/maths")}
+            onClick={() => setShowModal(true)}
+          >
+            <h3>Painting Championship</h3>
+            <p>Class 3–8(Open)</p>
+            <p>₹200 Registration</p>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              May 2026.
+              Venue & exact date will be announced soon.
+            </p>
+          </button>
+
+          <button
+            className={styles.segmentCard}
             // onClick={() => router.push("/quiz")}
             onClick={() => setShowModal(true)}
           >
@@ -331,7 +345,7 @@ export default function MatengFestPage() {
             <p>Class 6–10</p>
             <p>₹300 Registration</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              June 2026.
+              May 2026.
               Venue & exact date will be announced soon.
             </p>
           </button>
@@ -346,7 +360,7 @@ export default function MatengFestPage() {
             <p>Science • Technology • Research</p>
             <p>Class 9–12</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              June 2026.
+              May 2026.
               Venue & exact date will be announced soon.
             </p>
           </button>
