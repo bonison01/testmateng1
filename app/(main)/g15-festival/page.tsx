@@ -92,8 +92,8 @@ export default function TicketRegistrationPage() {
   const SERVICE_FEE_PER_TICKET = 7;
 
   const EARLY_BIRD_END = new Date('2026-03-30T23:59:59');
-  const passType = new Date() <= EARLY_BIRD_END ? 'early_bird' : 'normal';
-  const unitPrice = passType === 'normal' ? prices.normal : prices.normal;
+  const passType = 'normal';
+  const unitPrice = prices.normal;
 
   const subtotal = unitPrice * quantity;
   const serviceFee = SERVICE_FEE_PER_TICKET * quantity;
@@ -224,9 +224,8 @@ export default function TicketRegistrationPage() {
                     <div className="rounded-xl border-2 border-stone-600 bg-stone-600/30 p-4 flex justify-between items-center">
                       <div>
                         <p className="font-semibold">
-                          {passType === 'early_bird'
-                            ? 'Normal Pass'
-                            : 'Normal Pass'}
+                          
+                        Normal Pass
                         </p>
                         {/* {passType === 'early_bird' && (
                           <p className="text-xs text-stone-400">
