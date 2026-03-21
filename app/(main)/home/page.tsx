@@ -150,7 +150,7 @@ export default function Page() {
                   </p>
 
                   <p className="text-green-400 mt-2 font-semibold hover:underline">
-                    Get Your Early Pass Now →
+                    Get Your Pass Now →
                   </p>
 
                 </div>

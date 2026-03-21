@@ -93,7 +93,7 @@ export default function TicketRegistrationPage() {
 
   const EARLY_BIRD_END = new Date('2026-03-30T23:59:59');
   const passType = new Date() <= EARLY_BIRD_END ? 'early_bird' : 'normal';
-  const unitPrice = passType === 'early_bird' ? prices.earlyBird : prices.normal;
+  const unitPrice = passType === 'normal' ? prices.normal : prices.normal;
 
   const subtotal = unitPrice * quantity;
   const serviceFee = SERVICE_FEE_PER_TICKET * quantity;
@@ -188,13 +188,13 @@ export default function TicketRegistrationPage() {
               priority
             />
           </div>
-
+{/* 
           <div className="mt-6 text-zinc-200 text-sm space-y-1">
             <p>
               Early Bird ends: <span className="text-green-300">20 March 2026</span>
             </p>
             <p>Limited passes available — grab yours now!</p>
-          </div>
+          </div> */}
         </motion.div>
 
         {/* RIGHT SECTION */}
@@ -225,14 +225,14 @@ export default function TicketRegistrationPage() {
                       <div>
                         <p className="font-semibold">
                           {passType === 'early_bird'
-                            ? 'Early Bird Pass'
+                            ? 'Normal Pass'
                             : 'Normal Pass'}
                         </p>
-                        {passType === 'early_bird' && (
+                        {/* {passType === 'early_bird' && (
                           <p className="text-xs text-stone-400">
                             Early bird discount valid until 20 March 2026
                           </p>
-                        )}
+                        )} */}
                       </div>
                       <span className="text-xl font-bold">₹{unitPrice}</span>
                     </div>
