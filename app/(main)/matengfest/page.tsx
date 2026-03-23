@@ -119,7 +119,7 @@ export default function MatengFestPage() {
       transition={{ duration:0.6 }}
     >
       <div className={styles.timelineCircle}></div>
-      <h4>30 March 2026</h4>
+      <h4>7th  April 2026</h4>
       <p>Pre-NEET Competition</p>
     </motion.div>
 
@@ -218,22 +218,23 @@ export default function MatengFestPage() {
       </button>
 
       <div className={styles.dateBox}>
-        <h4>Important Dates</h4>
+        <h2>Important Dates & Venue</h2>
         <ul>
-          <li><strong>Last Date:</strong> 25 March 2026</li>
-          <li><strong>Admit Card:</strong> 27 March 2026</li>
-          <li><strong>Exam Date:</strong> 30th March 2026 (Monday)</li>
+          <li><strong>Last Date:</strong> 04th April 2026</li>
+          <li><strong>Admit Card:</strong> 05th April 2026</li>
+          <li><strong>Exam Date:</strong> 7th April 2026 (Tuesday)</li>
+          <h4><strong>Venue: </strong>Naoremthong, Imphal</h4>
         </ul>
       </div>
     </div>
 
     <div className={styles.prizeCard}>
-      <h3>Top Rewards</h3>
+      <h2><strong>Top Rewards</strong></h2>
       <ul>
-        <li><strong>1st Prize:</strong> ₹30,000</li>
-        <li><strong>2nd Prize:</strong> ₹15,000</li>
-        <li><strong>3rd Prize:</strong> ₹10,000</li>
-        <li><strong>10 Consolation Prizes:</strong> Cash Prize</li>
+        <li><strong>1st Prize:</strong> ₹30,000 + Book worth 1000 + Certificate of Appreciation</li>
+        <li><strong>2nd Prize:</strong> ₹15,000 + Book worth 1000 + Certificate of Appreciation</li>
+        <li><strong>3rd Prize:</strong> ₹10,000 + Book worth 1000 + Certificate of Appreciation</li>
+        <li><strong>10 Consolation Prizes:</strong> Cash Prize + Book worth 1000 + Certificate of Appreciation</li>
         <li><strong>Best Institute Award</strong></li>
       </ul>
     </div>
@@ -304,7 +305,7 @@ export default function MatengFestPage() {
               Last Date of Registration: 25th March 2026.
             </p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              Exam Date: 29th March 2026
+              Exam Date: 7th April 2026
             </p>
           </button>
 
@@ -317,8 +318,11 @@ export default function MatengFestPage() {
             <p>Class 3–8</p>
             <p>₹200 Registration</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              April last week / May first week.
-              Venue & exact date will be announced soon.
+              
+              Venue will be announced soon.
+            </p>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              Exam Date: 26th April 2026.
             </p>
           </button>
 
@@ -331,8 +335,11 @@ export default function MatengFestPage() {
             <p>Class 3–8(Open)</p>
             <p>₹200 Registration</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              May 2026.
-              Venue & exact date will be announced soon.
+              Venue will be announced soon.
+            </p>
+
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              Exam Date: 24th May 2026.
             </p>
           </button>
 
@@ -345,8 +352,11 @@ export default function MatengFestPage() {
             <p>Class 6–10</p>
             <p>₹300 Registration</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              May 2026.
-              Venue & exact date will be announced soon.
+              24th May 2026.
+              Venue will be announced soon.
+            </p>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              Exam Date: 24th May 2026.
             </p>
           </button>
 
@@ -360,8 +370,10 @@ export default function MatengFestPage() {
             <p>Science • Technology • Research</p>
             <p>Class 9–12</p>
             <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
-              May 2026.
-              Venue & exact date will be announced soon.
+              Venue will be announced soon.
+            </p>
+            <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.7 }}>
+              Exam Date: 24th May 2026.
             </p>
           </button>
 
@@ -370,12 +382,12 @@ export default function MatengFestPage() {
 
       {/* GRAND FINAL */}
       <section className={styles.grandFinal}>
-        <h2 className={styles.sectionTitle}>Grand Final Event – June 2026</h2>
+        <h2 className={styles.sectionTitle}>Grand Final Event – 24th May 2026</h2>
 
         <div className={styles.grandCard}>
           <p>
-            The Grand Final Event will be conducted in June 2026.
-            Venue and exact time will be announced soon.
+            The Grand Final Event will be conducted in 24th May 2026.
+            Venue will be announced soon.
           </p>
 
           <h4>On-Spot Competitions:</h4>
