@@ -108,7 +108,7 @@ export default function Page() {
                   </h3>
 
                   <p className="text-sm sm:text-base opacity-90 mt-2">
-                    Pre-NEET • Mathematics • Quiz • Innovation Challenge
+                    Pre-NEET • Mathematics • Quiz • Painting Competition• Innovation Challenge
                   </p>
 
                   <p className="text-yellow-300 mt-3 font-semibold">

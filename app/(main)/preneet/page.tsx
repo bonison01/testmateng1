@@ -570,7 +570,7 @@ export default function PreeNeetRegistrationForm() {
                 </div>
 
                 {/* Payment Section */}
-                <div className="border rounded-xl p-8 bg-gray-50/70 shadow-inner">
+                {/* <div className="border rounded-xl p-8 bg-gray-50/70 shadow-inner">
                   <h3 className="text-xl font-semibold mb-6 text-gray-800">Payment (₹{REGISTRATION_FEE})</h3>
                   <div className="grid gap-10 md:grid-cols-2 items-center">
                     <div className="flex flex-col items-center">
@@ -600,7 +600,7 @@ export default function PreeNeetRegistrationForm() {
                       )}
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               <Button
