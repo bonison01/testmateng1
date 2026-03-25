@@ -39,38 +39,7 @@ export default function Page() {
 
         {/* HERO */}
 
-        <section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
-            Discover • Deliver • Events
-          </h1>
-          <br />
-          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
-            Mateng connects people with local businesses, delivers essentials quickly,
-            and creates opportunities for youths through competitions and events.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-6 mt-10">
-
-            <Link href="/matengfest">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
-              ring-4 ring-green-500/20 hover:opacity-90 transition">
-                Explore Events →
-              </button>
-            </Link>
-
-            <Link href="/delivery-rates">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-gray-800 to-gray-900
-              ring-4 ring-gray-700/30 hover:opacity-90 transition">
-                Book Delivery →
-              </button>
-            </Link>
-
-          </div>
-
-        </section>
+        
 
 
 
@@ -103,12 +72,13 @@ export default function Page() {
 
                 <div className="absolute bottom-0 p-8 text-white">
 
-                  <h3 className="text-2xl sm:text-3xl font-semibold">
+                  {/* <h3 className="text-2xl sm:text-7xl font-semibold">
                     Mateng Edu Fest 2026
-                  </h3>
+                  </h3> */}
 
-                  <p className="text-sm sm:text-base opacity-90 mt-2">
-                    Pre-NEET • Mathematics • Quiz • Painting Competition• Innovation Challenge
+                  {/* <p className="text-sm sm:text-base opacity-90 mt-2"> */}
+                  <p className="text-base sm:text-lg md:text-3xl opacity-90 mt-2">
+                    Pre-NEET • Mathematics • Quiz • Painting Competition • Innovation Challenge
                   </p>
 
                   <p className="text-yellow-300 mt-3 font-semibold">
@@ -161,7 +131,38 @@ export default function Page() {
 
         </section>
 
+<section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
 
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
+            Discover • Deliver • Events
+          </h1>
+          <br />
+          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
+            Mateng connects people with local businesses, delivers essentials quickly,
+            and creates opportunities for youths through competitions and events.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 mt-10">
+
+            <Link href="/matengfest">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
+              ring-4 ring-green-500/20 hover:opacity-90 transition">
+                Explore Events →
+              </button>
+            </Link>
+
+            <Link href="/delivery-rates">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-gray-800 to-gray-900
+              ring-4 ring-gray-700/30 hover:opacity-90 transition">
+                Book Delivery →
+              </button>
+            </Link>
+
+          </div>
+
+        </section>
 
         {/* WHAT WE DO */}
 
