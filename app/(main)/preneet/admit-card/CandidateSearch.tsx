@@ -75,7 +75,7 @@ export default function CandidateSearch({ onSelect }: { onSelect: (data: any) =>
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-lg border-0">
+    <Card className="w-full max-w-2xl mx-auto shadow-lg border-0 h-fit">
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center gap-3">
           <div className="p-2 md:p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -113,7 +113,7 @@ export default function CandidateSearch({ onSelect }: { onSelect: (data: any) =>
               className="flex items-center gap-2 data-[state=on]:bg-green-600 data-[state=on]:text-white py-3 md:py-5 px-4 md:text-base"
             >
               <IdCard className="h-4 w-4" />
-              Candidate ID
+              Registration Number
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

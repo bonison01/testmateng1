@@ -53,7 +53,7 @@ export default function RootLayout({
         >
           <DarkModeProvider>
             <DarkModeWrapper>
-              <div className="w-[100vw] custom-bg relative">
+              <div className="w-full custom-bg relative">
                 <div className="lines">
                   <div className="line"></div>
                   <div className="line"></div>
