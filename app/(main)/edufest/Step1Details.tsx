@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 

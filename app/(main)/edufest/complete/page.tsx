@@ -5,12 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE } from '../type';
 import { generateRegistrationFormPDF } from '../generatePDF';
 
-
-
-export default function CompletePage() {
+export default function CompletePage({ searchParams }: { searchParams: { id?: string } }) {
     const router = useRouter();
-    const params = useSearchParams();
-    const id = params.get('id');
+    const id = searchParams?.id;
     const [registration, setRegistration] = useState<any>(null);
     const [countdown, setCountdown] = useState(30);
     const [pdfGenerated, setPdfGenerated] = useState(false);
