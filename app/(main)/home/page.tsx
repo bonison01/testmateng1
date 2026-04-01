@@ -32,7 +32,7 @@ export default function Page() {
 
   return (
 
-    <div className="w-[100vw] min-h-[calc(100svh-64px)] flex flex-col">
+    <div className="w-full min-h-[calc(100svh-64px)] flex flex-col">
 
       <div className="flex-grow">
 
