@@ -63,7 +63,6 @@ export function calculateTotalFee(
   let total = 0;
   for (const cat of categories) {
     const baseFee = COMPETITION_FEES[cat];
-    // For team events, fee is per member (team size includes leader)
     if (participationType === 'team' && teamSize && (cat === 'quiz' || cat === 'young_innovator')) {
       total += baseFee * teamSize;
     } else {
@@ -74,3 +73,4 @@ export function calculateTotalFee(
 }
 
 export const API_BASE = 'https://api.justmateng.info';
+// export const API_BASE = 'http://127.0.0.1:8000';

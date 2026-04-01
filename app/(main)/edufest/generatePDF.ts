@@ -102,7 +102,7 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
   doc.rect(10, 10, pageWidth - 20, 275);
 
   // ====================== HEADER ======================
-  
+
   // Logo in the middle
   if (logoBase64) {
     addImageSafe(doc, logoBase64, (pageWidth - 55) / 2, yPos, 55, 22); // Centered logo
@@ -120,8 +120,8 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
   // Organizer Details
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  st('Justmateng Service Pvt. Ltd | Sagolband, Imphal West, Manipur-795004', 
-     pageWidth / 2, yPos, { align: 'center' });
+  st('Justmateng Service Pvt. Ltd | Sagolband, Imphal West, Manipur-795004',
+    pageWidth / 2, yPos, { align: 'center' });
   yPos += 12;
 
   // Form Number (Bold, Top Right)
@@ -198,7 +198,13 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
   competitions.forEach(comp => {
     const selected = selectedCompetitions.includes(comp.key);
     doc.rect(18, yPos - 3.5, 4, 4);
-    if (selected) st('X', 18.8, yPos - 0.2);
+    if (selected) {
+      doc.setLineWidth(0.6);
+
+      // draw X inside the box
+      doc.line(18.5, yPos - 3, 21.5, yPos - 0.5); // \
+      doc.line(21.5, yPos - 3, 18.5, yPos - 0.5); // /
+    }
 
     st(comp.label, 26, yPos);
     if (selected) {
@@ -228,7 +234,13 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
       (opt.key === 'team_innovator' && participationType === 'team' && selectedCompetitions.includes('young_innovator'));
 
     doc.rect(18, yPos - 3.5, 4, 4);
-    if (isChecked) st('X', 18.8, yPos - 0.2);
+    if (isChecked) {
+      doc.setLineWidth(0.6);
+
+      // draw X inside the box
+      doc.line(18.5, yPos - 3, 21.5, yPos - 0.5); // \
+      doc.line(21.5, yPos - 3, 18.5, yPos - 0.5); // /
+    }
     st(opt.label, 26, yPos);
     yPos += 7;
   });
@@ -244,13 +256,13 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
       doc.setFont('helvetica', 'bold');
       st(`Member ${index + 2}:`, 15, yPos);
       doc.setFont('helvetica', 'normal');
-      st(member.name, 45, yPos);
+      yPos += 6;
+
+      st(member.name, 18, yPos);
       yPos += 6;
 
       st(`Class & Institution : ${member.class_institution}`, 18, yPos);
       yPos += 6;
-      st(`Contact / Address   : ${member.address_contact}`, 18, yPos);
-      yPos += 8;
     });
   }
 

@@ -5,9 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE } from '../type';
 import { generateRegistrationFormPDF } from '../generatePDF';
 
-export default function CompletePage({ searchParams }: { searchParams: { id?: string } }) {
+export const dynamic = 'force-dynamic';
+
+export default function CompletePage() {
     const router = useRouter();
-    const id = searchParams?.id;
+    const searchParams = useSearchParams();
+    const id = searchParams.get('id');
     const [registration, setRegistration] = useState<any>(null);
     const [countdown, setCountdown] = useState(30);
     const [pdfGenerated, setPdfGenerated] = useState(false);
@@ -109,19 +112,19 @@ export default function CompletePage({ searchParams }: { searchParams: { id?: st
     }, [registration]);
 
     // Countdown
-      useEffect(() => {
-        const interval = setInterval(() => {
-          setCountdown(c => {
-            if (c <= 1) {
-              clearInterval(interval);
-              router.push('/home');
-              return 0;
-            }
-            return c - 1;
-          });
-        }, 1000);
-        return () => clearInterval(interval);
-      }, [router]);
+    //   useEffect(() => {
+    //     const interval = setInterval(() => {
+    //       setCountdown(c => {
+    //         if (c <= 1) {
+    //           clearInterval(interval);
+    //           router.push('/home');
+    //           return 0;
+    //         }
+    //         return c - 1;
+    //       });
+    //     }, 1000);
+    //     return () => clearInterval(interval);
+    //   }, [router]);
 
     const formNo = id ? `MEF-${String(id).padStart(6, '0')}` : '';
 
@@ -186,7 +189,11 @@ export default function CompletePage({ searchParams }: { searchParams: { id?: st
                         <>
                             <div className="flex justify-between text-sm">
                                 <span className="text-white/40">Event</span>
-                                <span className="text-emerald-400 capitalize">{registration.competition_category?.replace('_', ' ')}</span>
+                                <span className="text-emerald-400 capitalize">
+                                    {registration.competition_category
+                                        ?.map((c: string) => c.replace(/_/g, ' '))
+                                        .join(', ')}
+                                </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-white/40">Participation</span>
