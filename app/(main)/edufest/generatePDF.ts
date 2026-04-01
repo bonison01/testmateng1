@@ -127,7 +127,7 @@ export const generateRegistrationFormPDF = async (data: RegistrationFormData): P
   // Form Number (Bold, Top Right)
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  st(`Form No: ${formNumber}`, pageWidth - 18, 22, { align: 'right' });
+  st(`Registration No: ${formNumber}`, pageWidth - 18, 22, { align: 'right' });
 
   // Separator Line
   doc.setLineWidth(0.4);
