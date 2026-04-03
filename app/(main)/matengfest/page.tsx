@@ -47,10 +47,10 @@ const timelineEvents = [
       { label: "Last Date", value: "TBA" },
     ],
     prizes: [
-      ["1st Prize", "₹20,000 + Certificate"],
-      ["2nd Prize", "₹12,000 + Certificate"],
-      ["3rd Prize", "₹8,000 + Certificate"],
-      ["5 Consolation Prizes", "Cash + Certificate"],
+      ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
+                ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
+                ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
+                ["5 Consolation Prizes", "Cash + Certificate"],
       ["Best School Award", "Special Trophy"],
     ],
   },
@@ -122,10 +122,10 @@ const segments = [
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
     ],
     prizes: [
-      ["1st Prize", "₹20,000 + Certificate"],
-      ["2nd Prize", "₹12,000 + Certificate"],
-      ["3rd Prize", "₹8,000 + Certificate"],
-      ["5 Consolation Prizes", "Cash + Certificate"],
+      ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
+                ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
+                ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
+                ["5 Consolation Prizes", "Cash + Certificate"],
       ["Best School Award", "Special Trophy"],
     ],
   },
@@ -514,7 +514,7 @@ export default function MatengFestPage() {
                 ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
                 ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
                 ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-                ["5 Consolation Prizes", "Cash + Certificate"],
+                ["25 Consolation Prizes", "Cash + Certificate"],
                 ["Best School Award", "Special Trophy"],
               ].map(([rank, reward]) => (
                 <div key={rank} className={styles.mathsPrizeRow}>
