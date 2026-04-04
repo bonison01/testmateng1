@@ -50,7 +50,7 @@ const timelineEvents = [
       ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
                 ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
                 ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-                ["5 Consolation Prizes", "Cash + Certificate"],
+                ["25 Consolation Prizes", "Cash + Certificate"],
       ["Best School Award", "Special Trophy"],
     ],
   },
@@ -149,7 +149,7 @@ const segments = [
       ["1st Prize", "₹3,000 + Certificate + Trophy + Book worth 1000 + T shirt"],
       ["2nd Prize", "₹1,500 + Certificate +  Book worth 1000 + T shirt"],
       ["3rd Prize", "₹1,000 + Certificate + Book worth 1000 + T shirt"],
-      ["Consolation Prizes", "Certificate + Goodies"],
+      ["10 Consolation Prizes", "Certificate + Goodies"],
     ],
   },
   {
@@ -169,9 +169,9 @@ const segments = [
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
-      ["1st Prize", "Cash + Certificate + Trophy"],
-      ["2nd Prize", "Cash + Certificate"],
-      ["3rd Prize", "Cash + Certificate"],
+      ["1st Prize", "4000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
+      ["2nd Prize", "2000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
+      ["3rd Prize", "1000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
       ["Best Speaker", "Special Award"],
     ],
   },
@@ -240,17 +240,22 @@ export default function MatengFestPage() {
     Download Brochure
   </button> */}
   <button
-    onClick={() => router.push("/preneet")}
-    className={styles.secondaryBtn}
-  >
-    Register for Pre-NEET
-  </button>
-  <button
     onClick={() => router.push("/edufest")}
     className={styles.primaryBtn}
   >
     Register for EduFest →
   </button>
+  
+
+
+<div className={styles.noticeContainer}>
+  <h4 className={styles.heroTitle1}>
+    Pre-NEET Examination admit cards will be available before 3 PM.
+  </h4>
+</div>
+
+
+
 </div>
         </motion.div>
       </section>
@@ -369,12 +374,12 @@ export default function MatengFestPage() {
                     <div className={styles.tlCta}>
                       {ev.open ? (
                         <>
-                          <button
+                          {/* <button
                             onClick={() => router.push(ev.registerHref!)}
                             className={styles.primaryBtn}
                           >
                             Register Now
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => router.push(ev.rulesHref!)}
                             className={styles.secondaryBtn}
@@ -426,7 +431,7 @@ export default function MatengFestPage() {
               pursue MBBS abroad through Mateng Events.
             </p>
             <p className={styles.meta}>Registration Fee: ₹250</p>
-            <button
+            {/* <button
               type="button"
               onClick={() => router.push("/preneet")}
               style={{
@@ -438,7 +443,7 @@ export default function MatengFestPage() {
               }}
             >
               Register for Pre-NEET
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={() => router.push("/preneetrules")}
