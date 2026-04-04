@@ -250,7 +250,7 @@ export default function MatengFestPage() {
 
 <div className={styles.noticeContainer}>
   <h4 className={styles.heroTitle1}>
-    Pre-NEET Examination admit cards will be available before 3 PM.
+    Pre-NEET admit cards will be released today by 3 PM. Please check back soon.
   </h4>
 </div>
 
