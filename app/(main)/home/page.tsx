@@ -59,7 +59,7 @@ export default function Page() {
         onClick={() => router.push("/preneet/admit-card")}
         style={{ cursor: "pointer" }}
       >
-        Pre-NEET admit cards will be released today by 3 PM. Please check back soon.
+        Download your Pre-NEET admit card here
       </h4>
     </div>
     <br />
