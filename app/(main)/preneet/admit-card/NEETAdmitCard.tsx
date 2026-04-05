@@ -16,13 +16,13 @@ export default function NEETAdmitCard({ data }: any) {
     scribeRequired: "N/A",
     disabilityType: "N/A",
     questionPaperMedium: "ENGLISH",
-    examDate: "To Be Announced",
-    reportingTime: "—",
-    gateClosingTime: "—",
-    testTiming: "—",
-    testCentreNo: "—",
-    testCentreName: "—",
-    testCentreAddress: data.address,
+    examDate: "07th April 2026 (Tuesday)",
+    reportingTime: "11:30 AM",
+    gateClosingTime: "12:30 PM",
+    testTiming: "01:00 PM to 04:20 PM (IST)",
+    testCentreNo: "MU001",
+    testCentreName: "Kangshang Hall, Manipuri Dept., Manipur University",
+    testCentreAddress: "Kangshang Hall, Manipuri Dept., Manipur University, Canchipur, Imphal, Manipur-795003",
   };
 
   const photo = data.documents?.find((d: { document_type: string; }) => d.document_type === "passport_photo")?.s3_url;
@@ -109,7 +109,6 @@ export default function NEETAdmitCard({ data }: any) {
             {/* QR Code and Signature Section */}
             <div className="grid grid-cols-3 border-b-2 border-black">
               <div className="border-r-2 border-black p-4 flex flex-col items-center justify-center">
-                {/* QR Code */}
                 <div className="bg-white p-2">
                   <QRCode
                     value={`Roll No: ${candidateData.rollNumber}, Name: ${candidateData.candidateName}, Application: ${candidateData.applicationNumber}`}
@@ -122,12 +121,11 @@ export default function NEETAdmitCard({ data }: any) {
               <div className="border-r-2 border-black p-4 flex items-center justify-center">
                 <div id='signature' className="text-center">
                   <img src={signature} alt="signature" className='h-40 rounded-lg' />
-
                   <p className='text-gray-600 italic'>Signature</p>
                 </div>
               </div>
               <div className="border-black p-4 flex items-center justify-center">
-                <div id='paassport' className="text-center">
+                <div id='passport' className="text-center">
                   <img src={photo} alt="photo" className='h-40 rounded-lg' />
                 </div>
               </div>
@@ -174,7 +172,7 @@ export default function NEETAdmitCard({ data }: any) {
               </div>
             </div>
 
-            {/* Signature Section */}
+            {/* Invigilator Signature */}
             <div className="p-4 text-center border-b-2 border-black">
               <div className='h-16' />
               <div className="font-bold text-sm mt-1 text-black">Invigilator Signature</div>
@@ -188,8 +186,8 @@ export default function NEETAdmitCard({ data }: any) {
               </div>
               <div className="mt-2">
                 1. I have read the Instructions, Guidelines, Information Bulletin, Instructions, and Notices related to this examination available on the website
-                <a href="https://exams.nta.ac.in/NEET/" className="text-blue-600 underline">https://exams.nta.ac.in/NEET/</a> and
-                <a href="http://www.nta.ac.in" className="text-blue-600 underline ml-1">www.nta.ac.in</a>
+                <a href="https://justmateng.com/matengfest" className="text-blue-600 underline"> https://justmateng.com/matengfest</a> and
+                <a href="https://justmateng.com/preneetrules.pdf" className="text-blue-600 underline ml-1">https://justmateng.com/preneetrules.pdf</a>
               </div>
               <div className="mt-1">
                 2. I have read the detailed "IMPORTANT INSTRUCTIONS FOR CANDIDATES" as given on Page-3 and I undertake to abide by the same.
