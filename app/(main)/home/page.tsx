@@ -4,8 +4,11 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/footer/Footer";
+import styles from "./../matengfest/page.module.css";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
 
   const [parcels, setParcels] = useState(0);
   const [merchants, setMerchants] = useState(0);
@@ -50,6 +53,16 @@ export default function Page() {
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
             Upcoming Events
           </h2>
+          <div className={styles.noticeContainer}>
+      <h4
+        className={styles.heroTitle1}
+        onClick={() => router.push("/preneet/admit-card")}
+        style={{ cursor: "pointer" }}
+      >
+        Pre-NEET admit cards will be released today by 3 PM. Please check back soon.
+      </h4>
+    </div>
+    <br />
 
           <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
 

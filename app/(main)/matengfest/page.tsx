@@ -239,6 +239,14 @@ export default function MatengFestPage() {
   >
     Download Brochure
   </button> */}
+
+  <button
+    onClick={() => router.push("/preneet/admit-card")}
+    className={styles.primaryBtn}
+  >
+    Download Pre-Neet Admit Card →
+  </button>
+
   <button
     onClick={() => router.push("/edufest")}
     className={styles.primaryBtn}
