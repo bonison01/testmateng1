@@ -110,7 +110,7 @@ export default function Footer() {
 
   {openProjects && (
     <div className="absolute bottom-full mb-2 right-0 bg-white border border-zinc-200 rounded-md shadow-lg py-2 z-50 w-48">
-      <Link href="https://mateng-new-invoice.vercel.app/">
+      <Link href="https://invoice-inventory-zeta.vercel.app/">
         <Button variant="link" className='w-full text-left px-4 py-1.5 text-zinc-500 hover:text-green-600'>
           Invoice Generator
         </Button>
