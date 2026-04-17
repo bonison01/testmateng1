@@ -11,7 +11,7 @@ import Link from "next/link";
 const timelineEvents = [
   {
     id: "preneet",
-    date: "7th April 2026",
+    date: "20th April 2026",
     name: "Pre-NEET Competition",
     chips: ["UG NEET Aspirants", "₹250 Fee", "Tuesday"],
     open: true,
@@ -35,7 +35,7 @@ const timelineEvents = [
   },
   {
     id: "maths",
-    date: "26th April 2026",
+    date: "Postpone until further notice",
     name: "Mathematics Championship",
     chips: ["Class 3–8", "₹200 Fee"],
     open: false,
@@ -56,7 +56,7 @@ const timelineEvents = [
   },
   {
     id: "grand",
-    date: "24th May 2026",
+    date: "Postpone until further notice",
     name: "Grand Final — Multi-Event Day",
     chips: ["All Segments", "Prize Ceremony"],
     open: false,
@@ -82,7 +82,7 @@ const segments = [
     name: "Pre-NEET Competition",
     sub: "UG NEET Aspirants",
     fee: "₹250",
-    date: "7th April 2026",
+    date: "20th April 2026",
     open: true,
     about:
       "A real-time NEET simulation exam — the first of its kind in Manipur. 180 questions across Physics, Chemistry, and Biology. All participants are eligible for a ₹1,00,000 scholarship toward MBBS abroad through Mateng Events.",
@@ -92,7 +92,7 @@ const segments = [
       { label: "Format", value: "180 Questions (PCB)" },
       { label: "Last Date", value: "4th April 2026" },
       { label: "Admit Card", value: "5th April 2026" },
-      { label: "Venue", value: "Naoremthong, Imphal" },
+      { label: "Venue", value: "Manipur University, Imphal" },
     ],
     prizes: [
       ["1st Prize", "₹30,000 + Book worth ₹1,000 + Certificate"],
@@ -110,7 +110,7 @@ const segments = [
     name: "Mathematics Championship",
     sub: "Class 3 – 8",
     fee: "₹200",
-    date: "26th April 2026",
+    date: "Postpone until further notice",
     open: false,
     about:
       "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Topics span arithmetic, geometry, logical reasoning, and applied mathematics across age-appropriate difficulty levels for Class 3 to 8.",
@@ -118,7 +118,7 @@ const segments = [
       { label: "Eligibility", value: "Class 3 to 8" },
       { label: "Duration", value: "2 hours" },
       { label: "Format", value: "MCQ" },
-      { label: "Last Date", value: "20th April 2026" },
+      { label: "Last Date", value: "Extended" },
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
     ],
     prizes: [
@@ -134,7 +134,7 @@ const segments = [
     name: "Painting Championship",
     sub: "Class 3–8 (Open)",
     fee: "₹200",
-    date: "24th May 2026",
+    date: "Postpone until further notice",
     open: false,
     about:
       "An on-the-spot painting competition exploring creativity and artistic expression. Themes will be revealed on the day of the event. All basic art materials will be provided on site.",
@@ -157,7 +157,7 @@ const segments = [
     name: "Quiz Championship",
     sub: "Class 6 – 10",
     fee: "₹300",
-    date: "24th May 2026",
+    date: "Postpone until further notice",
     open: false,
     about:
       "A multi-round quiz championship covering General Knowledge, Science, History, Current Affairs, and Logical Reasoning. Top teams from the preliminary round advance to the Grand Final stage.",
@@ -180,7 +180,7 @@ const segments = [
     name: "Young Innovators Challenge",
     sub: "Class 9–12 · Science & Tech",
     fee: "Open",
-    date: "24th May 2026",
+    date: "Postpone until further notice",
     open: false,
     about:
       "Students present original projects, research, or innovations in Science, Technology, Engineering, or Mathematics. Individual and team entries are welcome. Projects are evaluated on originality, feasibility, and presentation quality.",
@@ -469,7 +469,7 @@ export default function MatengFestPage() {
               <ul>
                 <li><strong>Last Date:</strong> 04th April 2026</li>
                 <li><strong>Admit Card:</strong> 05th April 2026</li>
-                <li><strong>Exam Date:</strong> 7th April 2026 (Tuesday)</li>
+                <li><strong>Exam Date:</strong> 20th April 2026 (Tuesday)</li>
                 <h4><strong>Venue: </strong>Manipur University, Imphal</h4>
               </ul>
             </div>
@@ -508,7 +508,7 @@ export default function MatengFestPage() {
               {[
                 ["Eligibility", "Class 3 – 8"],
                 ["Registration Fee", "₹200"],
-                ["Exam Date", "26th April 2026"],
+                ["Exam Date", "Posponed until futher notice"],
                 ["Venue", "Kakching, Thoubal, Bishnupur, Imphal West"],
                 ["Duration", "2 hours"],
                 ["Format", "MCQ"],
@@ -607,9 +607,9 @@ export default function MatengFestPage() {
 
       {/* ── GRAND FINAL ── */}
       <section className={styles.grandFinal}>
-  <h2 className={styles.sectionTitle}>Grand Final Event – 24th May 2026</h2>
+  <h2 className={styles.sectionTitle}>Grand Final Event – Postpone until further notice</h2>
   <div className={styles.grandCard}>
-    <p>The Grand Final Event will be conducted on 24th May 2026. Venue will be announced soon.</p>
+    {/* <p>The Grand Final Event will be conducted on 24th May 2026. Venue will be announced soon.</p> */}
     <h4>On-Spot Competitions:</h4>
     <ul>
       <li>Grand Final Quiz Competition</li>

@@ -41,10 +41,68 @@ export default function Page() {
 
 
         {/* HERO */}
+        <section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
 
-        
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
+            Discover • Deliver • Events
+          </h1>
+          <br />
+          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
+            Mateng connects people with local businesses, delivers essentials quickly,
+            and creates opportunities for youths through competitions and events.
+          </p>
 
+          <div className="flex flex-col sm:flex-row gap-6 mt-10">
 
+            <Link href="/matengfest">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
+              ring-4 ring-green-500/20 hover:opacity-90 transition">
+                Explore Events →
+              </button>
+            </Link>
+
+            <Link href="/delivery-rates">
+              <button className="px-8 py-3 rounded-full font-semibold text-white
+              bg-gradient-to-tr from-gray-800 to-gray-900
+              ring-4 ring-gray-700/30 hover:opacity-90 transition">
+                Book Delivery →
+              </button>
+            </Link>
+
+          </div>
+
+        </section>
+
+        {/* REGISTRATION OPEN BANNER - BIG */}
+
+<section className="w-full flex justify-center px-4 mt-8">
+
+  <div className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl min-h-[180px] sm:min-h-[220px] md:min-h-[260px] flex items-center">
+
+    {/* Background */}
+    <div className="absolute inset-0 bg-gradient-to-r from-[#14710f] via-[#1f9d1a] to-[#0f550c]" />
+
+    {/* Glow Effects */}
+    <div className="absolute -top-12 -left-12 w-52 h-52 bg-green-400/30 blur-3xl rounded-full" />
+    <div className="absolute -bottom-12 -right-12 w-52 h-52 bg-yellow-300/20 blur-3xl rounded-full" />
+
+    {/* Content */}
+    <div className="relative z-10 w-full text-center px-6 sm:px-10">
+
+      <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-wide text-white">
+        🎉 Mateng Education Festival 2026
+      </h2>
+
+      <p className="mt-3 text-base sm:text-lg md:text-xl text-green-100">
+        Registrations are now open 🚀
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
 
         {/* APPLE STYLE EVENTS */}
 
@@ -53,17 +111,43 @@ export default function Page() {
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
             Upcoming Events
           </h2>
-          <div className={styles.noticeContainer}>
-      <h4
-        className={styles.heroTitle1}
-        onClick={() => router.push("/preneet/admit-card")}
-        style={{ cursor: "pointer" }}
-      >
-        Download your Pre-NEET admit card here
-      </h4>
-    </div>
-    <br />
+          <div className="w-full max-w-4xl bg-red-600/10 border border-red-500 rounded-2xl p-6 text-center shadow-lg">
 
+            <h2 className="text-xl sm:text-2xl font-bold text-red-400 mb-3">
+              ⚠️ Important Notice
+            </h2>
+
+            <p className="text-white text-sm sm:text-base leading-relaxed">
+              Due to the ongoing tensions in Manipur, all upcoming events have been{" "}
+              <span className="font-semibold text-red-300">
+                postponed until further notice
+              </span>.
+            </p>
+
+            <p className="text-gray-300 mt-3 text-sm sm:text-base">
+              We sincerely apologize for any inconvenience caused and appreciate your understanding and support during this time.
+            </p>
+
+            <div className="mt-5 text-sm sm:text-base">
+              <p className="text-gray-400">For any queries or assistance:</p>
+              <p className="text-green-400 font-semibold mt-1">
+                📞 6009449928 / 6009459928
+              </p>
+            </div>
+
+          </div>
+
+          <br />
+          <div className={styles.noticeContainer}>
+            <h4
+              className={styles.heroTitle1}
+              onClick={() => router.push("/preneet/admit-card")}
+              style={{ cursor: "pointer" }}
+            >
+              Download your Pre-NEET admit card here
+            </h4>
+          </div>
+          <br />
           <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
 
 
@@ -144,38 +228,7 @@ export default function Page() {
 
         </section>
 
-<section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
-            Discover • Deliver • Events
-          </h1>
-          <br />
-          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
-            Mateng connects people with local businesses, delivers essentials quickly,
-            and creates opportunities for youths through competitions and events.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-6 mt-10">
-
-            <Link href="/matengfest">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
-              ring-4 ring-green-500/20 hover:opacity-90 transition">
-                Explore Events →
-              </button>
-            </Link>
-
-            <Link href="/delivery-rates">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-gray-800 to-gray-900
-              ring-4 ring-gray-700/30 hover:opacity-90 transition">
-                Book Delivery →
-              </button>
-            </Link>
-
-          </div>
-
-        </section>
 
         {/* WHAT WE DO */}
 
