@@ -44,7 +44,7 @@ function Navbar() {
     };
 
     const links = [
-        { name: "Home", href: "/home" },
+        // { name: "Home", href: "/home" },
         // { name: "Discover", href: "/discovery" },
         { name: "Discover", href: "https://www.instagram.com/mateng.discovery/" },
         { name: "Delivery Service", href: "/delivery-rates" },
