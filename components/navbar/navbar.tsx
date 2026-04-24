@@ -46,16 +46,17 @@ function Navbar() {
     const links = [
         // { name: "Home", href: "/home" },
         // { name: "Discover", href: "/discovery" },
-        { name: "Discover", href: "https://www.instagram.com/mateng.discovery/" },
+        { name: "Discover Businesses", href: "/businesses" },
         { name: "Delivery Service", href: "/delivery-rates" },
-        {
-            name: "Events",
-            children: [
-                { name: "MatengEduFest", href: "/matengfest" },
-                // { name: "G-15 Music Fest", href: "/CargoBookingPage" },
-                // { name: "Track Booking", href: "/track" },
-            ],
-        },
+        { name: "Events", href: "/events" },
+        // {
+        //     name: "Events",
+        //     children: [
+        //         { name: "MatengEduFest", href: "/matengfest" },
+        //         // { name: "G-15 Music Fest", href: "/CargoBookingPage" },
+        //         // { name: "Track Booking", href: "/track" },
+        //     ],
+        // },
         
     ];
 
