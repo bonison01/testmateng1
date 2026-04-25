@@ -30,8 +30,8 @@ const timelineEvents = [
       ["Best Institute Award", "Special Recognition"],
       ["MBBS Scholarship", "₹1,00,000 (abroad via Mateng Events)"],
     ],
-    registerHref: "/preneet",
-    rulesHref: "/preneetrules",
+    registerHref: "/events/matengfest/preneet",
+    rulesHref: "/events/matengfest/preneetrules",
   },
   {
     id: "maths",
@@ -48,9 +48,9 @@ const timelineEvents = [
     ],
     prizes: [
       ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
-                ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
-                ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-                ["25 Consolation Prizes", "Cash + Certificate"],
+      ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
+      ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
+      ["25 Consolation Prizes", "Cash + Certificate"],
       ["Best School Award", "Special Trophy"],
     ],
   },
@@ -102,8 +102,8 @@ const segments = [
       ["Best Institute Award", "Special Recognition"],
       ["MBBS Scholarship", "₹1,00,000 (abroad)"],
     ],
-    registerHref: "/preneet",
-    rulesHref: "/preneetrules",
+    registerHref: "/events/matengfest/preneet",
+    rulesHref: "/events/matengfest/preneet/preneetrules",
   },
   {
     id: "maths",
@@ -123,9 +123,9 @@ const segments = [
     ],
     prizes: [
       ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
-                ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
-                ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-                ["5 Consolation Prizes", "Cash + Certificate"],
+      ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
+      ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
+      ["5 Consolation Prizes", "Cash + Certificate"],
       ["Best School Award", "Special Trophy"],
     ],
   },
@@ -233,38 +233,38 @@ export default function MatengFestPage() {
           <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
           <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
           <div className={styles.heroButtons}>
-  {/* <button
+            {/* <button
     onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
     className={styles.secondaryBtn}
   >
     Download Brochure
   </button> */}
 
-  <button
-    onClick={() => router.push("/preneet/admit-card")}
-    className={styles.primaryBtn}
-  >
-    Download Pre-Neet Admit Card →
-  </button>
+            <button
+              onClick={() => router.push("/events/matengfest/preneet/admit-card")}
+              className={styles.primaryBtn}
+            >
+              Download Pre-Neet Admit Card →
+            </button>
 
-  <button
-    onClick={() => router.push("/edufest")}
-    className={styles.primaryBtn}
-  >
-    Register for EduFest →
-  </button>
-  
-
-
-<div className={styles.noticeContainer}>
-  <h4 className={styles.heroTitle1}>
-    Download your Pre-NEET admit card here
-  </h4>
-</div>
+            <button
+              onClick={() => router.push("/events/matengfest/edufest_registration")}
+              className={styles.primaryBtn}
+            >
+              Register for EduFest →
+            </button>
 
 
 
-</div>
+            {/* <div className={styles.noticeContainer}>
+              <h4 className={styles.heroTitle1}>
+                Download your Pre-NEET admit card here
+              </h4>
+            </div> */}
+
+
+
+          </div>
         </motion.div>
       </section>
 
@@ -439,22 +439,10 @@ export default function MatengFestPage() {
               pursue MBBS abroad through Mateng Events.
             </p>
             <p className={styles.meta}>Registration Fee: ₹250</p>
-            {/* <button
-              type="button"
-              onClick={() => router.push("/preneet")}
-              style={{
-                marginTop: "16px", padding: "12px 22px",
-                backgroundColor: "#14710F", color: "#ffffff",
-                border: "none", borderRadius: "8px",
-                fontWeight: "600", cursor: "pointer",
-                fontSize: "15px", marginRight: "10px",
-              }}
-            >
-              Register for Pre-NEET
-            </button> */}
+
             <button
               type="button"
-              onClick={() => router.push("/preneetrules")}
+              onClick={() => router.push("/events/matengfest/preneet/preneetrules")}
               style={{
                 marginTop: "16px", padding: "12px 22px",
                 backgroundColor: "#ffffff", color: "#14710F",
@@ -544,11 +532,11 @@ export default function MatengFestPage() {
               Full Details
             </button>
             <button
-              className={styles.primaryBtn}
-              onClick={() => setModalSeg(segments.find((s) => s.id === "maths")!)}
-            >
-              Register →
-            </button>
+  className={styles.primaryBtn}
+  onClick={() => router.push("/events/matengfest/edufest_registration")}
+>
+  Register →
+</button>
           </div>
         </div>
       </section>
@@ -607,35 +595,35 @@ export default function MatengFestPage() {
 
       {/* ── GRAND FINAL ── */}
       <section className={styles.grandFinal}>
-  <h2 className={styles.sectionTitle}>Grand Final Event – Postpone until further notice</h2>
-  <div className={styles.grandCard}>
-    {/* <p>The Grand Final Event will be conducted on 24th May 2026. Venue will be announced soon.</p> */}
-    <h4>On-Spot Competitions:</h4>
-    <ul>
-      <li>Grand Final Quiz Competition</li>
-      <li>Painting Competition</li>
-      <li>Young Innovators Challenge</li>
-    </ul>
-    <p>
-      The Grand Final will also include the Prize Distribution Ceremony for all Mateng EduFest
-      2026 championship segments.
-    </p>
-    {/* ── NEW BUTTON ── */}
-    <button
-      type="button"
-      onClick={() => router.push("/edufest")}
-      style={{
-        marginTop: "20px", padding: "12px 24px",
-        backgroundColor: "#14710F", color: "#ffffff",
-        border: "none", borderRadius: "8px",
-        fontWeight: "600", cursor: "pointer",
-        fontSize: "15px",
-      }}
-    >
-      Register for EduFest →
-    </button>
-  </div>
-</section>
+        <h2 className={styles.sectionTitle}>Grand Final Event – Postpone until further notice</h2>
+        <div className={styles.grandCard}>
+          {/* <p>The Grand Final Event will be conducted on 24th May 2026. Venue will be announced soon.</p> */}
+          <h4>On-Spot Competitions:</h4>
+          <ul>
+            <li>Grand Final Quiz Competition</li>
+            <li>Painting Competition</li>
+            <li>Young Innovators Challenge</li>
+          </ul>
+          <p>
+            The Grand Final will also include the Prize Distribution Ceremony for all Mateng EduFest
+            2026 championship segments.
+          </p>
+          {/* ── NEW BUTTON ── */}
+          <button
+            type="button"
+            onClick={() => router.push("/events/matengfest/edufest_registration")}
+            style={{
+              marginTop: "20px", padding: "12px 24px",
+              backgroundColor: "#14710F", color: "#ffffff",
+              border: "none", borderRadius: "8px",
+              fontWeight: "600", cursor: "pointer",
+              fontSize: "15px",
+            }}
+          >
+            Register for EduFest →
+          </button>
+        </div>
+      </section>
 
       {/* ── SEGMENT MODAL ── */}
       <AnimatePresence>
@@ -706,33 +694,33 @@ export default function MatengFestPage() {
 
               {/* Footer */}
               {/* Footer */}
-<div className={styles.modalFooter}>
-  {modalSeg.open && modalSeg.registerHref ? (
-    <button
-      className={styles.primaryBtn}
-      onClick={() => {
-        setModalSeg(null);
-        router.push(modalSeg.registerHref!);
-      }}
-    >
-      Register Now →
-    </button>
-  ) : (
-    <button
-      className={styles.primaryBtn}
-      onClick={() => {
-        setModalSeg(null);
-        router.push("/edufest");
-      }}
-    >
-      Register on EduFest →
-    </button>
-  )}
-  <button className={styles.secondaryBtn} onClick={() => setModalSeg(null)}>
-    Close
-  </button>
-  <span className={styles.modalContact}>Contact: +91 70855 71865</span>
-</div>
+              <div className={styles.modalFooter}>
+                {modalSeg.open && modalSeg.registerHref ? (
+                  <button
+                    className={styles.primaryBtn}
+                    onClick={() => {
+                      setModalSeg(null);
+                      router.push(modalSeg.registerHref!);
+                    }}
+                  >
+                    Register Now →
+                  </button>
+                ) : (
+                  <button
+                    className={styles.primaryBtn}
+                    onClick={() => {
+                      setModalSeg(null);
+                      router.push("/events/matengfest/edufest_registration");
+                    }}
+                  >
+                    Register on EduFest →
+                  </button>
+                )}
+                <button className={styles.secondaryBtn} onClick={() => setModalSeg(null)}>
+                  Close
+                </button>
+                <span className={styles.modalContact}>Contact: +91 70855 71865</span>
+              </div>
             </motion.div>
           </motion.div>
         )}
