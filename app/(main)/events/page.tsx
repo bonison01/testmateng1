@@ -153,7 +153,7 @@ function DetailModal({ event, onClose }: { event: DBEvent; onClose: () => void }
           {tab === "overview" && <>
             <p style={{ margin: "0 0 20px", fontSize: 14, lineHeight: 1.78, color: "#374151" }}>{event.description}</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-              {([["Date", event.date_start + (event.date_end ? ` – ${event.date_end}` : "")], ["Time", event.time_start || "All Day"], ["Venue", event.venue], ["City", event.city], ["Fee", event.fee_label], ["Organiser", event.organizer_name], event.capacity ? ["Capacity", event.capacity.toLocaleString()] : null, event.attendees_count ? ["Attended", event.attendees_count.toLocaleString()] : null] as ([string, string | number] | null)[]).filter(Boolean).map(([k, v]) => (
+              {([["Date", event.date_start + (event.date_end ? ` – ${event.date_end}` : "")], ["Time", event.time_start || "All Day"], ["Venue", event.venue], ["City", event.city], ["Fee", event.fee_label], ["Organiser", event.organizer_name], event.capacity ? ["Capacity", event.capacity.toLocaleString()] : null, event.attendees_count ? ["Attended", event.attendees_count.toLocaleString()] : null] as ([string, string | number] | null)[]).filter((x): x is [string, string | number] => x !== null).map(([k, v]) => (
                 <div key={String(k)} style={{ background: "#f9fafb", borderRadius: 10, padding: "10px 12px" }}><p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.07em" }}>{k}</p><p style={{ margin: "3px 0 0", fontSize: 13, fontWeight: 600, color: "#111827" }}>{String(v)}</p></div>
               ))}
             </div>

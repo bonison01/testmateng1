@@ -853,7 +853,7 @@ if (!customerId) {
                         style={{ width: "100%", padding: "11px 16px", background: activeSection === sec.id ? "#f0f9ff" : "none", border: "none", borderLeft: activeSection === sec.id ? "3px solid #6366f1" : "3px solid transparent", color: activeSection === sec.id ? "#4338ca" : "#6b7280", fontWeight: activeSection === sec.id ? 700 : 500, fontSize: 13, cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8, transition: "all 0.15s" }}>
                         <span style={{ fontSize: 14 }}>{sec.icon}</span>{sec.label}
                         {sec.id === "photos" && photos.length > 0 && <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 999, background: accentColor + "18", color: accentColor }}>{photos.length}</span>}
-                        {sec.id === "team" && team.length > 0 && <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 999, background: "#f3f4f6", color: "#6b7280" }}>{team.length}</span>}
+                        {sec.id === "services" && team.length > 0 && <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 999, background: "#f3f4f6", color: "#6b7280" }}>{team.length}</span>}
                       </button>
                     ))}
                   </div>

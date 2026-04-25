@@ -380,7 +380,7 @@ function DetailModal({ business, onClose }: { business: DBBusiness; onClose: () 
                   business.owner_name ? ["Owner", business.owner_name] : null,
                   business.established_year ? ["Established", String(business.established_year)] : null,
                   business.employee_count ? ["Team Size", business.employee_count] : null,
-                ] as ([string, string] | null)[]).filter(Boolean).map(([k, v]) => (
+                ] as ([string, string] | null)[]).filter((x): x is [string, string] => x !== null).map(([k, v]) => (
                   <div key={k} style={{ background: "#f9fafb", borderRadius: 10, padding: "10px 12px" }}>
                     <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.07em" }}>{k}</p>
                     <p style={{ margin: "3px 0 0", fontSize: 13, fontWeight: 600, color: "#111827", wordBreak: "break-word" }}>{v}</p>

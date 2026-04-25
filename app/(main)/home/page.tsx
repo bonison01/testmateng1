@@ -15,6 +15,17 @@ export default function Page() {
   const [businesses, setBusinesses] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
+  const PARTNERS = [
+  { name: "Partner 1", logo: "/partners/partner1.png" },
+  { name: "Partner 2", logo: "/partners/partner2.png" },
+  { name: "Partner 3", logo: "/partners/partner3.png" },
+  { name: "Partner 4", logo: "/partners/partner4.png" },
+  { name: "Partner 5", logo: "/partners/partner5.png" },
+  { name: "Partner 6", logo: "/partners/partner6.png" },
+  { name: "Partner 7", logo: "/partners/partner7.png" },
+  // { name: "Partner 8", logo: "/partners/partner8.png" },
+];
+
   useEffect(() => {
 
     const targetParcels = 100;
@@ -384,7 +395,38 @@ export default function Page() {
 
       )}
 
+{/* TRUSTED PARTNERS */}
+<section className="mt-24 px-6 flex flex-col items-center overflow-hidden">
+  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+    Trusted Partners
+  </h2>
+  <p className="text-gray-400 text-sm mb-10">
+    We work with over 400+ businesses, with a few highlighted here.
+  </p>
 
+  <div className="relative w-full max-w-5xl">
+    {/* Left fade */}
+    <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+    {/* Right fade */}
+    <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+
+    <div className="flex gap-10 animate-marquee whitespace-nowrap">
+      {/* Duplicate the list for seamless loop */}
+      {[...PARTNERS, ...PARTNERS].map((partner, i) => (
+        <div
+          key={i}
+          className="flex-shrink-0 w-32 h-16 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center px-4 hover:bg-white/10 transition"
+        >
+          <img
+            src={partner.logo}
+            alt={partner.name}
+            className="max-h-10 max-w-full object-contain opacity-70 hover:opacity-100 transition"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* FOOTER */}
 

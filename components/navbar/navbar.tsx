@@ -1,13 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { ArrowRight, LogOut, BadgeCheck } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-} from "@/components/ui/tooltip";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -19,17 +14,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/cart/store";
 import Image from "next/image";
 import { Separator } from "../ui/separator";
-import "./navbar.css";
 import { clearCart } from "@/lib/cart/cartSlice";
 import { clearUser } from "@/lib/cart/userSlice";
 import { CardDescription } from "../ui/card";
+import styles from "./navbar.module.css";
+
+type NavLink =
+    | { name: string; href: string; children?: undefined }
+    | { name: string; href?: undefined; children: { name: string; href: string }[] };
 
 function Navbar() {
     const [isNavOpen, setNavOpen] = useState<boolean>(false);
     const pathname = usePathname();
     const router = useRouter();
     const dispatch = useDispatch();
-    const cartItems = useSelector((state: RootState) => state.cart.items);
     const user = useSelector((state: RootState) => state.user.user);
 
     const toggleNav = () => setNavOpen((prev) => !prev);
@@ -43,21 +41,10 @@ function Navbar() {
         router.push("/login");
     };
 
-    const links = [
-        // { name: "Home", href: "/home" },
-        // { name: "Discover", href: "/discovery" },
+    const links: NavLink[] = [
         { name: "Discover Businesses", href: "/businesses" },
         { name: "Delivery Service", href: "/delivery-rates" },
         { name: "Events", href: "/events" },
-        // {
-        //     name: "Events",
-        //     children: [
-        //         { name: "MatengEduFest", href: "/matengfest" },
-        //         // { name: "G-15 Music Fest", href: "/CargoBookingPage" },
-        //         // { name: "Track Booking", href: "/track" },
-        //     ],
-        // },
-        
     ];
 
     const UserGreeting = () => (
@@ -74,23 +61,17 @@ function Navbar() {
                     Hi, {user?.name?.split(" ")[0] || "User"}
                 </button>
             </DropdownMenuTrigger>
-
             <DropdownMenuContent
                 align="end"
                 className="bg-[#1a1a1a] text-white border border-gray-500/30 shadow-lg rounded-lg p-2 min-w-[150px] z-[99999]"
             >
                 <DropdownMenuItem
                     className="hover:text-white cursor-pointer px-3 py-2"
-                    onClick={() => {
-                        router.push("/profile");
-                        closedNav();
-                    }}
+                    onClick={() => { router.push("/profile"); closedNav(); }}
                 >
                     <BadgeCheck /> Account Details
                 </DropdownMenuItem>
-
                 <Separator className="bg-gray-500/40" />
-
                 <DropdownMenuItem
                     className="hover:text-white cursor-pointer px-3 py-2"
                     onClick={handleLogout}
@@ -111,7 +92,6 @@ function Navbar() {
                     </span>
                 </button>
             </DropdownMenuTrigger>
-
             <DropdownMenuContent
                 align="end"
                 className="bg-[#1a1a1a] text-white border border-gray-500/30 shadow-lg rounded-lg p-2 min-w-[180px] z-[99999]"
@@ -125,13 +105,9 @@ function Navbar() {
                 >
                     👤 User Login
                 </DropdownMenuItem>
-
                 <DropdownMenuItem
                     className="hover:text-white cursor-pointer px-3 py-2"
-                    onClick={() => {
-                        window.open("https://www.matengmarket.com", "_blank");
-                        closedNav();
-                    }}
+                    onClick={() => { window.open("https://www.matengmarket.com", "_blank"); closedNav(); }}
                 >
                     🏢 Business Login
                 </DropdownMenuItem>
@@ -142,32 +118,23 @@ function Navbar() {
     return (
         <div className="w-full fixed top-0 z-[10000] sm:px-4 bg-gradient-to-r from-[#131316d9] via-[#222226a6] to-[#131316d9] backdrop-blur-sm">
 
-            {/* ------------------ DESKTOP NAV ------------------ */}
-            <div className="navbar hidden lg:flex justify-between items-center h-16">
-
-                <Link href={`/home`}>
+            {/* DESKTOP NAV */}
+            <div className="hidden lg:flex justify-between items-center h-16 px-4">
+                <Link href="/home">
                     <div className="h-16 flex items-center p-2 pl-0">
-                        <img src="../logo.png" alt="logo" className="h-full object-contain" />
+                        <img src="/logo.png" alt="logo" className="h-full object-contain" />
                     </div>
                 </Link>
 
-                <div className="menu-bar flex gap-4 items-center">
+                <div className="flex gap-4 items-center text-white/80 text-sm font-medium">
                     {links.map((link) =>
                         link.children ? (
                             <DropdownMenu key={link.name}>
                                 <DropdownMenuTrigger asChild>
-                                    <button
-                                        className={`px-3 py-1.5 rounded-full hover:bg-[#09090b20] ${
-                                            pathname.includes("delivery-rates") ||
-                                            pathname.includes("CargoBookingPage")
-                                                ? "bg-[#09090b20]"
-                                                : ""
-                                        }`}
-                                    >
+                                    <button className="px-3 py-1.5 rounded-full hover:bg-white/10 text-white/80">
                                         {link.name}
                                     </button>
                                 </DropdownMenuTrigger>
-
                                 <DropdownMenuContent className="bg-[#1a1a1a] text-white rounded-md shadow-md min-w-[160px] border border-gray-600/30 z-[99999]">
                                     {link.children.map((child) => (
                                         <DropdownMenuItem
@@ -184,8 +151,8 @@ function Navbar() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`px-3 py-1.5 rounded-full hover:bg-[#09090b20] ${
-                                    pathname === link.href ? "bg-[#09090b20]" : ""
+                                className={`px-3 py-1.5 rounded-full hover:bg-white/10 transition ${
+                                    pathname === link.href ? "bg-white/10 text-white" : ""
                                 }`}
                             >
                                 {link.name}
@@ -199,80 +166,50 @@ function Navbar() {
                 </div>
             </div>
 
-            {/* ------------------ MOBILE NAV ------------------ */}
-            <div className="small-navbar lg:hidden h-16 flex justify-between items-center px-3">
+            {/* MOBILE TOP BAR */}
+            <div className="lg:hidden h-16 flex justify-between items-center px-4">
                 <Link href="/home">
-                    <img src="../logo.png" alt="logo" className="w-32" />
+                    <img src="/logo.png" alt="logo" className="w-32" />
                 </Link>
 
-                <label className="hamburger pr-2">
-                    <input
-                        type="checkbox"
-                        className="hamburger-checkbox"
-                        checked={isNavOpen}
-                        onChange={toggleNav}
-                    />
-                    <svg viewBox="0 0 32 32">
-                        <path className="line line-top-bottom" d="M27 10 13 10..." />
-                        <path className="line" d="M7 16 27 16" />
-                    </svg>
-                </label>
+                {/* Hamburger */}
+                <button
+                    onClick={toggleNav}
+                    className="flex flex-col justify-center gap-[5px] w-8 h-8 p-1"
+                    aria-label="Toggle menu"
+                >
+                    <span className={`block h-0.5 bg-white rounded transition-all duration-300 ${isNavOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
+                    <span className={`block h-0.5 bg-white rounded transition-all duration-300 ${isNavOpen ? "opacity-0" : ""}`} />
+                    <span className={`block h-0.5 bg-white rounded transition-all duration-300 ${isNavOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
+                </button>
             </div>
 
             {/* MOBILE NAV MENU */}
-            <nav className={`nav-menu ${isNavOpen ? "open" : "closed"}`}>
-                <div className="flex flex-col items-center mt-6">
-
+            <nav className={`${styles.navMenu} ${isNavOpen ? styles.open : ""}`}>
+                <div className="flex flex-col items-center mt-2">
                     {links.map((link) =>
-                        link.children ? (
-                            <DropdownMenu key={link.name}>
-                                <DropdownMenuTrigger asChild>
-                                    <button className="navlink mt-2 text-lg font-medium">
-                                        {link.name}
-                                    </button>
-                                </DropdownMenuTrigger>
-
-                                <DropdownMenuContent
-                                    className="bg-[#1a1a1a] text-white rounded-md border border-white/10 min-w-[180px] z-[99999] fixed left-1/2 -translate-x-1/2"
-                                >
-                                    {link.children.map((child) => (
-                                        <DropdownMenuItem
-                                            key={child.href}
-                                            className="hover:bg-white/10 cursor-pointer"
-                                            onClick={() => {
-                                                router.push(child.href);
-                                                closedNav();
-                                            }}
-                                        >
-                                            {child.name}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
+                        link.children ? null : (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="navlink mt-3"
+                                className={styles.navlink}
                                 onClick={closedNav}
                             >
                                 {link.name}
                             </Link>
                         )
                     )}
-
                     <div className="mt-6">{user ? <UserGreeting /> : <LoginDropdown />}</div>
                 </div>
 
                 {/* Mobile CTA */}
-                <div className="mt-10 p-4 text-center">
-                    <CardDescription className="text-sm mb-3">
-                        Visit our cargo service page to get started.
+                <div className="mt-8 p-4 text-center">
+                    <CardDescription className="text-sm mb-3 text-gray-400">
+                        Cargo service inquiries
                     </CardDescription>
-
                     <a href="tel:+919774795905">
-                        <button className="flex px-6 py-3 mx-auto text-white bg-green-900/60 rounded-full shadow-md">
-                            Cargo Service Inquiries
+                        <button className="px-6 py-3 text-white bg-green-900/60 rounded-full shadow-md">
+                            📦 Cargo Service
                         </button>
                     </a>
                 </div>
