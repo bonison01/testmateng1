@@ -83,7 +83,15 @@ export default function Page() {
 
           </div>
 
-        </section>
+        </section><div className={styles.noticeContainer}>
+            <h4
+              className={styles.heroTitle1}
+              onClick={() => router.push("/events/matengfest")}
+              style={{ cursor: "pointer" }}
+            >
+              Check Pre Neet Examination Answer Key
+            </h4>
+          </div>
 
         {/* REGISTRATION OPEN BANNER - BIG */}
 
@@ -100,6 +108,7 @@ export default function Page() {
 
     {/* Content */}
     <div className="relative z-10 w-full text-center px-6 sm:px-10 py-8">
+      
 
   <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-wide text-white">
     🎉 Mateng Education Festival 2026
@@ -168,16 +177,8 @@ export default function Page() {
           </div>
 
           <br />
-          {/* <div className={styles.noticeContainer}>
-            <h4
-              className={styles.heroTitle1}
-              onClick={() => router.push("/preneet/admit-card")}
-              style={{ cursor: "pointer" }}
-            >
-              Download your Pre-NEET admit card here
-            </h4>
-          </div>
-          <br /> */}
+          
+          <br />
           <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
 
 

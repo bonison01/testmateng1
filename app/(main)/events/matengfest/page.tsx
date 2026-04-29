@@ -217,56 +217,71 @@ export default function MatengFestPage() {
 
       {/* ── HERO ── */}
       <section className={styles.hero}>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className={styles.heroInner}
-        >
-          <Image
-            src="/mateng-edufest-logo.png"
-            alt="Mateng EduFest 2026"
-            width={600}
-            height={100}
-            priority
-          />
-          <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
-          <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
-          <div className={styles.heroButtons}>
-            {/* <button
-    onClick={() => window.open("/Mateng Edu Fest.pdf", "_blank")}
-    className={styles.secondaryBtn}
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+    className={styles.heroInner}
   >
-    Download Brochure
-  </button> */}
+    <Image
+      src="/mateng-edufest-logo.png"
+      alt="Mateng EduFest 2026"
+      width={600}
+      height={100}
+      priority
+    />
 
-            <button
-              onClick={() => router.push("/events/matengfest/preneet/admit-card")}
-              className={styles.primaryBtn}
-            >
-              Download Pre-Neet Admit Card →
-            </button>
+    <h1 className={styles.heroTitle}>
+      Academic Excellence Platform 2026
+    </h1>
 
-            <button
-              onClick={() => router.push("/events/matengfest/edufest_registration")}
-              className={styles.primaryBtn}
-            >
-              Register for EduFest →
-            </button>
+    <p className={styles.heroSub}>
+      Competitive • Structured • Scholarship Driven
+    </p>
 
+    {/* Buttons */}
+    <div className={styles.heroButtons}>
+      {/* <button
+        onClick={() =>
+          router.push("/events/matengfest/preneet/admit-card")
+        }
+        className={styles.primaryBtn}
+      >
+        Download Pre-Neet Admit Card →
+      </button> */}
 
+      <button
+        onClick={() =>
+          router.push("/events/matengfest/edufest_registration")
+        }
+        className={styles.primaryBtn}
+      >
+        Register for EduFest →
+      </button>
+    </div>
 
-            {/* <div className={styles.noticeContainer}>
-              <h4 className={styles.heroTitle1}>
-                Download your Pre-NEET admit card here
-              </h4>
-            </div> */}
+    {/* Answer Key Links BELOW buttons */}
+    <div className={styles.answerLinks}>
+      <p>Download Pre-NEET Answer Key:</p>
 
+      <a href="/Set A.pdf" target="_blank" rel="noopener noreferrer">
+        Set A
+      </a>{" | "}
 
+      <a href="/Set B.pdf" target="_blank" rel="noopener noreferrer">
+        Set B
+      </a>{" | "}
 
-          </div>
-        </motion.div>
-      </section>
+      <a href="/Set C.pdf" target="_blank" rel="noopener noreferrer">
+        Set C
+      </a>{" | "}
+      <a href="/Key.pdf" target="_blank" rel="noopener noreferrer">
+        Solutions Key(Based on Set A)
+      </a>
+    </div>
+
+  </motion.div>
+</section>
 
       {/* ── CO-POWERED ── */}
       <div className="w-full flex justify-center px-4 mt-10">
@@ -532,11 +547,11 @@ export default function MatengFestPage() {
               Full Details
             </button>
             <button
-  className={styles.primaryBtn}
-  onClick={() => router.push("/events/matengfest/edufest_registration")}
->
-  Register →
-</button>
+              className={styles.primaryBtn}
+              onClick={() => router.push("/events/matengfest/edufest_registration")}
+            >
+              Register →
+            </button>
           </div>
         </div>
       </section>

@@ -1052,3 +1052,18 @@
     transform: translateX(-100%);
   }
 }
+.answerLinks {
+  margin-top: 50px;
+  font-size: 25px;
+  text-align: center;
+}
+
+.answerLinks a {
+  color: #14710F;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.answerLinks a:hover {
+  text-decoration: underline;
+}
