@@ -264,15 +264,15 @@ export default function MatengFestPage() {
     <div className={styles.answerLinks}>
       <p>Download Pre-NEET Answer Key:</p>
 
-      <a href="/Set A.pdf" target="_blank" rel="noopener noreferrer">
+      <a href="/SetA.pdf" target="_blank" rel="noopener noreferrer">
         Set A
       </a>{" | "}
 
-      <a href="/Set B.pdf" target="_blank" rel="noopener noreferrer">
+      <a href="/SetB.pdf" target="_blank" rel="noopener noreferrer">
         Set B
       </a>{" | "}
 
-      <a href="/Set C.pdf" target="_blank" rel="noopener noreferrer">
+      <a href="/SetC.pdf" target="_blank" rel="noopener noreferrer">
         Set C
       </a>{" | "}
       <a href="/Key.pdf" target="_blank" rel="noopener noreferrer">
