@@ -65,7 +65,7 @@ export default function Page() {
 
           <div className="flex flex-col sm:flex-row gap-6 mt-10">
 
-            <Link href="/events">
+            <Link href="/events/matengfest">
               <button className="px-8 py-3 rounded-full font-semibold text-white
               bg-gradient-to-tr from-[#14710f] to-[#0f550c]
               ring-4 ring-green-500/20 hover:opacity-90 transition">
