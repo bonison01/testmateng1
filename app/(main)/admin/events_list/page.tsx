@@ -19,6 +19,8 @@ interface DBEvent {
   organizer_name: string; date_start: string; date_end?: string; time_start?: string;
   venue: string; city: string; fee_label: string; capacity?: number; attendees_count?: number;
   sponsors: string[]; register_href?: string;
+  // ── NEW: public event page path ──
+  page_href?: string;
   // ── Contact fields ──
   contact_phone?: string; contact_email?: string; contact_name?: string;
   website_url?: string; maps_url?: string; social_instagram?: string; social_facebook?: string;
@@ -122,7 +124,7 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  // Contact fields — now typed directly (no `as any`)
+  // Contact fields
   const [contactPhone, setContactPhone] = useState(event.contact_phone || "");
   const [contactEmail, setContactEmail] = useState(event.contact_email || "");
   const [contactName, setContactName] = useState(event.contact_name || "");
@@ -142,6 +144,8 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
   const [tagsInput, setTagsInput] = useState((event.tags || []).join(", "));
   const [sponsorsInput, setSponsorsInput] = useState((event.sponsors || []).join(", "));
   const [registerHref, setRegisterHref] = useState(event.register_href || "");
+  // ── NEW: page path field ──
+  const [pageHref, setPageHref] = useState(event.page_href || "");
   const [featured, setFeatured] = useState(event.featured);
   const [dateStart, setDateStart] = useState(event.date_start);
   const [dateEnd, setDateEnd] = useState(event.date_end || "");
@@ -172,6 +176,8 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
         tags: tagsInput.split(",").map(t => t.trim()).filter(Boolean),
         sponsors: sponsorsInput.split(",").map(s => s.trim()).filter(Boolean),
         register_href: registerHref.trim() || null,
+        // ── NEW ──
+        page_href: pageHref.trim() || null,
         featured,
         date_start: dateStart,
         date_end: dateEnd || null,
@@ -180,7 +186,6 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
         city: city.trim(),
         fee_label: feeLabel.trim(),
         capacity: capacity ? parseInt(capacity) : null,
-        // Contact fields
         contact_phone: contactPhone.trim() || null,
         contact_email: contactEmail.trim() || null,
         contact_name: contactName.trim() || null,
@@ -261,7 +266,36 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
                 <EInput label="Subtitle / Tagline" value={subtitle} onChange={setSubtitle} placeholder="Short description" />
                 <ETextarea label="Description" value={description} onChange={setDescription} rows={5} placeholder="Full event description…" />
                 <EInput label="Organiser Name *" value={organizerName} onChange={setOrganizerName} placeholder="Organisation name" />
-                <EInput label="Registration Link" value={registerHref} onChange={setRegisterHref} placeholder="/register or https://…" />
+
+                {/* ── NEW: Page Path — sits prominently alongside the register link ── */}
+                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: "14px 14px 4px", marginBottom: 14 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#14710f" }}>
+                    🔗 Event Page Links
+                  </p>
+                  <EInput
+                    label="Public Event Page Path"
+                    value={pageHref}
+                    onChange={setPageHref}
+                    placeholder="/events/matengfest or https://mateng.in/events/edufest"
+                  />
+                  <EInput
+                    label="Registration Link"
+                    value={registerHref}
+                    onChange={setRegisterHref}
+                    placeholder="/register or https://…"
+                  />
+                  {/* Live preview of the "Learn More" link */}
+                  {(pageHref || registerHref) && (
+                    <div style={{ marginBottom: 10, padding: "8px 10px", background: "#fff", borderRadius: 7, border: "1px solid #d1fae5", fontSize: 11, color: "#065f46" }}>
+                      <span style={{ fontWeight: 700 }}>Preview → </span>
+                      Learn More button will go to:{" "}
+                      <span style={{ fontFamily: "monospace", color: "#14710f" }}>
+                        {pageHref || registerHref}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <EInput label="Tags (comma-separated)" value={tagsInput} onChange={setTagsInput} placeholder="NEET, Quiz, Outdoor" />
                   <EInput label="Sponsors (comma-separated)" value={sponsorsInput} onChange={setSponsorsInput} placeholder="Sponsor A, Sponsor B" />
@@ -387,6 +421,7 @@ function EditDrawer({ event, onClose, onSaved }: { event: DBEvent; onClose: () =
 
 // ── DETAIL DRAWER ─────────────────────────────────────────────────
 function EventDrawer({ event, onClose, onEdit }: { event: DBEvent; onClose: () => void; onEdit: () => void }) {
+  const router = useRouter();
   const [tab, setTab] = useState<"overview" | "lineup" | "schedule" | "prizes">("overview");
   const cat = CATEGORIES.find(c => c.id === event.category);
   const tabs = [
@@ -404,6 +439,19 @@ function EventDrawer({ event, onClose, onEdit }: { event: DBEvent; onClose: () =
 
   const hasContact = event.contact_name || event.contact_phone || event.contact_email ||
     event.website_url || event.maps_url || event.social_instagram || event.social_facebook;
+
+  // Resolve the "Learn More" destination: page_href takes priority, then register_href
+  const learnMoreHref = event.page_href || event.register_href || null;
+  const isExternal = learnMoreHref?.startsWith("http");
+
+  const handleLearnMore = () => {
+    if (!learnMoreHref) return;
+    if (isExternal) {
+      window.open(learnMoreHref, "_blank", "noopener,noreferrer");
+    } else {
+      router.push(learnMoreHref);
+    }
+  };
 
   return (
     <motion.div
@@ -483,6 +531,19 @@ function EventDrawer({ event, onClose, onEdit }: { event: DBEvent; onClose: () =
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {event.sponsors.map(s => <span key={s} style={{ padding: "4px 12px", background: "#f3f4f6", borderRadius: 6, fontSize: 12, color: "#374151", fontWeight: 500 }}>{s}</span>)}
                 </div>
+              </div>
+            )}
+
+            {/* ── Event Page Link indicator ── */}
+            {learnMoreHref && (
+              <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10 }}>
+                <span style={{ fontSize: 14 }}>🔗</span>
+                <span style={{ fontSize: 12, color: "#14710f", fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {learnMoreHref}
+                </span>
+                <span style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, flexShrink: 0, background: "#fff", border: "1px solid #d1fae5", borderRadius: 6, padding: "2px 7px" }}>
+                  {event.page_href ? "page" : "register"}
+                </span>
               </div>
             )}
 
@@ -601,11 +662,68 @@ function EventDrawer({ event, onClose, onEdit }: { event: DBEvent; onClose: () =
           )}
         </div>
 
-        {/* Footer */}
-        <div style={{ padding: "14px 22px", borderTop: "1px solid #f3f4f6", background: "#fff" }}>
-          <button onClick={onEdit}
-            style={{ display: "block", width: "100%", textAlign: "center", padding: "11px", background: "#111827", color: "#fff", borderRadius: 10, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
-            ✏️ Edit This Event
+        {/* ── Footer: Learn More + Edit ── */}
+        <div style={{ padding: "14px 22px", borderTop: "1px solid #f3f4f6", background: "#fff", display: "flex", gap: 10 }}>
+          {learnMoreHref ? (
+            <button
+              onClick={handleLearnMore}
+              style={{
+                flex: 1,
+                padding: "11px",
+                background: event.accent_color,
+                color: "#fff",
+                borderRadius: 10,
+                fontWeight: 700,
+                fontSize: 14,
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              {isExternal ? "🌐" : "→"} Learn More
+            </button>
+          ) : (
+            // Greyed-out placeholder when no page_href / register_href is set
+            <button
+              onClick={onEdit}
+              title="Set 'Public Event Page Path' in Basic Info to enable"
+              style={{
+                flex: 1,
+                padding: "11px",
+                background: "#f3f4f6",
+                color: "#9ca3af",
+                borderRadius: 10,
+                fontWeight: 600,
+                fontSize: 13,
+                border: "1px dashed #d1d5db",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              + Set Event Page Path
+            </button>
+          )}
+          <button
+            onClick={onEdit}
+            style={{
+              padding: "11px 18px",
+              background: "#f3f4f6",
+              color: "#374151",
+              border: "none",
+              borderRadius: 10,
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            ✏️ Edit
           </button>
         </div>
       </motion.div>
@@ -630,6 +748,12 @@ function EventRow({ event, onSelect, onEdit, onDelete }: { event: DBEvent; onSel
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
           <span style={{ fontSize: 14, fontWeight: 800, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 260 }}>{event.title}</span>
           {event.featured && <span style={{ fontSize: 9, fontWeight: 700, color: "#d97706", background: "#fffbeb", border: "1px solid #fde68a", padding: "1px 6px", borderRadius: 999, flexShrink: 0 }}>★</span>}
+          {/* ── Show page path as a small pill on the row ── */}
+          {event.page_href && (
+            <span style={{ fontSize: 9, fontWeight: 600, color: "#14710f", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "1px 7px", borderRadius: 999, flexShrink: 0, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              🔗 {event.page_href}
+            </span>
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{ fontSize: 11, color: "#9ca3af" }}>{cat?.label}</span>
@@ -709,6 +833,13 @@ function EventCard({ event, onSelect, onEdit, onDelete }: { event: DBEvent; onSe
         <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 4 }}>
           {(event.tags || []).slice(0, 3).map(t => <span key={t} style={{ padding: "2px 7px", borderRadius: 999, fontSize: 10, fontWeight: 600, background: event.accent_color + "12", color: event.accent_color }}>{t}</span>)}
         </div>
+        {/* ── Page path chip on card ── */}
+        {event.page_href && (
+          <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ fontSize: 10 }}>🔗</span>
+            <span style={{ fontSize: 10, color: "#14710f", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{event.page_href}</span>
+          </div>
+        )}
       </div>
       <div onClick={onSelect} style={{ cursor: "pointer", padding: "10px 18px", borderTop: "1px solid #f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 11, color: "#9ca3af" }}>{timeAgo(event.date_start)}</span>
@@ -881,6 +1012,8 @@ export default function EventsListPage() {
               { label: "Active / Live", value: events.filter(e => e.status === "open" || e.status === "ongoing").length, color: "#14710f" },
               { label: "Upcoming", value: events.filter(e => e.status === "upcoming").length, color: "#1a56a8" },
               { label: "Draft", value: statusCounts.draft || 0, color: "#9ca3af" },
+              // ── NEW: count how many events have a page path set ──
+              { label: "With Page Path", value: events.filter(e => !!e.page_href).length, color: "#14710f" },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <p style={{ margin: 0, fontSize: 20, fontWeight: 900, color }}>{value}</p>
