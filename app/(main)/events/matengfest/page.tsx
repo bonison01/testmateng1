@@ -9,18 +9,22 @@ import Link from "next/link";
 
 // ─── TIMELINE DATA ────────────────────────────────────────────────
 const timelineEvents = [
+  
   {
     id: "preneet",
     date: "20th April 2026",
     name: "Pre-NEET Competition",
-    chips: ["UG NEET Aspirants", "₹250 Fee", "Tuesday"],
-    open: true,
-    body: "First structured Pre-NEET simulation platform in Manipur. A real-time NEET-pattern exam with 180 questions across Physics, Chemistry, and Biology.",
+    chips: ["UG NEET Aspirants", "₹250 Fee"],
+    open: false,
+    closed: true,
+    body: "First structured Pre-NEET simulation platform in Manipur. A real-time NEET-pattern exam with 180 questions across Physics, Chemistry, and Biology. Registration is now closed.",
     info: [
-      { label: "Admit Card", value: "5th April 2026" },
+      // { label: "Last Date", value: "4th April 2026" },
+      // { label: "Admit Card", value: "5th April 2026" },
+      { label: "Exam Date", value: "20th April 2026" },
+      { label: "Prize Distribution", value: "26th May 2026" },
       { label: "Venue", value: "Manipur University, Imphal" },
       { label: "Duration", value: "3 hours 20 minutes" },
-      { label: "Last Date", value: "4th April 2026" },
     ],
     prizes: [
       ["1st Prize", "₹30,000 + Book worth ₹1,000 + Certificate"],
@@ -30,48 +34,84 @@ const timelineEvents = [
       ["Best Institute Award", "Special Recognition"],
       ["MBBS Scholarship", "₹1,00,000 (abroad via Mateng Events)"],
     ],
-    registerHref: "/events/matengfest/preneet",
     rulesHref: "/events/matengfest/preneetrules",
+    canRegister: false,
   },
   {
     id: "maths",
-    date: "Postpone until further notice",
+    date: "12th May 2026",
     name: "Mathematics Championship",
     chips: ["Class 3–8", "₹200 Fee"],
-    open: false,
-    body: "A rigorous mathematics olympiad to identify and celebrate young math talent across primary and middle school students in Manipur.",
+    open: true,
+    closed: false,
+    body: "A rigorous mathematics olympiad to identify and celebrate young math talent across primary and middle school students in Manipur. Conducted in 6 separate categories (Class 3 to Class 8).",
     info: [
+      { label: "Last Date", value: "07th May 2026" },
+      { label: "Admit Card", value: "10th May 2026" },
+      { label: "Exam Date", value: "12th May 2026" },
+      { label: "Prize Distribution", value: "26th May 2026" },
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
-      { label: "Format", value: "MCQ" },
       { label: "Duration", value: "2 hours" },
-      { label: "Last Date", value: "TBA" },
+      { label: "Format", value: "MCQ" },
     ],
     prizes: [
-      ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
-      ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
-      ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-      ["25 Consolation Prizes", "Cash + Certificate"],
-      ["Best School Award", "Special Trophy"],
+      ["1st Prize (per category)", "₹3,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["2nd Prize (per category)", "₹2,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["3rd Prize (per category)", "₹1,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["25 Consolation Prizes", "Cash Prize + Certificate + T-Shirt"],
+      ["Best Institute Award", "Memento + Certificate of Recognition"],
     ],
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
   },
   {
     id: "grand",
-    date: "Postpone until further notice",
+    date: "26th May 2026",
     name: "Grand Final — Multi-Event Day",
     chips: ["All Segments", "Prize Ceremony"],
-    open: false,
-    body: "The culminating event of Mateng EduFest 2026. Three on-spot championships plus the grand prize distribution ceremony for all segment winners.",
+    open: true,
+    closed: false,
+    body: "The culminating event of Mateng EduFest 2026. Quiz Championship, Painting Competition, and Young Innovators Challenge — all on the same day, followed by the grand prize distribution ceremony.",
     info: [
-      { label: "Events", value: "Quiz · Painting · Innovators" },
+      { label: "Quiz Last Date", value: "18th May 2026" },
+      { label: "Painting Last Date", value: "18th May 2026" },
+      { label: "Innovators Last Date", value: "18th May 2026" },
+      { label: "Admit Card", value: "20th May 2026" },
+      { label: "Event Date", value: "26th May 2026" },
       { label: "Venue", value: "To be announced" },
-      { label: "Ceremony", value: "All segment prizes distributed" },
     ],
     prizes: [
       ["Quiz Championship", "Class 6–10 · ₹300"],
-      ["Painting Championship", "Class 3–8 · ₹200"],
-      ["Young Innovators", "Class 9–12 · Open"],
+      ["Painting Championship", "Class 3–8 · ₹150"],
+      ["Young Innovators", "Class 9–12 · ₹300"],
       ["Prize Ceremony", "All segment winners felicitated"],
     ],
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
+  },
+];
+
+// ─── SYLLABUS DATA ─────────────────────────────────────────────────
+const mathsSyllabus = [
+  {
+    category: "Class 3",
+    topics: ["4-Digit Numbers", "Roman Numerals", "Addition", "Subtraction", "Multiplication", "Division", "Fractions", "Money"],
+  },
+  {
+    category: "Class 4",
+    topics: ["Numbers", "Roman Numerals", "Addition and Subtraction", "Multiplication", "Division", "Estimation", "Multiples and Factors", "Fractions", "Decimals", "Measures of Length, Weight, and Capacity"],
+  },
+  {
+    category: "Class 5 & 6",
+    topics: ["Number System", "Fractions and Decimals", "Multiples and Factors", "Simplification", "Average", "Ratio and Proportion", "Percentage", "Profit and Loss", "Simple Interest"],
+  },
+  {
+    category: "Class 7",
+    topics: ["Number System (Integers)", "Fractions and Decimals", "Data Handling", "Simple Equations", "Lines and Angles", "Triangle and its Properties", "Congruence of Triangles", "Comparing Quantities", "Rational Numbers"],
+  },
+  {
+    category: "Class 8",
+    topics: ["Number System (Rational Numbers)", "Linear Equations in One Variable", "Understanding Quadrilaterals", "Data Handling", "Squares and Square Roots", "Cubes and Cube Roots", "Comparing Quantities", "Algebraic Expressions and Identities"],
   },
 ];
 
@@ -82,16 +122,18 @@ const segments = [
     name: "Pre-NEET Competition",
     sub: "UG NEET Aspirants",
     fee: "₹250",
-    date: "20th April 2026",
-    open: true,
-    about:
-      "A real-time NEET simulation exam — the first of its kind in Manipur. 180 questions across Physics, Chemistry, and Biology. All participants are eligible for a ₹1,00,000 scholarship toward MBBS abroad through Mateng Events.",
+    date: "7th April 2026",
+    open: false,
+    closed: true,
+    about: "A real-time NEET simulation exam — the first of its kind in Manipur. 180 questions across Physics, Chemistry, and Biology. All participants are eligible for a ₹1,00,000 scholarship toward MBBS abroad through Mateng Events.",
     info: [
       { label: "Eligibility", value: "NEET 2026 Aspirants" },
       { label: "Duration", value: "3 hours 20 min" },
       { label: "Format", value: "180 Questions (PCB)" },
       { label: "Last Date", value: "4th April 2026" },
       { label: "Admit Card", value: "5th April 2026" },
+      { label: "Exam Date", value: "7th April 2026" },
+      { label: "Prize Distribution", value: "26th May 2026" },
       { label: "Venue", value: "Manipur University, Imphal" },
     ],
     prizes: [
@@ -102,110 +144,409 @@ const segments = [
       ["Best Institute Award", "Special Recognition"],
       ["MBBS Scholarship", "₹1,00,000 (abroad)"],
     ],
-    registerHref: "/events/matengfest/preneet",
-    rulesHref: "/events/matengfest/preneet/preneetrules",
+    syllabus: {
+      type: "preneet",
+      subjects: [
+        { name: "Physics", topics: ["Physical World & Measurement", "Kinematics", "Laws of Motion", "Work, Energy & Power", "Motion of System of Particles", "Gravitation", "Properties of Bulk Matter", "Thermodynamics", "Behaviour of Perfect Gas & Kinetic Theory", "Oscillations & Waves", "Electrostatics", "Current Electricity", "Magnetic Effects & Magnetism", "Electromagnetic Induction & AC", "Electromagnetic Waves", "Optics", "Dual Nature of Matter & Radiation", "Atoms & Nuclei", "Electronic Devices"] },
+        { name: "Chemistry", topics: ["Some Basic Concepts of Chemistry", "Structure of Atom", "Classification of Elements", "Chemical Bonding", "States of Matter", "Thermodynamics", "Equilibrium", "Redox Reactions", "Hydrogen", "s-Block Elements", "p-Block Elements", "Organic Chemistry Basics", "Hydrocarbons", "Environmental Chemistry", "Solid State", "Solutions", "Electrochemistry", "Chemical Kinetics", "Surface Chemistry", "Coordination Compounds", "Alcohols, Phenols & Ethers", "Aldehydes & Ketones", "Amines", "Biomolecules", "Polymers", "Chemistry in Everyday Life"] },
+        { name: "Biology", topics: ["Diversity in Living World", "Structural Organisation in Plants & Animals", "Cell Structure & Function", "Plant Physiology", "Human Physiology", "Reproduction", "Genetics & Evolution", "Biology & Human Welfare", "Biotechnology", "Ecology & Environment"] },
+      ],
+    },
+    canRegister: false,
   },
   {
     id: "maths",
     name: "Mathematics Championship",
     sub: "Class 3 – 8",
     fee: "₹200",
-    date: "Postpone until further notice",
-    open: false,
-    about:
-      "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Topics span arithmetic, geometry, logical reasoning, and applied mathematics across age-appropriate difficulty levels for Class 3 to 8.",
+    date: "12th May 2026",
+    open: true,
+    closed: false,
+    about: "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Conducted in 6 separate categories (Class 3 to Class 8). Prizes are awarded separately for each class category.",
     info: [
       { label: "Eligibility", value: "Class 3 to 8" },
       { label: "Duration", value: "2 hours" },
       { label: "Format", value: "MCQ" },
-      { label: "Last Date", value: "Extended" },
+      { label: "Last Date", value: "07th May 2026" },
+      { label: "Admit Card", value: "10th May 2026" },
+      { label: "Exam Date", value: "12th May 2026" },
+      { label: "Prize Distribution", value: "26th May 2026" },
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
     ],
     prizes: [
-      ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
-      ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
-      ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-      ["5 Consolation Prizes", "Cash + Certificate"],
-      ["Best School Award", "Special Trophy"],
+      ["1st Prize (per category)", "₹3,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["2nd Prize (per category)", "₹2,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["3rd Prize (per category)", "₹1,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["25 Consolation Prizes", "Cash Prize + Certificate + T-Shirt"],
+      ["Best Institute Award", "Memento + Certificate of Recognition"],
     ],
+    syllabus: {
+      type: "maths",
+      categories: mathsSyllabus,
+    },
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
   },
   {
     id: "painting",
     name: "Painting Championship",
     sub: "Class 3–8 (Open)",
-    fee: "₹200",
-    date: "Postpone until further notice",
-    open: false,
-    about:
-      "An on-the-spot painting competition exploring creativity and artistic expression. Themes will be revealed on the day of the event. All basic art materials will be provided on site.",
+    fee: "₹150",
+    date: "26th May 2026",
+    open: true,
+    closed: false,
+    about: "An on-the-spot painting competition exploring creativity and artistic expression. 3 themes will be announced on the day from the prepared list. Participants must choose one of the announced themes.",
     info: [
       { label: "Eligibility", value: "Class 3 to 8 (Open)" },
-      { label: "Duration", value: "2 hours" },
+      { label: "Duration", value: "3 hours" },
       { label: "Format", value: "On-spot painting" },
-      { label: "Last Date", value: "TBA" },
+      { label: "Last Date", value: "18th May 2026" },
+      { label: "Admit Card", value: "20th May 2026" },
+      { label: "Event Date", value: "26th May 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
-      ["1st Prize", "₹3,000 + Certificate + Trophy + Book worth 1000 + T shirt"],
-      ["2nd Prize", "₹1,500 + Certificate +  Book worth 1000 + T shirt"],
-      ["3rd Prize", "₹1,000 + Certificate + Book worth 1000 + T shirt"],
-      ["10 Consolation Prizes", "Certificate + Goodies"],
+      ["1st Prize", "₹3,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["2nd Prize", "₹1,500 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["3rd Prize", "₹1,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+      ["10 Consolation Prizes", "Cash Prize + Certificate + T-Shirt"],
     ],
+    syllabus: {
+      type: "painting",
+      note: "On the day of the competition, only 3 themes will be announced from the list below. Participants must choose any one of the announced themes.",
+      themes: [
+        "Digital World vs Real World",
+        "Dreams of Tomorrow",
+        "My City, My Pride",
+        "Future Technology",
+        "Save Nature, Save Earth",
+        "Role of Youth in Nation Building",
+        "Clean Environment, Healthy Life",
+        "Space Exploration",
+        "Education for a Better Future",
+        "Harmony in Diversity",
+      ],
+    },
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
   },
   {
     id: "quiz",
     name: "Quiz Championship",
     sub: "Class 6 – 10",
     fee: "₹300",
-    date: "Postpone until further notice",
-    open: false,
-    about:
-      "A multi-round quiz championship covering General Knowledge, Science, History, Current Affairs, and Logical Reasoning. Top teams from the preliminary round advance to the Grand Final stage.",
+    date: "26th May 2026",
+    open: true,
+    closed: false,
+    about: "A multi-round quiz championship. The preliminary round is a written test. Top 5 teams qualify for the Final Stage Round, conducted live on stage by the Quiz Master.",
     info: [
       { label: "Eligibility", value: "Class 6 to 10" },
-      { label: "Duration", value: "2.5 hours" },
-      { label: "Format", value: "Preliminary + Finals" },
-      { label: "Last Date", value: "TBA" },
+      { label: "Format", value: "Preliminary (Written) + Live Final" },
+      { label: "Last Date", value: "18th May 2026" },
+      { label: "Admit Card", value: "20th May 2026" },
+      { label: "Event Date", value: "26th May 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
-      ["1st Prize", "4000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
-      ["2nd Prize", "2000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
-      ["3rd Prize", "1000 Cash + Certificate + 2 Books worth 1000 each + Trophy + 2 T shirts"],
-      ["Best Speaker", "Special Award"],
+      ["1st Prize", "₹4,000 + Certificate + Memento + 2 Books ₹1,000 each + 2 T-Shirts"],
+      ["2nd Prize", "₹2,000 + Certificate + Memento + 2 Books ₹1,000 each + 2 T-Shirts"],
+      ["3rd Prize", "₹1,000 + Certificate + Memento + 2 Books ₹500 each + 2 T-Shirts"],
     ],
+    syllabus: {
+      type: "quiz",
+      topics: [
+        { name: "General Knowledge", desc: "World affairs, famous personalities, geography, history, and general awareness." },
+        { name: "Current Affairs", desc: "National & International events, recent news, government schemes, and global developments." },
+        { name: "Basic Science & Technology", desc: "Fundamental science concepts, recent scientific discoveries, and technology developments." },
+        { name: "Sports & Achievements", desc: "Major sporting events, records, Indian and international sports achievements." },
+        { name: "Art & Culture", desc: "Indian art forms, cultural heritage, literature, music, and festivals." },
+      ],
+      format: [
+        "Preliminary round: Written test for all registered teams.",
+        "Top 5 teams qualify for the Final Stage Round.",
+        "Final round conducted live on stage by the Quiz Master.",
+      ],
+    },
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
   },
   {
     id: "innovators",
     name: "Young Innovators Challenge",
     sub: "Class 9–12 · Science & Tech",
-    fee: "Open",
-    date: "Postpone until further notice",
-    open: false,
-    about:
-      "Students present original projects, research, or innovations in Science, Technology, Engineering, or Mathematics. Individual and team entries are welcome. Projects are evaluated on originality, feasibility, and presentation quality.",
+    fee: "₹300",
+    date: "26th May 2026",
+    open: true,
+    closed: false,
+    about: "Students present innovative ideas or projects that solve real-world problems using science and technology. Top 5 presentations are selected to pitch live on stage before judges and audience.",
     info: [
-      { label: "Eligibility", value: "Class 9 to 12" },
-      { label: "Duration", value: "Project Presentation" },
-      { label: "Format", value: "Science · Technology · Research" },
-      { label: "Last Date", value: "TBA" },
-      { label: "Venue", value: "TBA" },
+      { label: "Eligibility", value: "Class 9 to 12 (Open)" },
+      { label: "Format", value: "Project Presentation + Live Pitch" },
+      { label: "Last Date", value: "18th May 2026" },
+      { label: "Admit Card", value: "20th May 2026" },
+      { label: "Event Date", value: "26th May 2026" },
+      { label: "Venue", value: "To be announced" },
     ],
     prizes: [
-      ["Best Innovation", "5000 + Certificate + Mentorship + Book worth 2000 + Tshirt"],
-      ["2nd Prize", "3000 + Certificate + Book worth 1000 + Tshirt"],
-      ["3rd Prize", "2000 + Certificate + Book worth 1000 + Tshirt"],
-      ["Best Presentation", "Special Award"],
+      ["1st Prize", "₹5,000 + Certificate + Book worth ₹2,000 + T-Shirt"],
+      ["2nd Prize", "₹3,000 + Certificate + Book worth ₹1,000 + T-Shirt"],
+      ["3rd Prize", "₹2,000 + Certificate + Book worth ₹1,000 + T-Shirt"],
+      ["Best Institute Award", "Memento + Certificate of Recognition"],
+      ["Participation", "Certificate of Participation for every participant"],
     ],
+    syllabus: {
+      type: "innovators",
+      criteria: [
+        { name: "Innovation & Originality", desc: "How unique and creative is the idea or project?" },
+        { name: "Problem Solving Ability", desc: "Does the project address a real-world problem effectively?" },
+        { name: "Practical Feasibility", desc: "Can the idea realistically be implemented?" },
+        { name: "Scientific / Technical Understanding", desc: "Does the participant demonstrate solid knowledge of the underlying science or technology?" },
+        { name: "Presentation & Communication", desc: "How clearly and confidently is the project explained to the judges?" },
+      ],
+      format: [
+        "Each participant/team presents and explains their project or idea to the judges.",
+        "Based on evaluation, Top 5 presentations are selected.",
+        "Finalists pitch their ideas live on stage before the judges and audience.",
+      ],
+    },
+    registerHref: "/events/matengfest/edufest_registration",
+    canRegister: true,
   },
 ];
 
-// ─── TYPES ────────────────────────────────────────────────────────
 type Segment = (typeof segments)[number];
+
+// ─── DETAIL MODAL ─────────────────────────────────────────────────
+function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () => void; onRegister: (href: string) => void }) {
+  const [tab, setTab] = useState<"overview" | "syllabus">("overview");
+  const s = seg.syllabus as any;
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: "8px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    border: "none",
+    borderBottom: active ? "2px solid #14710F" : "2px solid transparent",
+    background: "transparent",
+    color: active ? "#14710F" : "#888",
+    transition: "all 0.18s",
+  });
+
+  return (
+    <motion.div
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+        display: "flex", alignItems: "flex-start", justifyContent: "center",
+        zIndex: 1000, padding: "2rem 1rem", overflowY: "auto",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        style={{
+          background: "#fff", borderRadius: 16, width: "100%", maxWidth: 640,
+          border: "0.5px solid #ddd", overflow: "hidden", marginTop: 16,
+        }}
+        initial={{ opacity: 0, y: 40, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.97 }}
+        transition={{ duration: 0.25 }}
+      >
+        {/* Header */}
+        <div style={{ background: "#0c3d14", padding: "1.25rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <h3 style={{ fontFamily: "Georgia, serif", fontSize: 20, color: "#fff", fontWeight: 700, marginBottom: 4 }}>{seg.name}</h3>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{seg.sub} · {seg.fee} Registration · {seg.date}</p>
+          </div>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", width: 30, height: 30, borderRadius: "50%", cursor: "pointer", fontSize: 15, flexShrink: 0 }}>✕</button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: "1px solid #eee", background: "#fafafa", paddingLeft: "1rem" }}>
+          <button style={tabStyle(tab === "overview")} onClick={() => setTab("overview")}>Overview</button>
+          {s && <button style={tabStyle(tab === "syllabus")} onClick={() => setTab("syllabus")}>
+            {s.type === "maths" ? "Syllabus" : s.type === "painting" ? "Themes" : s.type === "quiz" ? "Topics & Format" : s.type === "innovators" ? "Judging Criteria" : "Syllabus"}
+          </button>}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "1.25rem 1.5rem", maxHeight: "60vh", overflowY: "auto" }}>
+          {tab === "overview" && (
+            <>
+              {/* About */}
+              <p style={{ fontSize: 13, color: "#555", lineHeight: 1.7, marginBottom: "1.25rem" }}>{seg.about}</p>
+
+              {/* Info grid */}
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Event Info</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "1.25rem" }}>
+                {seg.info.map((r) => (
+                  <div key={r.label} style={{ background: "#f8f8f8", borderRadius: 8, padding: "8px 12px" }}>
+                    <span style={{ fontSize: 11, color: "#999", display: "block", marginBottom: 2 }}>{r.label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{r.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Prizes */}
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Prizes &amp; Rewards</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <tbody>
+                  {seg.prizes.map(([rank, reward]) => (
+                    <tr key={rank} style={{ borderBottom: "0.5px solid #eee" }}>
+                      <td style={{ padding: "7px 0", fontWeight: 600, color: "#0c3d14", width: "38%", verticalAlign: "top" }}>{rank}</td>
+                      <td style={{ padding: "7px 0 7px 12px", color: "#555", verticalAlign: "top" }}>{reward}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {tab === "syllabus" && s && (
+            <>
+              {/* MATHS SYLLABUS */}
+              {s.type === "maths" && (
+                <div>
+                  <p style={{ fontSize: 13, color: "#555", marginBottom: "1rem", lineHeight: 1.6 }}>
+                    The championship is conducted in <strong>6 separate categories</strong> (Class 3 to Class 8). Prizes are awarded independently for each category.
+                  </p>
+                  {s.categories.map((cat: any) => (
+                    <div key={cat.category} style={{ marginBottom: "1.1rem", background: "#f8f8f8", borderRadius: 10, overflow: "hidden" }}>
+                      <div style={{ background: "#0c3d14", padding: "8px 14px" }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{cat.category}</p>
+                      </div>
+                      <div style={{ padding: "10px 14px", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {cat.topics.map((t: string) => (
+                          <span key={t} style={{ fontSize: 12, background: "#e8f5e9", color: "#2e7d32", padding: "3px 10px", borderRadius: 999, fontWeight: 500 }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PAINTING THEMES */}
+              {s.type === "painting" && (
+                <div>
+                  <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 8, padding: "10px 14px", marginBottom: "1rem", fontSize: 13, color: "#5d4037", lineHeight: 1.6 }}>
+                    ⚠️ <strong>Important:</strong> {s.note}
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Possible Themes (prepare all)</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {s.themes.map((theme: string, i: number) => (
+                      <div key={theme} style={{ background: "#f8f8f8", borderRadius: 8, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#0c3d14", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontSize: 13, color: "#333" }}>{theme}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* QUIZ TOPICS */}
+              {s.type === "quiz" && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Topics Covered</p>
+                  <div style={{ marginBottom: "1.25rem" }}>
+                    {s.topics.map((t: any) => (
+                      <div key={t.name} style={{ background: "#f8f8f8", borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#0c3d14", marginBottom: 3 }}>{t.name}</p>
+                        <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>{t.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Competition Format</p>
+                  {s.format.map((step: string, i: number) => (
+                    <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#0c3d14", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                      <p style={{ fontSize: 13, color: "#555", lineHeight: 1.6 }}>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* INNOVATORS CRITERIA */}
+              {s.type === "innovators" && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Judging Criteria</p>
+                  <div style={{ marginBottom: "1.25rem" }}>
+                    {s.criteria.map((c: any, i: number) => (
+                      <div key={c.name} style={{ background: "#f8f8f8", borderRadius: 8, padding: "10px 14px", marginBottom: 8, display: "flex", gap: 12, alignItems: "flex-start" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#0c3d14", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>{i + 1}</span>
+                        <div>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: "#0c3d14", marginBottom: 3 }}>{c.name}</p>
+                          <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>{c.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", marginBottom: 10 }}>Competition Format</p>
+                  {s.format.map((step: string, i: number) => (
+                    <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#0c3d14", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                      <p style={{ fontSize: 13, color: "#555", lineHeight: 1.6 }}>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PRE-NEET SYLLABUS */}
+              {s.type === "preneet" && (
+                <div>
+                  <p style={{ fontSize: 13, color: "#555", marginBottom: "1rem", lineHeight: 1.6 }}>
+                    The exam follows the standard <strong>NTA NEET syllabus</strong> covering Physics, Chemistry, and Biology (Botany + Zoology) from Class 11 and 12.
+                  </p>
+                  {s.subjects.map((subj: any) => (
+                    <div key={subj.name} style={{ marginBottom: "1rem", background: "#f8f8f8", borderRadius: 10, overflow: "hidden" }}>
+                      <div style={{ background: "#0c3d14", padding: "8px 14px" }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{subj.name}</p>
+                      </div>
+                      <div style={{ padding: "10px 14px", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {subj.topics.map((t: string) => (
+                          <span key={t} style={{ fontSize: 12, background: "#e8f5e9", color: "#2e7d32", padding: "3px 10px", borderRadius: 999, fontWeight: 500 }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: "1rem 1.5rem", borderTop: "0.5px solid #eee", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", background: "#f9f9f9" }}>
+          {seg.canRegister ? (
+            <button
+              style={{ background: "#14710F", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+              onClick={() => { onClose(); onRegister((seg as any).registerHref ?? "/events/matengfest/edufest_registration"); }}
+            >
+              Register Now →
+            </button>
+          ) : (
+            <button style={{ background: "#f0f0f0", color: "#aaa", border: "0.5px solid #ddd", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "not-allowed" }} disabled>
+              Registration Closed
+            </button>
+          )}
+          <button
+            style={{ background: "transparent", color: "#333", border: "0.5px solid #ccc", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+            onClick={onClose}
+          >
+            Close
+          </button>
+          <span style={{ fontSize: 12, color: "#aaa", marginLeft: "auto" }}>Contact: +91 60094 49928</span>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────
 export default function MatengFestPage() {
-  const [openTl, setOpenTl] = useState<string | null>("preneet");
+  const [openTl, setOpenTl] = useState<string | null>("maths");
   const [modalSeg, setModalSeg] = useState<Segment | null>(null);
   const router = useRouter();
 
@@ -217,87 +558,38 @@ export default function MatengFestPage() {
 
       {/* ── HERO ── */}
       <section className={styles.hero}>
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8 }}
-    className={styles.heroInner}
-  >
-    <Image
-      src="/mateng-edufest-logo.png"
-      alt="Mateng EduFest 2026"
-      width={600}
-      height={100}
-      priority
-    />
-
-    <h1 className={styles.heroTitle}>
-      Academic Excellence Platform 2026
-    </h1>
-
-    <p className={styles.heroSub}>
-      Competitive • Structured • Scholarship Driven
-    </p>
-
-    {/* Buttons */}
-    <div className={styles.heroButtons}>
-      {/* <button
-        onClick={() =>
-          router.push("/events/matengfest/preneet/admit-card")
-        }
-        className={styles.primaryBtn}
-      >
-        Download Pre-Neet Admit Card →
-      </button> */}
-
-      <button
-        onClick={() =>
-          router.push("/events/matengfest/edufest_registration")
-        }
-        className={styles.primaryBtn}
-      >
-        Register for EduFest →
-      </button>
-    </div>
-
-    {/* Answer Key Links BELOW buttons */}
-    <div className={styles.answerLinks}>
-      <p>Download Pre-NEET Answer Key:</p>
-
-      <a href="/SetA.pdf" target="_blank" rel="noopener noreferrer">
-        Set A
-      </a>{" | "}
-
-      <a href="/SetB.pdf" target="_blank" rel="noopener noreferrer">
-        Set B
-      </a>{" | "}
-
-      <a href="/SetC.pdf" target="_blank" rel="noopener noreferrer">
-        Set C
-      </a>{" | "}
-      <a href="/Key.pdf" target="_blank" rel="noopener noreferrer">
-        Solutions Key(Based on Set A)
-      </a>
-    </div>
-
-  </motion.div>
-</section>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className={styles.heroInner}
+        >
+          <Image
+            src="/mateng-edufest-logo.png"
+            alt="Mateng EduFest 2026"
+            width={600}
+            height={100}
+            priority
+          />
+          <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
+          <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
+          <div className={styles.heroButtons}>
+            <button onClick={() => router.push("/events/matengfest/edufest_registration")} className={styles.primaryBtn}>
+              Register for EduFest →
+            </button>
+          </div>
+        </motion.div>
+      </section>
 
       {/* ── CO-POWERED ── */}
       <div className="w-full flex justify-center px-4 mt-10">
-        <Link
-          href="https://kangleicareersolution.co.in/index"
-          target="_blank"
-          className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw]"
-        >
+        <Link href="https://kangleicareersolution.co.in/index" target="_blank" className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw]">
           <div className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition">
             <div className="px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-10">
               <div className="text-center md:text-left max-w-xl">
                 <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">Co-Powered By</h1>
                 <p className="text-base md:text-lg text-gray-600 mt-3">In Strategic Partnership With</p>
-                <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
-                  Empowering Students Through Structured Competitive Platforms
-                </p>
+                <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">Empowering Students Through Structured Competitive Platforms</p>
               </div>
               <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md">
                 <Image src="/kanglei.png" alt="Kanglei Career Solutions" width={260} height={120} />
@@ -311,10 +603,8 @@ export default function MatengFestPage() {
       <section className={styles.timelineSection}>
         <h2 className={styles.sectionTitle}>EduFest Timeline</h2>
 
-        {/* Horizontal pin row — exact layout from screenshot */}
         <div className={styles.timelineWrapper}>
           <div className={styles.timelineLine} />
-
           {timelineEvents.map((ev) => {
             const isOpen = openTl === ev.id;
             return (
@@ -325,15 +615,12 @@ export default function MatengFestPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                {/* Clickable pin */}
                 <button
                   onClick={() => toggleTl(ev.id)}
                   className={`${styles.timelineCircleBtn} ${isOpen ? styles.timelineCircleActive : ""}`}
                   aria-label={`Toggle ${ev.name}`}
                 />
-
                 <h4>{ev.date}</h4>
-
                 {ev.id === "grand" ? (
                   <>
                     <p className={styles.grandLabel}>Grand Final</p>
@@ -347,16 +634,16 @@ export default function MatengFestPage() {
                 ) : (
                   <p>{ev.name}</p>
                 )}
-
-                {ev.open && (
-                  <span className={styles.tlPinOpenBadge}>Open</span>
+                {ev.open && !ev.closed && <span className={styles.tlPinOpenBadge}>Open</span>}
+                {ev.closed && (
+                  <span style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 600, background: "#fce4ec", color: "#c62828" }}>Closed</span>
                 )}
               </motion.div>
             );
           })}
         </div>
 
-        {/* Expand panel — rendered below the full timeline row */}
+        {/* Expand panel */}
         <AnimatePresence initial={false}>
           {openTl && (() => {
             const ev = timelineEvents.find((e) => e.id === openTl);
@@ -376,10 +663,11 @@ export default function MatengFestPage() {
                       {ev.chips.map((c) => (
                         <span key={c} className={styles.tlChip}>{c}</span>
                       ))}
-                      {ev.open && (
-                        <span className={`${styles.tlChip} ${styles.tlChipGreen}`}>
-                          Registration Open
-                        </span>
+                      {ev.open && !ev.closed && (
+                        <span className={`${styles.tlChip} ${styles.tlChipGreen}`}>Registration Open</span>
+                      )}
+                      {ev.closed && (
+                        <span className={styles.tlChip} style={{ background: "#fce4ec", color: "#c62828", border: "1px solid #f5a0b0" }}>Registration Closed</span>
                       )}
                     </div>
 
@@ -395,30 +683,26 @@ export default function MatengFestPage() {
                     </div>
 
                     <div className={styles.tlCta}>
-                      {ev.open ? (
+                      {ev.canRegister ? (
+                        <button onClick={() => router.push(ev.registerHref!)} className={styles.primaryBtn}>
+                          Register Now →
+                        </button>
+                      ) : ev.closed ? (
                         <>
-                          {/* <button
-                            onClick={() => router.push(ev.registerHref!)}
-                            className={styles.primaryBtn}
-                          >
-                            Register Now
-                          </button> */}
-                          <button
-                            onClick={() => router.push(ev.rulesHref!)}
-                            className={styles.secondaryBtn}
-                          >
-                            Rules &amp; Regulations
-                          </button>
+                          <button className={styles.primaryBtn} style={{ opacity: 0.45, cursor: "not-allowed" }} disabled>Registration Closed</button>
+                          {ev.rulesHref && (
+                            <button onClick={() => router.push(ev.rulesHref!)} className={styles.secondaryBtn}>Rules &amp; Regulations</button>
+                          )}
                         </>
                       ) : (
+                        <button className={styles.secondaryBtn}>Coming Soon</button>
+                      )}
+                      {ev.id !== "grand" && (
                         <button
                           className={styles.secondaryBtn}
-                          onClick={() => {
-                            const seg = segments.find((s) => s.id === ev.id);
-                            if (seg) setModalSeg(seg);
-                          }}
+                          onClick={() => setModalSeg(segments.find((s) => s.id === ev.id) ?? null)}
                         >
-                          View Details
+                          More Details
                         </button>
                       )}
                     </div>
@@ -428,9 +712,7 @@ export default function MatengFestPage() {
                     <p className={styles.tlPrizesTitle}>Prizes &amp; Rewards</p>
                     <ul className={styles.tlPrizeList}>
                       {ev.prizes.map(([rank, reward]) => (
-                        <li key={rank}>
-                          <strong>{rank}:</strong> {reward}
-                        </li>
+                        <li key={rank}><strong>{rank}:</strong> {reward}</li>
                       ))}
                     </ul>
                   </div>
@@ -441,38 +723,84 @@ export default function MatengFestPage() {
         </AnimatePresence>
       </section>
 
+      {/* ── MATHEMATICS SECTION ── */}
+      <section className={styles.mathsSection}>
+        <h2 className={styles.sectionTitle}>Mathematics Championship</h2>
+        <div className={styles.mathsCard}>
+          <div className={styles.mathsHeader}>
+            <div className={styles.mathsIconWrap}>∑</div>
+            <div>
+              <h3 className={styles.mathsTitle}>Mathematics Championship</h3>
+              <p className={styles.mathsSub}>First structured math olympiad for young minds in Manipur — Class 3 to 8</p>
+            </div>
+          </div>
+          <div className={styles.mathsBody}>
+            <div className={styles.mathsCol}>
+              <p className={styles.mathsColLabel}>Event Details</p>
+              {[
+                ["Eligibility", "Class 3 – 8"],
+                ["Registration Fee", "₹200"],
+                ["Exam Date", "12th May 2026"],
+                ["Last Date", "07th May 2026"],
+                ["Admit Card", "10th May 2026"],
+                ["Prize Distribution", "26th May 2026"],
+                ["Venue", "Kakching, Thoubal, Bishnupur, Imphal West"],
+                ["Duration", "2 hours"],
+                ["Format", "MCQ"],
+              ].map(([k, v]) => (
+                <div key={k} className={styles.mathsRow}>
+                  <span className={styles.mathsRowLabel}>{k}</span>
+                  <span className={styles.mathsRowVal}>{v}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.mathsCol}>
+              <p className={styles.mathsColLabel}>Prizes &amp; Rewards</p>
+              {[
+                ["1st Prize (per category)", "₹3,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+                ["2nd Prize (per category)", "₹2,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+                ["3rd Prize (per category)", "₹1,000 + Certificate + Memento + Book ₹1,000 + T-Shirt"],
+                ["25 Consolation Prizes", "Cash Prize + Certificate + T-Shirt"],
+                ["Best Institute Award", "Memento + Certificate of Recognition"],
+              ].map(([rank, reward]) => (
+                <div key={rank} className={styles.mathsPrizeRow}>
+                  <strong>{rank}</strong>
+                  <span>{reward}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={styles.mathsFooter}>
+            <button className={styles.secondaryBtn} onClick={() => setModalSeg(segments.find((s) => s.id === "maths")!)}>
+              More Details &amp; Syllabus
+            </button>
+            <button className={styles.primaryBtn} onClick={() => router.push("/events/matengfest/edufest_registration")}>
+              Register →
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ── PRE-NEET FEATURE ── */}
       <section className={styles.feature}>
         <div className={styles.featureGrid}>
           <div>
             <h2>Pre-NEET Competition</h2>
-            <p className={styles.highlight}>
-              First Structured Pre-NEET Platform in Manipur. A Real-Time NEET Performance Experience.
-            </p>
-            <p>
-              All participants will be eligible for a ₹1,00,000 scholarship if they choose to
-              pursue MBBS abroad through Mateng Events.
-            </p>
+            <p className={styles.highlight}>First Structured Pre-NEET Platform in Manipur. A Real-Time NEET Performance Experience.</p>
+            <p>All participants will be eligible for a ₹1,00,000 scholarship if they choose to pursue MBBS abroad through Mateng Events.</p>
             <p className={styles.meta}>Registration Fee: ₹250</p>
-
             <button
               type="button"
               onClick={() => router.push("/events/matengfest/preneet/preneetrules")}
-              style={{
-                marginTop: "16px", padding: "12px 22px",
-                backgroundColor: "#ffffff", color: "#14710F",
-                border: "2px solid #14710F", borderRadius: "8px",
-                fontWeight: "600", cursor: "pointer", fontSize: "15px",
-              }}
+              style={{ marginTop: "16px", padding: "12px 22px", backgroundColor: "#ffffff", color: "#14710F", border: "2px solid #14710F", borderRadius: "8px", fontWeight: "600", cursor: "pointer", fontSize: "15px" }}
             >
               Rules &amp; Regulations
             </button>
             <div className={styles.dateBox}>
               <h2>Important Dates &amp; Venue</h2>
               <ul>
-                <li><strong>Last Date:</strong> 04th April 2026</li>
-                <li><strong>Admit Card:</strong> 05th April 2026</li>
-                <li><strong>Exam Date:</strong> 20th April 2026 (Tuesday)</li>
+                <li><strong>Exam Date:</strong> 20th April 2026</li>
+                <li><strong>Prize Distribution:</strong> 26th May 2026</li>
                 <h4><strong>Venue: </strong>Manipur University, Imphal</h4>
               </ul>
             </div>
@@ -486,72 +814,13 @@ export default function MatengFestPage() {
               <li><strong>10 Consolation Prizes:</strong> Cash Prize + Book worth ₹1,000 + Certificate</li>
               <li><strong>Best Institute Award</strong></li>
             </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ── MATHEMATICS SECTION ── */}
-      <section className={styles.mathsSection}>
-        <h2 className={styles.sectionTitle}>Mathematics Championship</h2>
-        <div className={styles.mathsCard}>
-          <div className={styles.mathsHeader}>
-            <div className={styles.mathsIconWrap}>∑</div>
-            <div>
-              <h3 className={styles.mathsTitle}>Mathematics Championship</h3>
-              <p className={styles.mathsSub}>
-                First structured math olympiad for young minds in Manipur — Class 3 to 8
-              </p>
+            <div className={styles.answerLinks}>
+              <p>Download Pre-NEET Answer Key:</p>
+              <a href="/SetA.pdf" target="_blank" rel="noopener noreferrer">Set A</a>{" | "}
+              <a href="/SetB.pdf" target="_blank" rel="noopener noreferrer">Set B</a>{" | "}
+              <a href="/SetC.pdf" target="_blank" rel="noopener noreferrer">Set C</a>{" | "}
+              <a href="/Key.pdf" target="_blank" rel="noopener noreferrer">Solutions Key (Based on Set A)</a>
             </div>
-          </div>
-
-          <div className={styles.mathsBody}>
-            {/* Left: details */}
-            <div className={styles.mathsCol}>
-              <p className={styles.mathsColLabel}>Event Details</p>
-              {[
-                ["Eligibility", "Class 3 – 8"],
-                ["Registration Fee", "₹200"],
-                ["Exam Date", "Posponed until futher notice"],
-                ["Venue", "Kakching, Thoubal, Bishnupur, Imphal West"],
-                ["Duration", "2 hours"],
-                ["Format", "MCQ"],
-              ].map(([k, v]) => (
-                <div key={k} className={styles.mathsRow}>
-                  <span className={styles.mathsRowLabel}>{k}</span>
-                  <span className={styles.mathsRowVal}>{v}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Right: prizes */}
-            <div className={styles.mathsCol}>
-              <p className={styles.mathsColLabel}>Prizes &amp; Rewards</p>
-              {[
-                ["1st Prize", "₹3,000(each Category) + Certificate +  Book worth 1000 + T shirt"],
-                ["2nd Prize", "₹2,000(each Category) + Certificate + Book worth 1000 + T shirt"],
-                ["3rd Prize", "₹1,000(each Category)  + Certificate +  Book worth 1000 + T shirt"],
-                ["25 Consolation Prizes", "Cash + Certificate"],
-                ["Best School Award", "Special Trophy"],
-              ].map(([rank, reward]) => (
-                <div key={rank} className={styles.mathsPrizeRow}>
-                  <strong>{rank}</strong>
-                  <span>{reward}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.mathsFooter}>
-            <span className={styles.mathsNote}>Registration link opening soon</span>
-            <button className={styles.secondaryBtn} onClick={() => setModalSeg(segments.find((s) => s.id === "maths")!)}>
-              Full Details
-            </button>
-            <button
-              className={styles.primaryBtn}
-              onClick={() => router.push("/events/matengfest/edufest_registration")}
-            >
-              Register →
-            </button>
           </div>
         </div>
       </section>
@@ -563,9 +832,7 @@ export default function MatengFestPage() {
             <div className="text-center md:text-left max-w-xl">
               <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">Academic Partner</h1>
               <p className="text-base md:text-lg text-gray-600 mt-3">In Collaboration With</p>
-              <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">
-                Supporting Educational Growth Through Strategic Academic Partnership
-              </p>
+              <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">Supporting Educational Growth Through Strategic Academic Partnership</p>
             </div>
             <a href="https://www.facebook.com/khan.sarori" target="_blank" rel="noopener noreferrer">
               <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md cursor-pointer hover:shadow-lg transition">
@@ -579,30 +846,22 @@ export default function MatengFestPage() {
       {/* ── CHAMPIONSHIP SEGMENTS ── */}
       <section className={styles.segments}>
         <h2 className={styles.sectionTitle}>Championship Segments</h2>
-        <p className={styles.segmentsNote}>
-          Click any segment to view full details and registration options.
-        </p>
-
+        <p className={styles.segmentsNote}>Click any segment to view full details, syllabus, and registration.</p>
         <div className={styles.segmentGrid}>
           {segments.map((seg) => (
-            <button
-              key={seg.id}
-              className={styles.segmentCard}
-              onClick={() => setModalSeg(seg)}
-            >
-              {/* Badge */}
-              {seg.open ? (
+            <button key={seg.id} className={styles.segmentCard} onClick={() => setModalSeg(seg)}>
+              {seg.closed ? (
+                <span className={styles.segSoonBadge} style={{ background: "#fce4ec", color: "#c62828" }}>Closed</span>
+              ) : seg.open ? (
                 <span className={styles.segOpenBadge}>Open</span>
               ) : (
                 <span className={styles.segSoonBadge}>Soon</span>
               )}
-
               <h3>{seg.name}</h3>
               <p>{seg.sub}</p>
-              <p className={styles.segFee}>₹{seg.fee.replace("₹", "")} Registration</p>
+              <p className={styles.segFee}>{seg.fee} Registration</p>
               <p className={styles.segDate}>{seg.date}</p>
-
-              <span className={styles.segViewBtn}>View Details →</span>
+              <span className={styles.segViewBtn}>View Details &amp; Syllabus →</span>
             </button>
           ))}
         </div>
@@ -610,138 +869,75 @@ export default function MatengFestPage() {
 
       {/* ── GRAND FINAL ── */}
       <section className={styles.grandFinal}>
-        <h2 className={styles.sectionTitle}>Grand Final Event – Postpone until further notice</h2>
+        <h2 className={styles.sectionTitle}>Grand Final Event – 26th May 2026</h2>
         <div className={styles.grandCard}>
-          {/* <p>The Grand Final Event will be conducted on 24th May 2026. Venue will be announced soon.</p> */}
           <h4>On-Spot Competitions:</h4>
           <ul>
             <li>Grand Final Quiz Competition</li>
             <li>Painting Competition</li>
             <li>Young Innovators Challenge</li>
           </ul>
-          <p>
-            The Grand Final will also include the Prize Distribution Ceremony for all Mateng EduFest
-            2026 championship segments.
-          </p>
-          {/* ── NEW BUTTON ── */}
+          <p>The Grand Final will also include the Prize Distribution Ceremony for all Mateng EduFest 2026 championship segments.</p>
           <button
             type="button"
             onClick={() => router.push("/events/matengfest/edufest_registration")}
-            style={{
-              marginTop: "20px", padding: "12px 24px",
-              backgroundColor: "#14710F", color: "#ffffff",
-              border: "none", borderRadius: "8px",
-              fontWeight: "600", cursor: "pointer",
-              fontSize: "15px",
-            }}
+            style={{ marginTop: "20px", padding: "12px 24px", backgroundColor: "#14710F", color: "#ffffff", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer", fontSize: "15px" }}
           >
             Register for EduFest →
           </button>
         </div>
       </section>
 
-      {/* ── SEGMENT MODAL ── */}
+      {/* ── GENERAL RULES ── */}
+      <section style={{ maxWidth: 860, margin: "0 auto 3rem", padding: "0 1rem" }}>
+        <h2 className={styles.sectionTitle}>General Rules &amp; Regulations</h2>
+        <div style={{ background: "#f8f8f8", borderRadius: 14, padding: "1.5rem", border: "0.5px solid #e0e0e0" }}>
+          {[
+            "Registration fees once paid are non-refundable.",
+            "Participants must report at least 45 minutes before their scheduled event.",
+            "Participants must carry their Admit Card along with a valid ID proof (Aadhaar Card, PAN Card, or School ID) for verification.",
+            "Admit cards without the seal and signature of the competent authority will not be valid for entry.",
+            "Mobile phones or unfair means are strictly prohibited during competitions.",
+            "Any form of misconduct may lead to disqualification.",
+            "The decision of judges and the organizing committee will be final and binding.",
+            "Requests for rechecking must be submitted within 10 days of result declaration, along with a rechecking fee of ₹1,000.",
+            "The organizing committee reserves the right to modify rules if necessary.",
+          ].map((rule, i) => (
+            <div key={i} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#14710F", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+              <p style={{ fontSize: 13, color: "#444", lineHeight: 1.6, margin: 0 }}>{rule}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Application Centres */}
+        <div style={{ marginTop: "1.5rem", background: "#f0f7f0", borderRadius: 14, padding: "1.5rem", border: "0.5px solid #c8e6c9" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#0c3d14", marginBottom: 10 }}>📍 Offline Application Centres</p>
+          {[
+            "Mateng Office — Sagolband Sayang Leirak, Imphal (near Indian Oil Pump Sayang)",
+            "Kanglei Career Solutions — Checkon, near Traffic Island Checkon",
+            "Nefsa Education Consultant — Hapta, Imphal",
+            "Kanglei Career Solutions — Thoubal Bazar, near Post Office Thoubal",
+          ].map((centre, i) => (
+            <p key={i} style={{ fontSize: 13, color: "#444", marginBottom: 5, lineHeight: 1.5 }}>• {centre}</p>
+          ))}
+          <p style={{ fontSize: 13, color: "#0c3d14", fontWeight: 600, marginTop: 10 }}>
+            🌐 Apply online at: <a href="http://www.justmateng.com" target="_blank" rel="noopener noreferrer" style={{ color: "#14710F" }}>www.justmateng.com</a> (No form fee for online applications)
+          </p>
+        </div>
+      </section>
+
+      {/* ── DETAIL MODAL ── */}
       <AnimatePresence>
         {modalSeg && (
-          <motion.div
-            className={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setModalSeg(null);
-            }}
-          >
-            <motion.div
-              className={styles.modalBox}
-              initial={{ opacity: 0, y: 40, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.97 }}
-              transition={{ duration: 0.25 }}
-            >
-              {/* Header */}
-              <div className={styles.modalHead}>
-                <div>
-                  <h3 className={styles.modalTitle}>{modalSeg.name}</h3>
-                  <p className={styles.modalSub}>
-                    {modalSeg.sub} · {modalSeg.fee} Registration
-                  </p>
-                </div>
-                <button className={styles.modalClose} onClick={() => setModalSeg(null)}>✕</button>
-              </div>
-
-              {/* Body */}
-              <div className={styles.modalBody}>
-                {/* About */}
-                <div className={styles.modalSection}>
-                  <p className={styles.modalSectionLabel}>About</p>
-                  <p className={styles.modalAbout}>{modalSeg.about}</p>
-                </div>
-
-                {/* Info grid */}
-                <div className={styles.modalSection}>
-                  <p className={styles.modalSectionLabel}>Event Info</p>
-                  <div className={styles.modalInfoGrid}>
-                    {modalSeg.info.map((row) => (
-                      <div key={row.label} className={styles.modalInfoCell}>
-                        <span className={styles.modalInfoLabel}>{row.label}</span>
-                        <span className={styles.modalInfoVal}>{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Prizes */}
-                <div className={styles.modalSection}>
-                  <p className={styles.modalSectionLabel}>Prizes &amp; Rewards</p>
-                  <table className={styles.modalPrizeTable}>
-                    <tbody>
-                      {modalSeg.prizes.map(([rank, reward]) => (
-                        <tr key={rank}>
-                          <td className={styles.modalPrizeRank}>{rank}</td>
-                          <td className={styles.modalPrizeReward}>{reward}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Footer */}
-              {/* Footer */}
-              <div className={styles.modalFooter}>
-                {modalSeg.open && modalSeg.registerHref ? (
-                  <button
-                    className={styles.primaryBtn}
-                    onClick={() => {
-                      setModalSeg(null);
-                      router.push(modalSeg.registerHref!);
-                    }}
-                  >
-                    Register Now →
-                  </button>
-                ) : (
-                  <button
-                    className={styles.primaryBtn}
-                    onClick={() => {
-                      setModalSeg(null);
-                      router.push("/events/matengfest/edufest_registration");
-                    }}
-                  >
-                    Register on EduFest →
-                  </button>
-                )}
-                <button className={styles.secondaryBtn} onClick={() => setModalSeg(null)}>
-                  Close
-                </button>
-                <span className={styles.modalContact}>Contact: +91 70855 71865</span>
-              </div>
-            </motion.div>
-          </motion.div>
+          <DetailModal
+            seg={modalSeg}
+            onClose={() => setModalSeg(null)}
+            onRegister={(href) => router.push(href)}
+          />
         )}
       </AnimatePresence>
 
-      {/* ── FOOTER ── */}
       <footer className={styles.footer}>© 2026 Justmateng Service Pvt. Ltd.</footer>
     </div>
   );
