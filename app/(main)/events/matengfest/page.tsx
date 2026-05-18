@@ -22,7 +22,7 @@ const timelineEvents = [
       // { label: "Last Date", value: "4th April 2026" },
       // { label: "Admit Card", value: "5th April 2026" },
       { label: "Exam Date", value: "20th April 2026" },
-      { label: "Prize Distribution", value: "26th May 2026" },
+      { label: "Prize Distribution", value: "26th July 2026" },
       { label: "Venue", value: "Manipur University, Imphal" },
       { label: "Duration", value: "3 hours 20 minutes" },
     ],
@@ -39,17 +39,17 @@ const timelineEvents = [
   },
   {
     id: "maths",
-    date: "12th May 2026",
+    date: "12th July 2026",
     name: "Mathematics Championship",
     chips: ["Class 3–8", "₹200 Fee"],
     open: true,
     closed: false,
     body: "A rigorous mathematics olympiad to identify and celebrate young math talent across primary and middle school students in Manipur. Conducted in 6 separate categories (Class 3 to Class 8).",
     info: [
-      { label: "Last Date", value: "07th May 2026" },
-      { label: "Admit Card", value: "10th May 2026" },
-      { label: "Exam Date", value: "12th May 2026" },
-      { label: "Prize Distribution", value: "26th May 2026" },
+      { label: "Last Date", value: "07th July 2026" },
+      { label: "Admit Card", value: "10th July 2026" },
+      { label: "Exam Date", value: "12th July 2026" },
+      { label: "Prize Distribution", value: "26th July 2026" },
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
       { label: "Duration", value: "2 hours" },
       { label: "Format", value: "MCQ" },
@@ -66,18 +66,18 @@ const timelineEvents = [
   },
   {
     id: "grand",
-    date: "26th May 2026",
+    date: "26th July 2026",
     name: "Grand Final — Multi-Event Day",
     chips: ["All Segments", "Prize Ceremony"],
     open: true,
     closed: false,
     body: "The culminating event of Mateng EduFest 2026. Quiz Championship, Painting Competition, and Young Innovators Challenge — all on the same day, followed by the grand prize distribution ceremony.",
     info: [
-      { label: "Quiz Last Date", value: "18th May 2026" },
-      { label: "Painting Last Date", value: "18th May 2026" },
-      { label: "Innovators Last Date", value: "18th May 2026" },
-      { label: "Admit Card", value: "20th May 2026" },
-      { label: "Event Date", value: "26th May 2026" },
+      { label: "Quiz Last Date", value: "18th July 2026" },
+      { label: "Painting Last Date", value: "18th July 2026" },
+      { label: "Innovators Last Date", value: "18th July 2026" },
+      { label: "Admit Card", value: "20th July 2026" },
+      { label: "Event Date", value: "26th July 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
@@ -133,7 +133,7 @@ const segments = [
       { label: "Last Date", value: "4th April 2026" },
       { label: "Admit Card", value: "5th April 2026" },
       { label: "Exam Date", value: "7th April 2026" },
-      { label: "Prize Distribution", value: "26th May 2026" },
+      { label: "Prize Distribution", value: "26th July 2026" },
       { label: "Venue", value: "Manipur University, Imphal" },
     ],
     prizes: [
@@ -159,7 +159,7 @@ const segments = [
     name: "Mathematics Championship",
     sub: "Class 3 – 8",
     fee: "₹200",
-    date: "12th May 2026",
+    date: "12th July 2026",
     open: true,
     closed: false,
     about: "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Conducted in 6 separate categories (Class 3 to Class 8). Prizes are awarded separately for each class category.",
@@ -167,10 +167,10 @@ const segments = [
       { label: "Eligibility", value: "Class 3 to 8" },
       { label: "Duration", value: "2 hours" },
       { label: "Format", value: "MCQ" },
-      { label: "Last Date", value: "07th May 2026" },
-      { label: "Admit Card", value: "10th May 2026" },
-      { label: "Exam Date", value: "12th May 2026" },
-      { label: "Prize Distribution", value: "26th May 2026" },
+      { label: "Last Date", value: "07th July 2026" },
+      { label: "Admit Card", value: "10th July 2026" },
+      { label: "Exam Date", value: "12th July 2026" },
+      { label: "Prize Distribution", value: "26th July 2026" },
       { label: "Venue", value: "Kakching, Thoubal, Bishnupur, Imphal West" },
     ],
     prizes: [
@@ -192,7 +192,7 @@ const segments = [
     name: "Painting Championship",
     sub: "Class 3–8 (Open)",
     fee: "₹150",
-    date: "26th May 2026",
+    date: "26th July 2026",
     open: true,
     closed: false,
     about: "An on-the-spot painting competition exploring creativity and artistic expression. 3 themes will be announced on the day from the prepared list. Participants must choose one of the announced themes.",
@@ -200,9 +200,9 @@ const segments = [
       { label: "Eligibility", value: "Class 3 to 8 (Open)" },
       { label: "Duration", value: "3 hours" },
       { label: "Format", value: "On-spot painting" },
-      { label: "Last Date", value: "18th May 2026" },
-      { label: "Admit Card", value: "20th May 2026" },
-      { label: "Event Date", value: "26th May 2026" },
+      { label: "Last Date", value: "18th July 2026" },
+      { label: "Admit Card", value: "20th July 2026" },
+      { label: "Event Date", value: "26th July 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
@@ -235,16 +235,16 @@ const segments = [
     name: "Quiz Championship",
     sub: "Class 6 – 10",
     fee: "₹300",
-    date: "26th May 2026",
+    date: "26th July 2026",
     open: true,
     closed: false,
     about: "A multi-round quiz championship. The preliminary round is a written test. Top 5 teams qualify for the Final Stage Round, conducted live on stage by the Quiz Master.",
     info: [
       { label: "Eligibility", value: "Class 6 to 10" },
       { label: "Format", value: "Preliminary (Written) + Live Final" },
-      { label: "Last Date", value: "18th May 2026" },
-      { label: "Admit Card", value: "20th May 2026" },
-      { label: "Event Date", value: "26th May 2026" },
+      { label: "Last Date", value: "18th July 2026" },
+      { label: "Admit Card", value: "20th July 2026" },
+      { label: "Event Date", value: "26th July 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
@@ -275,16 +275,16 @@ const segments = [
     name: "Young Innovators Challenge",
     sub: "Class 9–12 · Science & Tech",
     fee: "₹300",
-    date: "26th May 2026",
+    date: "26th July 2026",
     open: true,
     closed: false,
     about: "Students present innovative ideas or projects that solve real-world problems using science and technology. Top 5 presentations are selected to pitch live on stage before judges and audience.",
     info: [
       { label: "Eligibility", value: "Class 9 to 12 (Open)" },
       { label: "Format", value: "Project Presentation + Live Pitch" },
-      { label: "Last Date", value: "18th May 2026" },
-      { label: "Admit Card", value: "20th May 2026" },
-      { label: "Event Date", value: "26th May 2026" },
+      { label: "Last Date", value: "18th July 2026" },
+      { label: "Admit Card", value: "20th July 2026" },
+      { label: "Event Date", value: "26th July 2026" },
       { label: "Venue", value: "To be announced" },
     ],
     prizes: [
@@ -740,10 +740,10 @@ export default function MatengFestPage() {
               {[
                 ["Eligibility", "Class 3 – 8"],
                 ["Registration Fee", "₹200"],
-                ["Exam Date", "12th May 2026"],
-                ["Last Date", "07th May 2026"],
-                ["Admit Card", "10th May 2026"],
-                ["Prize Distribution", "26th May 2026"],
+                ["Exam Date", "12th July 2026"],
+                ["Last Date", "07th July 2026"],
+                ["Admit Card", "10th July 2026"],
+                ["Prize Distribution", "26th July 2026"],
                 ["Venue", "Kakching, Thoubal, Bishnupur, Imphal West"],
                 ["Duration", "2 hours"],
                 ["Format", "MCQ"],
@@ -800,7 +800,7 @@ export default function MatengFestPage() {
               <h2>Important Dates &amp; Venue</h2>
               <ul>
                 <li><strong>Exam Date:</strong> 20th April 2026</li>
-                <li><strong>Prize Distribution:</strong> 26th May 2026</li>
+                <li><strong>Prize Distribution:</strong> 26th July 2026</li>
                 <h4><strong>Venue: </strong>Manipur University, Imphal</h4>
               </ul>
             </div>
@@ -869,7 +869,7 @@ export default function MatengFestPage() {
 
       {/* ── GRAND FINAL ── */}
       <section className={styles.grandFinal}>
-        <h2 className={styles.sectionTitle}>Grand Final Event – 26th May 2026</h2>
+        <h2 className={styles.sectionTitle}>Grand Final Event – 26th July 2026</h2>
         <div className={styles.grandCard}>
           <h4>On-Spot Competitions:</h4>
           <ul>
