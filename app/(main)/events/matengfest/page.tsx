@@ -587,11 +587,36 @@ export default function MatengFestPage() {
           />
           <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
           <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
-          <div className={styles.heroButtons}>
-            <button onClick={() => router.push("/events/matengfest/edufest_registration")} className={styles.primaryBtn}>
-              Register for EduFest →
-            </button>
-          </div>
+          <div className={styles.heroButtons} style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
+  <button
+    onClick={() => router.push("/events/matengfest/edufest_registration")}
+    className={styles.primaryBtn}
+  >
+    Register for EduFest →
+  </button>
+
+  {/* Prospectus Download */}
+  <a
+    href="/bulletin.pdf"
+    download
+    style={{
+      padding: "12px 20px",
+      borderRadius: "10px",
+      background: "#ffffff",
+      color: "#14710F",
+      border: "2px solid #14710F",
+      fontWeight: 600,
+      fontSize: "14px",
+      textDecoration: "none",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "0.2s",
+    }}
+  >
+    Download Prospectus & Syllabus
+  </a>
+</div>
         </motion.div>
       </section>
 

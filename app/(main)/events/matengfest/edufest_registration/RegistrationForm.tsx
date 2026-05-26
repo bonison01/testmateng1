@@ -43,8 +43,27 @@ export default function RegistrationForm() {
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white mb-2" style={{ fontFamily: "'Syne', sans-serif" }}>
             Competition Registration
           </h1>
+          
           <p className="text-gray-400 text-sm">Inspiring Young Minds Through Creativity, Knowledge & Innovation</p>
+<div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+  {/* Prospectus */}
+  <a
+    href="/bulletin.pdf"
+    download
+    className="px-5 py-2.5 rounded-xl bg-emerald-500 text-black font-semibold text-sm hover:bg-emerald-400 transition-all duration-200 shadow-lg shadow-emerald-500/20"
+  >
+    Download Prospectus
+  </a>
 
+  {/* Maths Syllabus */}
+  <a
+    href="/syllabus.pdf"
+    download
+    className="px-5 py-2.5 rounded-xl border border-emerald-500/40 bg-white/5 text-emerald-300 font-semibold text-sm hover:bg-emerald-500/10 transition-all duration-200"
+  >
+    Download Maths Syllabus
+  </a>
+</div>
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-3 mt-8">
             {[
