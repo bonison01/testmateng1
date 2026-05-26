@@ -531,12 +531,26 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
               Registration Closed
             </button>
           )}
-          <button
-            style={{ background: "transparent", color: "#333", border: "0.5px solid #ccc", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
-            onClick={onClose}
-          >
-            Close
-          </button>
+          {/* Syllabus Download */}
+<a
+  href={`/bulletin.pdf`}
+  download
+  style={{
+    background: "#ffffff",
+    color: "#14710F",
+    border: "1px solid #14710F",
+    borderRadius: 8,
+    padding: "9px 18px",
+    fontSize: 13,
+    fontWeight: 600,
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  Download Prospectus & Syllabus
+</a>
           <span style={{ fontSize: 12, color: "#aaa", marginLeft: "auto" }}>Contact: +91 60094 49928</span>
         </div>
       </motion.div>
