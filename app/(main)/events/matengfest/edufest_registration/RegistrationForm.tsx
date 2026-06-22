@@ -108,6 +108,7 @@ export default function RegistrationForm() {
           <Step2Payment
             formData={formData}
             registrationId={registrationId}
+            onBack={() => setStep(1)}
           />
         )}
       </div>

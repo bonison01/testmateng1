@@ -1,11 +1,29 @@
+import { createClient } from '@supabase/supabase-js';
+
+// ─────────────────────────────────────────────────────────────────────────
+// Supabase client
+// ─────────────────────────────────────────────────────────────────────────
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Storage bucket that holds passport photos, signatures, and payment screenshots.
+export const DOCUMENTS_BUCKET = 'edufest-documents';
+
+// ─────────────────────────────────────────────────────────────────────────
+// Domain types
+// ─────────────────────────────────────────────────────────────────────────
+export type CompetitionKey = 'painting' | 'quiz' | 'mathematics' | 'young_innovator';
+
+export type DocumentType = 'passport_photo' | 'candidate_signature' | 'payment_screenshot';
+
 export interface TeamMember {
   name: string;
   student_class: string;
   dob: string;
   institution_name: string;
 }
-
-export type CompetitionKey = 'painting' | 'quiz' | 'mathematics' | 'young_innovator';
 
 export interface FormData {
   full_name: string;
@@ -27,6 +45,18 @@ export interface FormData {
   candidate_signature: File | null;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Competition metadata
+// ─────────────────────────────────────────────────────────────────────────
+export const COMPETITION_LABELS: Record<CompetitionKey, string> = {
+  painting: 'Painting',
+  quiz: 'Quiz',
+  mathematics: 'Mathematics',
+  young_innovator: 'Young Innovator',
+};
+
+// Per-competition base fee (₹). Quiz and Young Innovator are team events —
+// the fee is per team, not per member, unless noted otherwise by your rules.
 export const COMPETITION_FEES: Record<CompetitionKey, number> = {
   painting: 150,
   quiz: 300,
@@ -34,43 +64,36 @@ export const COMPETITION_FEES: Record<CompetitionKey, number> = {
   young_innovator: 300,
 };
 
-export const COMPETITION_LABELS: Record<CompetitionKey, string> = {
-  painting: 'Painting Competition',
-  quiz: 'Quiz Competition',
-  mathematics: 'Mathematics Championship',
-  young_innovator: 'Young Innovators Challenge',
-};
-
 export const COMPETITION_DATES: Record<CompetitionKey, string> = {
-  painting: '24 May 2026',
-  quiz: '24 May 2026',
-  mathematics: '26 April 2026',
-  young_innovator: '24 May 2026',
+  painting: 'TBA',
+  quiz: 'TBA',
+  mathematics: 'TBA',
+  young_innovator: 'TBA',
 };
 
 export const COMPETITION_ELIGIBILITY: Record<CompetitionKey, string> = {
-  painting: 'Class 3–8',
-  quiz: 'Class 6–10',
-  mathematics: 'Class 3–8',
-  young_innovator: 'Class 9–12',
+  painting: 'Class 1–12',
+  quiz: 'Class 1–12',
+  mathematics: 'Class 1–12',
+  young_innovator: 'Class 1–12',
 };
 
+/**
+ * Calculates the total registration fee across all selected competitions.
+ * Team-eligible competitions (quiz, young_innovator) are multiplied by team
+ * size when participation_type is 'team'; everything else is a flat per-entry fee.
+ */
 export function calculateTotalFee(
   categories: CompetitionKey[],
   participationType: 'individual' | 'team',
   teamSize: number | null
 ): number {
-  let total = 0;
-  for (const cat of categories) {
-    const baseFee = COMPETITION_FEES[cat];
-    if (participationType === 'team' && teamSize && (cat === 'quiz' || cat === 'young_innovator')) {
-      total += baseFee * teamSize;
-    } else {
-      total += baseFee;
+  return categories.reduce((total, cat) => {
+    const base = COMPETITION_FEES[cat];
+    const isTeamEligible = cat === 'quiz' || cat === 'young_innovator';
+    if (participationType === 'team' && isTeamEligible && teamSize) {
+      return total + base * teamSize;
     }
-  }
-  return total;
+    return total + base;
+  }, 0);
 }
-
-export const API_BASE = 'https://api.justmateng.info';
-// export const API_BASE = 'http://127.0.0.1:8000';

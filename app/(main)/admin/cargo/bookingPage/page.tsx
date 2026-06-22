@@ -17,9 +17,11 @@ import {
   Camera,
   X,
   Loader2,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -155,6 +157,7 @@ const PartyCard = ({
       <div className="space-y-4">
         <Field label="Full name" required>
           <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
             value={form[name]}
             onChange={(e) => update(name, e.target.value as never)}
             placeholder="e.g. Bonison"
@@ -164,6 +167,7 @@ const PartyCard = ({
         </Field>
         <Field label="Phone number" required>
           <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
             value={form[phone]}
             onChange={(e) => update(phone, e.target.value.replace(/\D/g, "").slice(0, 10) as never)}
             placeholder="10 digit mobile number"
@@ -174,6 +178,7 @@ const PartyCard = ({
         </Field>
         <Field label="Address" required>
           <Textarea
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
             value={form[address]}
             onChange={(e) => update(address, e.target.value as never)}
             placeholder="House / street / locality"
@@ -185,6 +190,7 @@ const PartyCard = ({
         <div className="grid grid-cols-2 gap-3">
           <Field label="City / state">
             <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
               value={form[cityState]}
               onChange={(e) => update(cityState, e.target.value as never)}
               placeholder="e.g. Imphal, Manipur"
@@ -192,6 +198,7 @@ const PartyCard = ({
           </Field>
           <Field label="Pincode" required>
             <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
               value={form[pincode]}
               onChange={(e) => update(pincode, e.target.value.replace(/\D/g, "").slice(0, 6) as never)}
               placeholder="795103"
@@ -215,6 +222,7 @@ export default function CargoBookingForm({
 }: {
   onSuccess?: () => void;
 }) {
+  const router = useRouter();
   const [form, setForm] = useState<CargoFormData>(emptyForm);
   const [trackingId] = useState(generateTrackingId());
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -336,9 +344,20 @@ export default function CargoBookingForm({
           <h1 className="text-lg font-medium text-neutral-900">New booking</h1>
           <p className="text-sm text-neutral-500">Enter shipper and consignee details</p>
         </div>
-        <div className="text-right">
-          <p className="text-[11px] uppercase tracking-wide text-neutral-400">Tracking ID</p>
-          <p className="font-mono text-sm font-medium text-emerald-700">{trackingId}</p>
+        <div className="flex items-center gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/cargo")}
+            className="border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+          >
+            <List className="mr-1.5 h-4 w-4" />
+            View bookings
+          </Button>
+          <div className="text-right">
+            <p className="text-[11px] uppercase tracking-wide text-neutral-400">Tracking ID</p>
+            <p className="font-mono text-sm font-medium text-emerald-700">{trackingId}</p>
+          </div>
         </div>
       </div>
 
@@ -358,6 +377,7 @@ export default function CargoBookingForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Product name" required>
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.product_name}
                 onChange={(e) => update("product_name", e.target.value)}
                 placeholder="e.g. Clothes"
@@ -367,6 +387,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Weight estimate (kg)" required>
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.weight_estimate}
                 onChange={(e) => update("weight_estimate", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="10"
@@ -377,10 +398,13 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Delivery mode" required>
               <Select value={form.delivery_mode} onValueChange={(v) => update("delivery_mode", v as CargoFormData["delivery_mode"])}>
-                <SelectTrigger aria-invalid={!!errors.delivery_mode}>
+                <SelectTrigger
+                  className="bg-white text-neutral-900 border-neutral-300"
+                  aria-invalid={!!errors.delivery_mode}
+                >
                   <SelectValue placeholder="Choose mode" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-neutral-900">
                   <SelectItem value="standard">Standard</SelectItem>
                   <SelectItem value="express">Express</SelectItem>
                 </SelectContent>
@@ -389,10 +413,10 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Current status">
               <Select value={form.status} onValueChange={(v) => update("status", v as CargoFormData["status"])}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white text-neutral-900 border-neutral-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-neutral-900">
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Out for Delivery">Out for delivery</SelectItem>
                   <SelectItem value="Delivered">Delivered</SelectItem>
@@ -423,6 +447,7 @@ export default function CargoBookingForm({
 
             <Field label="Third-party tracking (optional)">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.third_party_tracking}
                 onChange={(e) => update("third_party_tracking", e.target.value)}
                 placeholder="Courier partner AWB number"
@@ -453,6 +478,7 @@ export default function CargoBookingForm({
 
             <Field label="Notes" className="sm:col-span-2">
               <Textarea
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.notes}
                 onChange={(e) => update("notes", e.target.value)}
                 placeholder="Fragile, handle with care, etc."
@@ -468,6 +494,7 @@ export default function CargoBookingForm({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <Field label="Estimate charge" required>
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.estimate_charge}
                 onChange={(e) => update("estimate_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="100"
@@ -478,6 +505,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Handling charge">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.handling_charge}
                 onChange={(e) => update("handling_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0"
@@ -486,6 +514,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Docket charge">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.docket_charge}
                 onChange={(e) => update("docket_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0"
@@ -494,6 +523,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Pickup charge">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.pickup_charge}
                 onChange={(e) => update("pickup_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0"
@@ -502,6 +532,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Packaging charge">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.packaging_charge}
                 onChange={(e) => update("packaging_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0"
@@ -510,6 +541,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Extra mile delivery">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.extra_mile_delivery}
                 onChange={(e) => update("extra_mile_delivery", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0"
@@ -518,6 +550,7 @@ export default function CargoBookingForm({
             </Field>
             <Field label="Final charge (optional)">
               <Input
+            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.final_charge}
                 onChange={(e) => update("final_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="Settled after delivery"

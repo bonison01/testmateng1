@@ -1,8 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { type FormData, type TeamMember, type CompetitionKey, COMPETITION_LABELS, COMPETITION_FEES, COMPETITION_DATES, COMPETITION_ELIGIBILITY, calculateTotalFee, API_BASE } from './type';
+import React, { useState, useRef } from 'react';
+import {
+    type FormData,
+    type TeamMember,
+    type CompetitionKey,
+    type DocumentType,
+    COMPETITION_LABELS,
+    COMPETITION_FEES,
+    COMPETITION_DATES,
+    COMPETITION_ELIGIBILITY,
+    calculateTotalFee,
+    supabase,
+    DOCUMENTS_BUCKET,
+} from './type';
+// NOTE: Duplicate-registration lookup (by phone/email) has been removed.
+// Every submission always creates a brand-new registration row, even if
+// the same phone number or email was used before.
 
 import {
     Select,
@@ -39,16 +54,11 @@ const DISABLED_INPUT_CLASS = "w-full !bg-white/5 border !border-white/10 rounded
 
 export default function Step1Details({ formData, setFormData, onNext }: Props) {
     const [loading, setLoading] = useState(false);
+    const [submitStage, setSubmitStage] = useState<'saving' | 'uploading' | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [lookingUp, setLookingUp] = useState(false);
-    const [existingReg, setExistingReg] = useState<any>(null);
-    const [isExistingMode, setIsExistingMode] = useState(false);
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [sigPreview, setSigPreview] = useState<string | null>(null);
-
-    const [hasPassportPhoto, setHasPassportPhoto] = useState(false);
-    const [hasSignature, setHasSignature] = useState(false);
 
     const [phoneTouched, setPhoneTouched] = useState(false);
     const [phoneValid, setPhoneValid] = useState(false);
@@ -57,11 +67,8 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
 
     const photoRef = useRef<HTMLInputElement>(null);
     const sigRef = useRef<HTMLInputElement>(null);
-    const phoneDebounceRef = useRef<NodeJS.Timeout | null>(null);
-    const emailDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    // const isFormDisabled = !!existingReg; // Disable all fields when existing registration is found
-    const isFormDisabled = false; // Allow editing all fields, but only show warning when existing registration is detected
+    const isFormDisabled = false;
 
     const update = (field: keyof FormData, value: any) => {
         if (isFormDisabled) return; // Prevent updates if form is disabled
@@ -71,127 +78,22 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
         }
     };
 
-    const prefillFormFromExisting = (reg: any) => {
-        setIsExistingMode(true);
-        setExistingReg(reg);
-
-        const normalizedCategories: CompetitionKey[] = Array.isArray(reg.competition_category)
-            ? reg.competition_category
-            : reg.competition_category ? [reg.competition_category as CompetitionKey] : [];
-
-        const passportDoc = reg.documents?.find((d: any) => d.document_type === 'passport_photo');
-        const sigDoc = reg.documents?.find((d: any) => d.document_type === 'candidate_signature');
-
-        setHasPassportPhoto(!!passportDoc);
-        setHasSignature(!!sigDoc);
-
-        setPhotoPreview(passportDoc?.s3_url || null);
-        setSigPreview(sigDoc?.s3_url || null);
-
-        setFormData(prev => ({
-            ...prev,
-            full_name: reg.full_name || prev.full_name,
-            dob: reg.dob || prev.dob,
-            student_class: reg.student_class || prev.student_class,
-            institution_name: reg.institution_name || prev.institution_name,
-            contact_number: reg.contact_number || prev.contact_number,
-            gender: reg.gender || prev.gender,
-            email: reg.email || prev.email,
-            alternate_contact_number: reg.alternate_contact_number || prev.alternate_contact_number,
-            address: reg.address || prev.address,
-            father_name: reg.father_name || prev.father_name,
-            father_occupation: reg.father_occupation || prev.father_occupation,
-            competition_category: normalizedCategories.length > 0 ? normalizedCategories : prev.competition_category,
-            participation_type: reg.participation_type || prev.participation_type,
-            team_members: reg.team_members
-                ? reg.team_members.map((m: any) => ({
-                    name: m.name || '',
-                    student_class: m.student_class || '',
-                    dob: m.dob || '',
-                    institution_name: m.institute || m.institution_name || '',
-                }))
-                : prev.team_members,
-            passport_photo: null,
-            candidate_signature: null,
-        }));
-    };
-
-    const resetExistingState = () => {
-        setExistingReg(null);
-        setIsExistingMode(false);
-        setHasPassportPhoto(false);
-        setHasSignature(false);
-        setPhotoPreview(null);
-        setSigPreview(null);
-    };
-
-    const handleLookup = async (overrides: { contact_number?: string; email?: string }) => {
-        const contact_number = overrides.contact_number ?? formData.contact_number;
-        const email = overrides.email ?? formData.email;
-
-        const phoneOk = /^[6-9]\d{9}$/.test(contact_number);
-        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-        if (!phoneOk && !emailOk) return;
-
-        setLookingUp(true);
-
-        try {
-            const body = {
-                contact_number: phoneOk ? contact_number : null,
-                email: emailOk ? email : null,
-            };
-
-            const res = await fetch(`${API_BASE}/edu-fest/validate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-
-            const data = await res.json();
-
-            if (data.exists && data.registration) {
-                prefillFormFromExisting(data.registration);
-            } else {
-                resetExistingState();
-            }
-        } catch {
-            resetExistingState();
-        } finally {
-            setLookingUp(false);
-        }
-    };
+    // Phone/email are validated for format only — no duplicate lookup is performed,
+    // so the same number or email can be used across multiple registrations.
 
     const handlePhoneChange = (value: string) => {
         if (isFormDisabled) return;
         const digits = value.replace(/\D/g, '').slice(0, 10);
         setPhoneTouched(true);
         update('contact_number', digits);
-
-        if (phoneDebounceRef.current) clearTimeout(phoneDebounceRef.current);
-
-        if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
-            setPhoneValid(true);
-            phoneDebounceRef.current = setTimeout(() => handleLookup({ contact_number: digits }), 500);
-        } else {
-            setPhoneValid(false);
-            resetExistingState();
-        }
+        setPhoneValid(digits.length === 10 && /^[6-9]\d{9}$/.test(digits));
     };
 
     const handleEmailChange = (value: string) => {
         if (isFormDisabled) return;
         setEmailTouched(true);
         update('email', value);
-
-        if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current);
-
-        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            setEmailValid(true);
-            emailDebounceRef.current = setTimeout(() => handleLookup({ email: value }), 600);
-        } else {
-            setEmailValid(false);
-        }
+        setEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
     };
 
     const toggleCompetition = (key: CompetitionKey) => {
@@ -274,9 +176,9 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
 
         if (formData.competition_category.length === 0) e.competition_category = 'Select at least one competition';
 
-        // Only require documents that are NOT already uploaded
-        if (!hasPassportPhoto && !formData.passport_photo) e.passport_photo = 'Passport photo required';
-        if (!hasSignature && !formData.candidate_signature) e.candidate_signature = 'Signature required';
+        // Documents are always required on a fresh registration
+        if (!formData.passport_photo) e.passport_photo = 'Passport photo required';
+        if (!formData.candidate_signature) e.candidate_signature = 'Signature required';
 
         if (formData.participation_type === 'team' && formData.team_members.length === 0) {
             e.team_members = 'Add at least one team member';
@@ -285,18 +187,46 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
         return e;
     };
 
+    /**
+     * Uploads a single file to the edufest-documents Storage bucket and
+     * records it in the documents table. Replaces the old
+     * POST /edu-fest/{regId}/documents multipart endpoint.
+     */
+    const uploadDocument = async (regId: number, file: File, type: DocumentType) => {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const storagePath = `${regId}/${type}-${Date.now()}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from(DOCUMENTS_BUCKET)
+            .upload(storagePath, file, { contentType: file.type });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+            .from(DOCUMENTS_BUCKET)
+            .getPublicUrl(storagePath);
+
+        const { error: dbError } = await supabase
+            .from('documents')
+            .insert({
+                registration_id: regId,
+                document_type: type,
+                storage_path: storagePath,
+                s3_url: publicUrlData.publicUrl,
+            });
+
+        if (dbError) throw dbError;
+    };
+
     const uploadDocuments = async (regId: number) => {
-        const uploads: Array<{ file: File; type: string }> = [];
+        const uploads: Array<{ file: File; type: DocumentType }> = [];
 
         if (formData.passport_photo) uploads.push({ file: formData.passport_photo, type: 'passport_photo' });
         if (formData.candidate_signature) uploads.push({ file: formData.candidate_signature, type: 'candidate_signature' });
 
         for (const { file, type } of uploads) {
-            const fd = new FormData();
-            fd.append('document_type', type);
-            fd.append('file', file);
             try {
-                await fetch(`${API_BASE}/edu-fest/${regId}/documents`, { method: 'POST', body: fd });
+                await uploadDocument(regId, file, type);
             } catch (err) {
                 console.error(`Upload failed for ${type}`, err);
             }
@@ -313,114 +243,67 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
         }
 
         setLoading(true);
+        setSubmitStage('saving');
 
         try {
-            let regId: number;
+            const payload: any = {
+                full_name: formData.full_name,
+                dob: formData.dob,
+                student_class: formData.student_class,
+                institution_name: formData.institution_name,
+                contact_number: formData.contact_number,
+                gender: formData.gender,
+                email: formData.email,
+                alternate_contact_number: formData.alternate_contact_number || null,
+                address: formData.address,
+                father_name: formData.father_name,
+                father_occupation: formData.father_occupation,
+                competition_category: formData.competition_category,
+                participation_type: hasTeamEvent ? formData.participation_type : 'individual',
+            };
 
-            if (existingReg) {
-                regId = existingReg.id;
-            } else {
-                const payload: any = {
-                    full_name: formData.full_name,
-                    dob: formData.dob,
-                    student_class: formData.student_class,
-                    institution_name: formData.institution_name,
-                    contact_number: formData.contact_number,
-                    gender: formData.gender,
-                    email: formData.email,
-                    alternate_contact_number: formData.alternate_contact_number || null,
-                    address: formData.address,
-                    father_name: formData.father_name,
-                    father_occupation: formData.father_occupation,
-                    competition_category: formData.competition_category,
-                    participation_type: hasTeamEvent ? formData.participation_type : 'individual',
-                };
-
-                if (formData.participation_type === 'team' && hasTeamEvent) {
-                    payload.team_size = formData.team_members.length + 1;
-                    payload.team_members = formData.team_members.map((m: TeamMember) => ({
-                        name: m.name,
-                        dob: m.dob,
-                        student_class: m.student_class,
-                        institute: m.institution_name,
-                    }));
-                }
-
-                // console.log('Submitting payload:', payload);
-
-                const res = await fetch(`${API_BASE}/edu-fest`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-
-                if (!res.ok) throw new Error('Registration failed');
-                const reg = await res.json();
-                regId = reg.id;
+            if (formData.participation_type === 'team' && hasTeamEvent) {
+                payload.team_size = formData.team_members.length + 1;
+                payload.team_members = formData.team_members.map((m: TeamMember) => ({
+                    name: m.name,
+                    dob: m.dob,
+                    student_class: m.student_class,
+                    institute: m.institution_name,
+                }));
             }
 
+            // Always insert a new registration — duplicate phone numbers and
+            // emails across multiple registrations are allowed.
+            const { data: reg, error } = await supabase
+                .from('registrations')
+                .insert(payload)
+                .select()
+                .single();
+
+            if (error) throw error;
+            const regId = reg.id;
+
+            setSubmitStage('uploading');
             await uploadDocuments(regId);
 
-            const bothDocumentsUploaded = (hasPassportPhoto || !!formData.passport_photo) &&
-                (hasSignature || !!formData.candidate_signature);
-
-            // If both documents are present → Registration is considered completed
-            if (bothDocumentsUploaded) {
-                onNext(regId); // You can route to completion page or show success
-            } else {
-                onNext(regId);
-            }
+            onNext(regId);
 
         } catch {
-            setErrors({ submit: 'Network error. Please try again.' });
+            setErrors({
+                submit: "Looks like the network is down on our end. Don't worry — your details are safe, just try again in a moment. If it still doesn't go through, give our team a shout at 6009729928 and we'll get you sorted.",
+            });
         } finally {
             setLoading(false);
+            setSubmitStage(null);
         }
     };
 
     const totalFee = calculateTotalFee(formData.competition_category, formData.participation_type, null);
 
-    const bothDocsReady = (hasPassportPhoto || !!formData.passport_photo) &&
-        (hasSignature || !!formData.candidate_signature);
-
-    const registrationCompleted = hasPassportPhoto && hasSignature;
-
-    useEffect(() => {
-        return () => {
-            if (phoneDebounceRef.current) clearTimeout(phoneDebounceRef.current);
-            if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current);
-        };
-    }, []);
+    const bothDocsReady = !!formData.passport_photo && !!formData.candidate_signature;
 
     return (
         <div className="space-y-8">
-            {/* Existing Registration Notice */}
-            {existingReg && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
-                    <div className="flex items-start gap-3">
-                        <span className="text-amber-400 text-lg">⚠️</span>
-                        <div>
-                            <p className="text-amber-400 font-semibold text-sm">Existing Registration Found</p>
-                            <p className="text-white/60 text-sm mt-1">
-                                A registration already exists. You can only upload missing documents.
-                            </p>
-                            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                                <div><span className="text-gray-400">Name:</span> <span className="text-white">{existingReg.full_name}</span></div>
-                                <div>
-                                    <span className="text-gray-400">Category:</span>{' '}
-                                    <span className="text-emerald-400 capitalize">
-                                        {Array.isArray(existingReg.competition_category)
-                                            ? existingReg.competition_category.join(', ')
-                                            : existingReg.competition_category}
-                                    </span>
-                                </div>
-                                <div><span className="text-gray-400">Email:</span> <span className="text-white">{existingReg.email}</span></div>
-                                <div><span className="text-gray-400">ID:</span> <span className="text-white">MEF-{String(existingReg.id).padStart(6, '0')}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Personal Details */}
             <Section title="Personal Details" icon="👤">
@@ -487,9 +370,6 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
                                 disabled={isFormDisabled}
                             />
                             {phoneTouched && phoneValid && !isFormDisabled && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400">✓</span>}
-                            {lookingUp && phoneTouched && !isFormDisabled && (
-                                <span className="absolute right-8 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
-                            )}
                         </div>
                     </Field>
 
@@ -775,8 +655,6 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
                         ref={photoRef}
                         onChange={e => handleFileChange('photo', e)}
                         hint="Clear face photo, white background preferred"
-                        isAlreadyUploaded={hasPassportPhoto}
-                        uploadedText="Already uploaded on server"
                     />
                     <FileUpload
                         id="candidate_signature"
@@ -787,22 +665,30 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
                         ref={sigRef}
                         onChange={e => handleFileChange('sig', e)}
                         hint="Sign on white paper and photograph/scan"
-                        isAlreadyUploaded={hasSignature}
-                        uploadedText="Already uploaded on server"
                     />
                 </div>
             </Section>
 
             {errors.submit && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-semibold">
-                    {errors.submit}
+                <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-start gap-3">
+                    <span className="text-xl flex-shrink-0">📡</span>
+                    <div>
+                        <p className="text-red-300 font-semibold text-sm">Network is down</p>
+                        <p className="text-red-200/80 text-sm mt-1 leading-relaxed">
+                            Don't worry, please contact our team at{' '}
+                            <a href="tel:6009729928" className="text-emerald-400 font-semibold hover:underline">
+                                6009729928
+                            </a>{' '}
+                            and we'll help you sort it out.
+                        </p>
+                    </div>
                 </div>
             )}
 
             <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={loading || (existingReg ? registrationCompleted : !bothDocsReady && !formData.passport_photo && !formData.candidate_signature)}
+                disabled={loading || !bothDocsReady}
                 className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_40px_rgba(16,185,129,0.2)]"
             >
                 {loading ? (
@@ -810,21 +696,48 @@ export default function Step1Details({ formData, setFormData, onNext }: Props) {
                         <span className="w-5 h-5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
                         Processing…
                     </>
-                ) : registrationCompleted ? (
-                    'Registration Completed ✓'
                 ) : bothDocsReady ? (
-                    'Go to Payment →'
-                ) : existingReg ? (
-                    'Upload Missing Documents & Continue →'
-                ) : (
                     'Continue to Payment →'
+                ) : (
+                    'Upload Photo & Signature to Continue →'
                 )}
             </button>
+
+            <SubmitOverlay visible={loading} stage={submitStage} />
         </div>
     );
 }
 
 // ── Helper Components ─────────────────────────────────────────────
+
+function SubmitOverlay({ visible, stage }: { visible: boolean; stage: 'saving' | 'uploading' | null }) {
+    if (!visible) return null;
+
+    const message = stage === 'uploading'
+        ? 'Uploading your photo & signature…'
+        : 'Saving your registration…';
+
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-5 px-8 py-10 rounded-3xl bg-[#0f1117] border border-emerald-500/20 shadow-[0_0_60px_rgba(16,185,129,0.15)] max-w-sm mx-4 text-center">
+                <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-4 border-emerald-500/15" />
+                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 animate-spin" />
+                    <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-emerald-300/70 animate-spin [animation-duration:1.4s] [animation-direction:reverse]" />
+                </div>
+                <div>
+                    <p className="text-white font-semibold text-base">{message}</p>
+                    <p className="text-gray-400 text-sm mt-1.5">This usually takes just a few seconds. Please don't close this page.</p>
+                </div>
+                <div className="flex gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function Section({ title, icon, subtitle, children }: {
     title: string;
