@@ -492,7 +492,7 @@ export default function CargoBookingForm({
         <div className="rounded-lg border border-neutral-200 p-4">
           <h3 className="mb-4 text-sm font-medium text-neutral-900">Charges</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <Field label="Estimate charge" required>
+            <Field label="Frieght charge" required>
               <Input
             className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                 value={form.estimate_charge}

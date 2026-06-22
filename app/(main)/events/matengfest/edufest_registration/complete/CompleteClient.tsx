@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { API_BASE } from '../type';
-import { generateRegistrationFormPDF } from '../generatePDF';
+import { generateEduFestAdmitCardPDF } from '../generatePDF';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 
 export default function CompleteClient() {
     const router = useRouter();
@@ -20,7 +21,6 @@ export default function CompleteClient() {
             .then(r => r.json())
             .then(async (reg) => {
                 setRegistration(reg);
-                // Fetch documents too
                 try {
                     const docsRes = await fetch(`${API_BASE}/edu-fest/${id}/documents`);
                     const docsData = await docsRes.json();
@@ -31,40 +31,36 @@ export default function CompleteClient() {
             .catch(() => { });
     }, [id]);
 
+    const buildPdfData = (registration: any) => ({
+        id: registration.id,
+        full_name: registration.full_name,
+        dob: registration.dob,
+        student_class: registration.student_class,
+        institution_name: registration.institution_name,
+        contact_number: registration.contact_number,
+        gender: registration.gender,
+        email: registration.email,
+        father_name: registration.father_name,
+        competition_category: registration.competition_category
+            ? [registration.competition_category].flat()
+            : [],
+        participation_type: registration.participation_type,
+        team_size: registration.team_size ?? null,
+        team_members: (registration.team_members || []).map((m: any) => ({
+            name: m.name,
+            student_class: m.student_class || '',
+            dob: m.dob || '',
+            institute: m.institute || '',
+        })),
+        documents: registration.documents || [],
+    });
+
     const handleDownloadPDF = async () => {
         if (!registration) return;
-
-        const competitions: string[] = (() => {
-            const cat = registration.competition_category;
-            return cat ? [cat] : [];
-        })();
-
-        const pdfData = {
-            id: registration.id,
-            candidate_name: registration.full_name,
-            dob: registration.dob,
-            class_institution: `${registration.student_class}, ${registration.institution_name}`,
-            contact_number: registration.contact_number,
-            gender: registration.gender,
-            alternative_contact: registration.alternate_contact_number || '',
-            address: registration.address,
-            father_name: registration.father_name,
-            father_occupation: registration.father_occupation,
-            competitions,
-            participation_type: registration.participation_type,
-            team_members: (registration.team_members || []).map((m: any) => ({
-                name: m.name,
-                class_institution: `${m.student_class || ''}, ${m.institute || ''}`,
-                address_contact: `${m.address || ''} | ${m.contact_number || ''}`,
-            })),
-            email: registration.email,
-            documents: registration.documents || [],
-        };
-
         try {
-            await generateRegistrationFormPDF(pdfData);
+            await generateEduFestAdmitCardPDF(buildPdfData(registration));
         } catch (err) {
-            console.error("PDF generation failed", err);
+            console.error('PDF generation failed', err);
         }
     };
 
@@ -73,56 +69,27 @@ export default function CompleteClient() {
         if (!registration || pdfRef.current) return;
         pdfRef.current = true;
 
-        const competitions: string[] = (() => {
-            const cat = registration.competition_category;
-            // API stores single category; normalize
-            return cat ? [cat] : [];
-        })();
-
-        const pdfData = {
-            id: registration.id,
-            candidate_name: registration.full_name,
-            dob: registration.dob,
-            class_institution: `${registration.student_class}, ${registration.institution_name}`,
-            contact_number: registration.contact_number,
-            gender: registration.gender,
-            alternative_contact: registration.alternate_contact_number || '',
-            address: registration.address,
-            father_name: registration.father_name,
-            father_occupation: registration.father_occupation,
-            competitions,
-            participation_type: registration.participation_type,
-            team_members: (registration.team_members || []).map((m: any) => ({
-                name: m.name,
-                class_institution: `${m.student_class || ''}, ${m.institute || ''}`,
-                address_contact: `${m.address || ''} | ${m.contact_number || ''}`,
-            })),
-            email: registration.email,
-            documents: registration.documents || [],
-        };
-
-        // Delay slightly to allow page render
         setTimeout(() => {
-            generateRegistrationFormPDF(pdfData)
+            generateEduFestAdmitCardPDF(buildPdfData(registration))
                 .then(() => setPdfGenerated(true))
                 .catch(() => setPdfGenerated(true));
         }, 1200);
     }, [registration]);
 
     // Countdown
-      useEffect(() => {
+    useEffect(() => {
         const interval = setInterval(() => {
-          setCountdown(c => {
-            if (c <= 1) {
-              clearInterval(interval);
-              router.push('/home');
-              return 0;
-            }
-            return c - 1;
-          });
+            setCountdown(c => {
+                if (c <= 1) {
+                    clearInterval(interval);
+                    router.push('/home');
+                    return 0;
+                }
+                return c - 1;
+            });
         }, 1000);
         return () => clearInterval(interval);
-      }, [router]);
+    }, [router]);
 
     const formNo = id ? `MEF-${String(id).padStart(6, '0')}` : '';
 
@@ -131,13 +98,6 @@ export default function CompleteClient() {
             {/* Background glows */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
             <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] rounded-full bg-teal-500/5 blur-3xl pointer-events-none" />
-
-            {/* <button
-                onClick={handleDownloadPDF}
-                className="w-full py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-medium hover:bg-emerald-500/30 transition-all"
-            >
-                📄 Download Registration PDF
-            </button> */}
 
             {/* Confetti dots */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -188,8 +148,9 @@ export default function CompleteClient() {
                             <div className="flex justify-between text-sm">
                                 <span className="text-white/40">Event</span>
                                 <span className="text-emerald-400 capitalize">
-                                    {registration.competition_category
-                                        ?.map((c: string) => c.replace(/_/g, ' '))
+                                    {[registration.competition_category]
+                                        .flat()
+                                        .map((c: string) => c.replace(/_/g, ' '))
                                         .join(', ')}
                                 </span>
                             </div>
@@ -215,6 +176,14 @@ export default function CompleteClient() {
                         </>
                     )}
                 </div>
+
+                {/* Manual re-download button */}
+                <button
+                    onClick={handleDownloadPDF}
+                    className="w-full py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-medium hover:bg-emerald-500/30 transition-all mb-6"
+                >
+                    📄 Re-download PDF
+                </button>
 
                 {/* Countdown */}
                 <div className="space-y-3">
