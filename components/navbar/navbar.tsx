@@ -83,37 +83,43 @@ function Navbar() {
     );
 
     const LoginDropdown = () => (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button className="cartBtn rounded-full p-0.5">
-                    <span className="rounded-full py-2 px-6 flex items-center">
-                        Login
-                        <ArrowRight size={18} className="text-white ml-1" />
-                    </span>
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                align="end"
-                className="bg-[#1a1a1a] text-white border border-gray-500/30 shadow-lg rounded-lg p-2 min-w-[180px] z-[99999]"
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <button className="cartBtn rounded-full p-0.5">
+                <span className="rounded-full py-2 px-6 flex items-center">
+                    Login
+                    <ArrowRight size={18} className="text-white ml-1" />
+                </span>
+            </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+            align="end"
+            className="bg-[#1a1a1a] text-white border border-gray-500/30 shadow-lg rounded-lg p-2 min-w-[180px] z-[99999]"
+        >
+            <DropdownMenuItem
+                className="hover:text-white cursor-pointer px-3 py-2"
+                onClick={() => {
+                    router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+                    closedNav();
+                }}
             >
-                <DropdownMenuItem
-                    className="hover:text-white cursor-pointer px-3 py-2"
-                    onClick={() => {
-                        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-                        closedNav();
-                    }}
-                >
-                    👤 User Login
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    className="hover:text-white cursor-pointer px-3 py-2"
-                    onClick={() => { window.open("https://vendors2-01-lake.vercel.app/login", "_blank"); closedNav(); }}
-                >
-                    🏢 Business Login
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
+                👤 User Login
+            </DropdownMenuItem>
+            <DropdownMenuItem
+                className="hover:text-white cursor-pointer px-3 py-2"
+                onClick={() => { window.open("https://vendors2-01-lake.vercel.app/login", "_blank"); closedNav(); }}
+            >
+                🏢 Business Login
+            </DropdownMenuItem>
+            <DropdownMenuItem
+                className="hover:text-white cursor-pointer px-3 py-2"
+                onClick={() => { router.push("/admin"); closedNav(); }}
+            >
+                🛡️ Admin Login
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
+);
 
     return (
         <div className="w-full fixed top-0 z-[10000] sm:px-4 bg-gradient-to-r from-[#131316d9] via-[#222226a6] to-[#131316d9] backdrop-blur-sm">
