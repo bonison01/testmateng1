@@ -3,34 +3,24 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ChevronDown,
-  ChevronUp,
   Loader2,
   Plus,
   Search,
-  X,
   CreditCard,
   ArrowLeft,
-  IndianRupee,
-  Package,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// NOTE: no Supabase client here. cargo_customers and cargo_payments are
+// both RLS-locked to service-role only — every read/write below goes
+// through /api/admin/cargo/customers/* routes.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,7 +46,6 @@ interface Booking {
   amount_paid: number;
   status: string;
   created_at: string;
-  customer_id?: string | null;
 }
 
 interface Payment {
@@ -73,10 +62,6 @@ interface CustomerWithStats extends CargoCustomer {
   outstanding: number;
   booking_count: number;
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 const effectiveCharge = (b: Booking) => b.final_charge ?? b.estimate_charge;
 
@@ -114,25 +99,29 @@ function CustomerModal({
     setSaving(true);
     const payload = { name, phone, address, city_state: cityState, pincode };
 
-    let result;
-    if (existing) {
-      result = await supabase
-        .from("cargo_customers")
-        .update(payload)
-        .eq("id", existing.id)
-        .select()
-        .single();
-    } else {
-      result = await supabase.from("cargo_customers").insert(payload).select().single();
-    }
+    try {
+      const res = existing
+        ? await fetch(`/api/admin/cargo/customers/${existing.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch("/api/admin/cargo/customers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
 
-    if (result.error) {
-      toast.error(result.error.message);
-    } else {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not save customer");
+
       toast.success(existing ? "Customer updated" : "Customer added");
-      onSaved(result.data as CargoCustomer);
+      onSaved(json.data as CargoCustomer);
+    } catch (err: any) {
+      toast.error(err.message || "Could not save customer");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
@@ -222,55 +211,24 @@ function RecordPaymentModal({
       toast.error("Enter a valid amount");
       return;
     }
-    if (amt > outstanding) {
-      toast.error(`Amount exceeds outstanding balance (₹${outstanding.toFixed(2)})`);
-      return;
-    }
     setSaving(true);
 
-    // Insert payment record
-    const { error: payErr } = await supabase.from("cargo_payments").insert({
-      customer_id: customer.id,
-      booking_id: null,
-      amount: amt,
-      note: note || "Manual payment",
-    });
-    if (payErr) {
-      toast.error(payErr.message);
+    try {
+      const res = await fetch(`/api/admin/cargo/customers/${customer.id}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amt, note }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not record payment");
+
+      toast.success(`₹${amt.toFixed(2)} payment recorded for ${customer.name}`);
+      onRecorded();
+    } catch (err: any) {
+      toast.error(err.message || "Could not record payment");
+    } finally {
       setSaving(false);
-      return;
     }
-
-    // Distribute payment across unpaid/partial bookings (oldest first)
-    const { data: unpaidBookings } = await supabase
-      .from("cargo_bookings")
-      .select("id, estimate_charge, final_charge, amount_paid, payment_status")
-      .eq("customer_id", customer.id)
-      .in("payment_status", ["unpaid", "partial"])
-      .order("created_at", { ascending: true });
-
-    let remaining = amt;
-    for (const b of (unpaidBookings as Booking[]) ?? []) {
-      if (remaining <= 0) break;
-      const total = effectiveCharge(b);
-      const alreadyPaid = b.amount_paid ?? 0;
-      const due = total - alreadyPaid;
-      const applying = Math.min(remaining, due);
-      const newPaid = alreadyPaid + applying;
-      const newStatus: Booking["payment_status"] =
-        newPaid >= total ? "paid" : newPaid > 0 ? "partial" : "unpaid";
-
-      await supabase
-        .from("cargo_bookings")
-        .update({ amount_paid: newPaid, payment_status: newStatus })
-        .eq("id", b.id);
-
-      remaining -= applying;
-    }
-
-    toast.success(`₹${amt.toFixed(2)} payment recorded for ${customer.name}`);
-    onRecorded();
-    setSaving(false);
   };
 
   return (
@@ -346,23 +304,17 @@ function CustomerDetail({
 
   const load = async () => {
     setLoading(true);
-    const [{ data: bData }, { data: pData }] = await Promise.all([
-      supabase
-        .from("cargo_bookings")
-        .select(
-          "id,tracking_id,product_name,estimate_charge,final_charge,payment_status,amount_paid,status,created_at"
-        )
-        .eq("customer_id", customer.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("cargo_payments")
-        .select("*")
-        .eq("customer_id", customer.id)
-        .order("paid_at", { ascending: false }),
-    ]);
-    setBookings((bData as Booking[]) ?? []);
-    setPayments((pData as Payment[]) ?? []);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/admin/cargo/customers/${customer.id}/detail`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not load customer detail");
+      setBookings(json.data.bookings ?? []);
+      setPayments(json.data.payments ?? []);
+    } catch (err: any) {
+      toast.error(err.message || "Could not load customer detail");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -429,9 +381,7 @@ function CustomerDetail({
             </div>
             <div
               className={`rounded-lg border p-4 ${
-                outstanding > 0
-                  ? "border-red-200 bg-red-50"
-                  : "border-neutral-200"
+                outstanding > 0 ? "border-red-200 bg-red-50" : "border-neutral-200"
               }`}
             >
               <p className="text-xs text-neutral-500">Outstanding</p>
@@ -594,56 +544,16 @@ export default function CargoCustomersPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data: cData, error } = await supabase
-      .from("cargo_customers")
-      .select("*")
-      .order("name");
-    if (error) {
-      toast.error(error.message);
+    try {
+      const res = await fetch("/api/admin/cargo/customers");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not load customers");
+      setCustomers((json.data as CustomerWithStats[]) ?? []);
+    } catch (err: any) {
+      toast.error(err.message || "Could not load customers");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data: bData } = await supabase
-      .from("cargo_bookings")
-      .select("customer_id,estimate_charge,final_charge,amount_paid,payment_status")
-      .not("customer_id", "is", null);
-
-    type BookingStat = {
-      customer_id: string;
-      estimate_charge: number;
-      final_charge: number | null;
-      amount_paid: number;
-      payment_status: string;
-    };
-
-    const bookingMap = new Map<
-      string,
-      { total_billed: number; total_paid: number; count: number }
-    >();
-    for (const b of (bData ?? []) as BookingStat[]) {
-      if (!b.customer_id) continue;
-      const cur = bookingMap.get(b.customer_id) ?? { total_billed: 0, total_paid: 0, count: 0 };
-      const charge = b.final_charge ?? b.estimate_charge;
-      cur.total_billed += charge;
-      cur.total_paid += b.amount_paid ?? 0;
-      cur.count += 1;
-      bookingMap.set(b.customer_id, cur);
-    }
-
-    const enriched: CustomerWithStats[] = (cData as CargoCustomer[]).map((c) => {
-      const stats = bookingMap.get(c.id) ?? { total_billed: 0, total_paid: 0, count: 0 };
-      return {
-        ...c,
-        total_billed: stats.total_billed,
-        total_paid: stats.total_paid,
-        outstanding: Math.max(0, stats.total_billed - stats.total_paid),
-        booking_count: stats.count,
-      };
-    });
-
-    setCustomers(enriched);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -667,11 +577,14 @@ export default function CargoCustomersPage() {
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete ${name}? This won't delete their bookings.`)) return;
-    const { error } = await supabase.from("cargo_customers").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      const res = await fetch(`/api/admin/cargo/customers/${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not delete customer");
       toast.success("Customer removed");
       load();
+    } catch (err: any) {
+      toast.error(err.message || "Could not delete customer");
     }
   };
 
@@ -694,7 +607,7 @@ export default function CargoCustomersPage() {
             setShowModal(false);
             setEditCustomer(undefined);
           }}
-          onSaved={(c) => {
+          onSaved={() => {
             setShowModal(false);
             setEditCustomer(undefined);
             load();
@@ -794,12 +707,10 @@ export default function CargoCustomersPage() {
                   className="flex items-center gap-4 rounded-lg border border-neutral-200 p-4 hover:border-emerald-200 hover:bg-emerald-50/30 transition cursor-pointer"
                   onClick={() => setSelected(c)}
                 >
-                  {/* Avatar */}
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-medium text-emerald-700">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-neutral-900">{c.name}</p>
                     <p className="text-xs text-neutral-500">
@@ -808,7 +719,6 @@ export default function CargoCustomersPage() {
                     </p>
                   </div>
 
-                  {/* Stats */}
                   <div className="hidden sm:flex items-center gap-6 text-sm">
                     <div className="text-center">
                       <p className="text-xs text-neutral-400">Bookings</p>
@@ -830,7 +740,6 @@ export default function CargoCustomersPage() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div
                     className="flex items-center gap-2"
                     onClick={(e) => e.stopPropagation()}

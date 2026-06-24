@@ -25,13 +25,12 @@ import {
   CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// NOTE: no Supabase client here anymore. cargo_customers, cargo_bookings,
+// and cargo_payments are all locked down via RLS (service-role only),
+// and the storage bucket no longer has public policies either. Every
+// read/write below goes through /api/admin/cargo/* routes instead.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,21 +46,17 @@ interface CargoCustomer {
 }
 
 interface CargoFormData {
-  // customer link
   customer_id: string;
-  // sender
   sender_name: string;
   sender_phone: string;
   sender_address: string;
   sender_city_state: string;
   sender_pincode: string;
-  // receiver
   receiver_name: string;
   receiver_phone: string;
   receiver_address: string;
   receiver_city_state: string;
   receiver_pincode: string;
-  // package
   product_name: string;
   weight_estimate: string;
   delivery_mode: "standard" | "express" | "";
@@ -70,7 +65,6 @@ interface CargoFormData {
   notes: string;
   status: "Pending" | "Out for Delivery" | "Delivered";
   third_party_tracking: string;
-  // charges
   handling_charge: string;
   docket_charge: string;
   pickup_charge: string;
@@ -78,7 +72,6 @@ interface CargoFormData {
   extra_mile_delivery: string;
   estimate_charge: string;
   final_charge: string;
-  // payment
   payment_status: "paid" | "unpaid" | "partial";
   amount_paid: string;
 }
@@ -244,7 +237,7 @@ const PartyCard = ({
 };
 
 // ---------------------------------------------------------------------------
-// Save-customer modal (inline, no dialog library needed)
+// Save-customer modal
 // ---------------------------------------------------------------------------
 
 function SaveCustomerModal({
@@ -278,19 +271,21 @@ function SaveCustomerModal({
             pincode: form.receiver_pincode,
           };
 
-    const { data: inserted, error } = await supabase
-      .from("cargo_customers")
-      .insert(data)
-      .select()
-      .single();
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(`${inserted.name} saved as frequent customer`);
-      onSaved(inserted as CargoCustomer);
+    try {
+      const res = await fetch("/api/admin/cargo/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not save customer");
+      toast.success(`${json.data.name} saved as frequent customer`);
+      onSaved(json.data as CargoCustomer);
+    } catch (err: any) {
+      toast.error(err.message || "Could not save customer");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
@@ -361,13 +356,12 @@ export default function CargoBookingForm({
   const [customers, setCustomers] = useState<CargoCustomer[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  // Load frequent customers
+  // Load frequent customers via the server route.
   useEffect(() => {
-    supabase
-      .from("cargo_customers")
-      .select("*")
-      .order("name")
-      .then(({ data }) => setCustomers((data as CargoCustomer[]) ?? []));
+    fetch("/api/admin/cargo/customers")
+      .then((res) => res.json())
+      .then((json) => setCustomers((json.data as CargoCustomer[]) ?? []))
+      .catch((err) => console.error("Customers fetch error:", err));
   }, []);
 
   const update = <K extends keyof CargoFormData>(key: K, value: CargoFormData[K]) => {
@@ -375,7 +369,6 @@ export default function CargoBookingForm({
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
-  // When a frequent customer is selected, autofill sender fields
   const handleCustomerSelect = (customerId: string) => {
     if (customerId === "__none__") {
       update("customer_id", "");
@@ -440,19 +433,6 @@ export default function CargoBookingForm({
     }
     setSubmitting(true);
     try {
-      let photo_url = "";
-      if (photoFile) {
-        const path = `bookings/${trackingId}-${photoFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("cargo-photos")
-          .upload(path, photoFile, { upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: publicUrl } = supabase.storage
-          .from("cargo-photos")
-          .getPublicUrl(path);
-        photo_url = publicUrl.publicUrl;
-      }
-
       const amountPaid =
         form.payment_status === "paid"
           ? sumCharges(form)
@@ -480,7 +460,6 @@ export default function CargoBookingForm({
         status: form.status,
         third_party_tracking: form.third_party_tracking,
         tracking_id: trackingId,
-        photo_url,
         weight_estimate: parseFloat(form.weight_estimate),
         handling_charge: form.handling_charge ? parseFloat(form.handling_charge) : null,
         docket_charge: form.docket_charge ? parseFloat(form.docket_charge) : null,
@@ -495,39 +474,26 @@ export default function CargoBookingForm({
         amount_paid: amountPaid,
       };
 
-      const { data: inserted, error: insertError } = await supabase
-        .from("cargo_bookings")
-        .insert(payload)
-        .select()
-        .single();
-      if (insertError) throw insertError;
+      // multipart/form-data so the photo (if any) travels alongside the
+      // JSON payload in one request to the server route.
+      const fd = new FormData();
+      fd.append("payload", JSON.stringify(payload));
+      if (photoFile) fd.append("photo", photoFile);
 
-      // If partial payment, log it to cargo_payments
-      if (form.payment_status === "partial" && form.customer_id && amountPaid > 0) {
-        await supabase.from("cargo_payments").insert({
-          customer_id: form.customer_id,
-          booking_id: inserted.id,
-          amount: amountPaid,
-          note: "Partial payment at booking",
-        });
-      }
-      // If fully paid and linked to a customer, log it too
-      if (form.payment_status === "paid" && form.customer_id) {
-        await supabase.from("cargo_payments").insert({
-          customer_id: form.customer_id,
-          booking_id: inserted.id,
-          amount: amountPaid,
-          note: "Paid at booking",
-        });
-      }
+      const res = await fetch("/api/admin/cargo/bookings", {
+        method: "POST",
+        body: fd,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Could not create booking");
 
       toast.success(`Booking ${trackingId} created`);
       setForm(emptyForm);
       removePhoto();
       setTrackingId(generateTrackingId());
       onSuccess?.();
-    } catch (err) {
-      toast.error((err as Error).message || "Could not create booking");
+    } catch (err: any) {
+      toast.error(err.message || "Could not create booking");
     } finally {
       setSubmitting(false);
     }

@@ -12,14 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Search, X, ChevronDown, ChevronUp, FileText, Plus, Users } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// NOTE: the direct Supabase anon-key client is gone from this file on
+// purpose. cargo_bookings no longer has a public SELECT/UPDATE policy
+// (see sql/002_lock_down_cargo_bookings_rls.sql), so reads and writes
+// now go through /api/admin/cargo/bookings, which uses the service-role
+// key server-side and is itself gated by middleware + a session check.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,6 +59,8 @@ const PAYMENT_STYLES: Record<string, string> = {
   partial: "bg-amber-50 text-amber-700",
 };
 
+const STATUS_OPTIONS: Booking["status"][] = ["Pending", "Out for Delivery", "Delivered"];
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -76,24 +78,55 @@ export default function AdminBookingsPage() {
   const [endDate, setEndDate] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("cargo_bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Supabase fetch error:", error);
-        toast.error(error.message || "Could not load bookings");
-      } else {
-        setBookings((data as Booking[]) ?? []);
+      try {
+        const res = await fetch("/api/admin/cargo/bookings");
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.message || "Could not load bookings");
+        }
+        setBookings((json.data as Booking[]) ?? []);
+      } catch (err: any) {
+        console.error("Bookings fetch error:", err);
+        toast.error(err.message || "Could not load bookings");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchBookings();
   }, []);
+
+  const handleStatusChange = async (bookingId: string, newStatus: Booking["status"]) => {
+    const previous = bookings;
+    // Optimistic update
+    setBookings((rows) =>
+      rows.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
+    );
+    setUpdatingId(bookingId);
+
+    try {
+      const res = await fetch(`/api/admin/cargo/bookings/${bookingId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Could not update status");
+      }
+      toast.success(`Status updated to "${newStatus}"`);
+    } catch (err: any) {
+      console.error("Status update error:", err);
+      toast.error(err.message || "Could not update status");
+      setBookings(previous); // roll back
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     let rows = [...bookings];
@@ -246,8 +279,9 @@ export default function AdminBookingsPage() {
             </SelectTrigger>
             <SelectContent className="bg-white text-neutral-900">
               <SelectItem value="all">All modes</SelectItem>
-              <SelectItem value="standard">Standard</SelectItem>
-              <SelectItem value="express">Express</SelectItem>
+              <SelectItem value="standard">Indian Post</SelectItem>
+              <SelectItem value="express">Cargo Express</SelectItem>
+              <SelectItem value="express">Cargo Normal</SelectItem>
             </SelectContent>
           </Select>
 
@@ -343,13 +377,33 @@ export default function AdminBookingsPage() {
                     <td className="px-4 py-2.5 text-neutral-500">{b.weight_estimate} kg</td>
                     <td className="px-4 py-2.5 capitalize text-neutral-500">{b.delivery_mode}</td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          STATUS_STYLES[b.status] ?? "bg-neutral-100 text-neutral-600"
-                        }`}
+                      <Select
+                        value={b.status}
+                        onValueChange={(value) =>
+                          handleStatusChange(b.id, value as Booking["status"])
+                        }
+                        disabled={updatingId === b.id}
                       >
-                        {b.status}
-                      </span>
+                        <SelectTrigger
+                          className={`h-7 w-[150px] border-0 px-2 text-xs font-medium ${
+                            STATUS_STYLES[b.status] ?? "bg-neutral-100 text-neutral-600"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {updatingId === b.id && (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            )}
+                            <SelectValue />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-neutral-900">
+                          {STATUS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="px-4 py-2.5 text-neutral-700">
                       ₹{Number(b.estimate_charge).toFixed(2)}

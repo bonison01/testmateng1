@@ -66,13 +66,13 @@ export default function InvoiceTemplate({ booking }: { booking: InvoiceBooking }
   return (
     <div className="mx-auto max-w-2xl bg-white p-10 text-neutral-900 print:p-0">
       {/* Header */}
-      <div className="border-b-2 border-emerald-600 pb-5 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-emerald-700">{COMPANY.name}</h1>
-        <p className="mt-1 text-xs text-neutral-600">{COMPANY.address}</p>
-        <p className="text-xs text-neutral-600">
-          Phone: {COMPANY.phone} | Website: {COMPANY.website} | GSTIN: {COMPANY.gstin}
-        </p>
-      </div>
+<div className="border-b-2 border-emerald-600 pb-5">
+  <h1 className="text-4xl font-black italic tracking-tight text-black">{COMPANY.name}</h1>
+  <p className="mt-1 text-xs text-neutral-600">{COMPANY.address}</p>
+  <p className="text-xs text-neutral-600">
+    Phone: {COMPANY.phone} | Website: {COMPANY.website} | GSTIN: {COMPANY.gstin}
+  </p>
+</div>
 
       {/* Tracking */}
       <div className="mt-5 text-center">

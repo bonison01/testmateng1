@@ -1,16 +1,9 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import { Loader2, Download, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import InvoiceTemplate, { InvoiceBooking } from "@/app/(main)/admin/cargo/InvoiceTemplate";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import InvoiceTemplate, { InvoiceBooking } from "../../InvoiceTemplate";
 
 export default function InvoicePage() {
   const params = useParams();
@@ -24,25 +17,20 @@ export default function InvoicePage() {
   useEffect(() => {
     const fetchBooking = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("cargo_bookings")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setBooking(data as InvoiceBooking);
+      setError(null);
+      try {
+        const res = await fetch(`/api/admin/cargo/bookings/${id}`);
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || "Could not load this booking");
+        setBooking(json.data as InvoiceBooking);
+      } catch (err: any) {
+        setError(err.message || "Could not load this booking");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     if (id) fetchBooking();
   }, [id]);
-
-  const handleDownload = () => {
-    window.print();
-  };
 
   return (
     <div className="min-h-screen bg-neutral-50 print:bg-white">
@@ -53,7 +41,7 @@ export default function InvoicePage() {
           Back
         </Button>
         <Button
-          onClick={handleDownload}
+          onClick={() => window.print()}
           disabled={!booking}
           className="bg-emerald-600 text-white hover:bg-emerald-700"
         >
@@ -72,20 +60,39 @@ export default function InvoicePage() {
             Could not load this booking: {error}
           </p>
         ) : booking ? (
-          <InvoiceTemplate booking={booking} />
+          // ↓ this id is what the print CSS targets
+          <div id="invoice-print-area">
+            <InvoiceTemplate booking={booking} />
+          </div>
         ) : (
           <p className="text-center text-sm text-neutral-500">Booking not found.</p>
         )}
       </div>
 
-      {/* Print styles */}
       <style jsx global>{`
         @media print {
           @page {
+            size: A4;
             margin: 0.5in;
           }
-          body {
-            background: white;
+
+          /* Hide everything on the page */
+          body * {
+            visibility: hidden;
+          }
+
+          /* Then reveal only the invoice */
+          #invoice-print-area,
+          #invoice-print-area * {
+            visibility: visible;
+          }
+
+          /* Pin it to the top-left so nothing else shifts it */
+          #invoice-print-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
           }
         }
       `}</style>

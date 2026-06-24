@@ -1,3 +1,4 @@
+//app/(main)/admin/login
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { Suspense } from 'react';
 function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/admin/edufest';
+  const redirect = searchParams.get('redirect') || '/admin/dashboard';
 
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +21,9 @@ function AdminLoginContent() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/login', {
+      // Dedicated admin endpoint — checks the separate `admins` table,
+      // not the customer table that /api/login checks.
+      const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailOrPhone, password }),
@@ -33,24 +36,11 @@ function AdminLoginContent() {
         return;
       }
 
-      const userData = data.data;
-
-      // Only role === 'admin' may proceed. Everyone else, including a
-      // perfectly valid customer login, is rejected here.
-      if (userData?.role !== 'admin') {
-        setError('This account does not have admin access.');
-        return;
-      }
-
-      // Set a cookie so server-side middleware can protect /admin/* routes.
-      // Max-Age 28800 = 8 hours. Adjust as needed.
-      document.cookie = `admin_token=${userData.token}; path=/; max-age=28800; SameSite=Lax`;
-
-      // Also keep it in localStorage in case admin pages want to read it
-      // client-side (e.g. for an Authorization header on API calls).
-      localStorage.setItem('admin_token', userData.token);
-      localStorage.setItem('admin_name', userData.name || '');
-
+      // The session cookie is set server-side as httpOnly by the API
+      // route above — there is nothing to store here. It can't (and
+      // shouldn't) be read by client JS; that's what makes it secure
+      // against XSS-based token theft. middleware.ts verifies it on
+      // every request to /admin/*.
       router.push(redirect);
     } catch (err) {
       console.error('Admin login error:', err);
