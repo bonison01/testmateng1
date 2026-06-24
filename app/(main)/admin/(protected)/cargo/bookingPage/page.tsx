@@ -1,8 +1,8 @@
-//app/(main)/admin/cargo/bookingPage/page.tsx
+// app/(main)/admin/cargo/bookingPage/page.tsx
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,14 +23,14 @@ import {
   UserPlus,
   User,
   CreditCard,
+  FileText,
+  Plus,
+  LayoutDashboard,
+  Search,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-// NOTE: no Supabase client here anymore. cargo_customers, cargo_bookings,
-// and cargo_payments are all locked down via RLS (service-role only),
-// and the storage bucket no longer has public policies either. Every
-// read/write below goes through /api/admin/cargo/* routes instead.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,7 +59,7 @@ interface CargoFormData {
   receiver_pincode: string;
   product_name: string;
   weight_estimate: string;
-  delivery_mode: "standard" | "express" | "";
+  delivery_mode: "Indian Post" | "Express Cargo" | "Normal Cargo" | "";
   pickup_required: boolean;
   delivery_required: boolean;
   notes: string;
@@ -125,6 +125,187 @@ function sumCharges(data: CargoFormData) {
     data.extra_mile_delivery,
     data.estimate_charge,
   ].reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Success Modal
+// ---------------------------------------------------------------------------
+
+function SuccessModal({
+  trackingId,
+  bookingId,
+  onNewOrder,
+  onDashboard,
+}: {
+  trackingId: string;
+  bookingId: string;
+  onNewOrder: () => void;
+  onDashboard: () => void;
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
+        <div className="mb-4 flex flex-col items-center text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+          </div>
+          <h2 className="text-base font-semibold text-neutral-900">Booking created!</h2>
+          <p className="mt-1 font-mono text-sm text-emerald-700">{trackingId}</p>
+        </div>
+
+        <div className="space-y-2">
+          <Button
+            className="w-full border border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+            variant="outline"
+            onClick={() => router.push(`/admin/cargo/invoice/${bookingId}`)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Download invoice
+          </Button>
+
+          <Button
+            className="w-full bg-emerald-600 font-bold text-white hover:bg-emerald-700"
+            onClick={onNewOrder}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create new order
+          </Button>
+
+          <Button
+            className="w-full border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50"
+            variant="outline"
+            onClick={onDashboard}
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Go to dashboard
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Customer search combobox
+// ---------------------------------------------------------------------------
+
+function CustomerCombobox({
+  customers,
+  value,
+  onChange,
+}: {
+  customers: CargoCustomer[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selected = customers.find((c) => c.id === value);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return customers.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) || c.phone.includes(q)
+    );
+  }, [customers, search]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const select = (id: string) => {
+    onChange(id);
+    setSearch("");
+    setOpen(false);
+  };
+
+  const clear = () => {
+    onChange("");
+    setSearch("");
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <div
+        className="flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900"
+        onClick={() => setOpen((o) => !o)}
+      >
+        {selected ? (
+          <span className="flex-1 truncate">
+            {selected.name} · {selected.phone}
+          </span>
+        ) : (
+          <span className="text-neutral-400">Select a frequent customer (optional)</span>
+        )}
+        {selected ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); clear(); }}
+            className="ml-2 text-neutral-400 hover:text-neutral-700"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <Search className="ml-2 h-3.5 w-3.5 text-neutral-400" />
+        )}
+      </div>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg">
+          <div className="border-b border-neutral-100 p-2">
+            <Input
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name or phone…"
+              className="h-7 border-neutral-200 bg-white text-sm text-neutral-900 placeholder:text-neutral-400"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <ul className="max-h-48 overflow-y-auto py-1">
+            <li
+              className="cursor-pointer px-3 py-2 text-sm text-neutral-400 hover:bg-neutral-50"
+              onClick={() => clear()}
+            >
+              — No frequent customer —
+            </li>
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-neutral-400">No results</li>
+            ) : (
+              filtered.map((c) => (
+                <li
+                  key={c.id}
+                  className={`cursor-pointer px-3 py-2 text-sm hover:bg-emerald-50 ${
+                    c.id === value ? "bg-emerald-50 text-emerald-700" : "text-neutral-700"
+                  }`}
+                  onClick={() => select(c.id)}
+                >
+                  <span className="font-medium">{c.name}</span>
+                  <span className="ml-2 text-neutral-400">{c.phone}</span>
+                  {c.city_state && (
+                    <span className="ml-2 text-neutral-400">· {c.city_state}</span>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -293,8 +474,7 @@ function SaveCustomerModal({
       <div className="w-full max-w-sm rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
         <h2 className="mb-1 text-sm font-medium text-neutral-900">Save as frequent customer</h2>
         <p className="mb-4 text-xs text-neutral-500">
-          Choose whose details to save. You can do this for both — save one, reopen to save the
-          other.
+          Choose whose details to save. You can do this for both — save one, reopen to save the other.
         </p>
         <div className="mb-4 flex gap-3">
           {(["sender", "receiver"] as const).map((opt) => (
@@ -352,11 +532,10 @@ export default function CargoBookingForm({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof CargoFormData, string>>>({});
-
   const [customers, setCustomers] = useState<CargoCustomer[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [successData, setSuccessData] = useState<{ trackingId: string; bookingId: string } | null>(null);
 
-  // Load frequent customers via the server route.
   useEffect(() => {
     fetch("/api/admin/cargo/customers")
       .then((res) => res.json())
@@ -370,7 +549,7 @@ export default function CargoBookingForm({
   };
 
   const handleCustomerSelect = (customerId: string) => {
-    if (customerId === "__none__") {
+    if (!customerId) {
       update("customer_id", "");
       return;
     }
@@ -425,6 +604,13 @@ export default function CargoBookingForm({
     return Object.keys(next).length === 0;
   };
 
+  const resetForm = () => {
+    setForm(emptyForm);
+    removePhoto();
+    setTrackingId(generateTrackingId());
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
@@ -465,17 +651,13 @@ export default function CargoBookingForm({
         docket_charge: form.docket_charge ? parseFloat(form.docket_charge) : null,
         pickup_charge: form.pickup_charge ? parseFloat(form.pickup_charge) : null,
         packaging_charge: form.packaging_charge ? parseFloat(form.packaging_charge) : null,
-        extra_mile_delivery: form.extra_mile_delivery
-          ? parseFloat(form.extra_mile_delivery)
-          : null,
+        extra_mile_delivery: form.extra_mile_delivery ? parseFloat(form.extra_mile_delivery) : null,
         estimate_charge: parseFloat(form.estimate_charge),
         final_charge: form.final_charge ? parseFloat(form.final_charge) : null,
         payment_status: form.payment_status,
         amount_paid: amountPaid,
       };
 
-      // multipart/form-data so the photo (if any) travels alongside the
-      // JSON payload in one request to the server route.
       const fd = new FormData();
       fd.append("payload", JSON.stringify(payload));
       if (photoFile) fd.append("photo", photoFile);
@@ -487,10 +669,7 @@ export default function CargoBookingForm({
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Could not create booking");
 
-      toast.success(`Booking ${trackingId} created`);
-      setForm(emptyForm);
-      removePhoto();
-      setTrackingId(generateTrackingId());
+      setSuccessData({ trackingId, bookingId: json.data.id });
       onSuccess?.();
     } catch (err: any) {
       toast.error(err.message || "Could not create booking");
@@ -503,6 +682,18 @@ export default function CargoBookingForm({
 
   return (
     <>
+      {successData && (
+        <SuccessModal
+          trackingId={successData.trackingId}
+          bookingId={successData.bookingId}
+          onNewOrder={() => {
+            setSuccessData(null);
+            resetForm();
+          }}
+          onDashboard={() => router.push("/admin/cargo")}
+        />
+      )}
+
       {showSaveModal && (
         <SaveCustomerModal
           form={form}
@@ -558,46 +749,22 @@ export default function CargoBookingForm({
                   Save current as customer
                 </Button>
               </div>
-              <Select
-                value={form.customer_id || "__none__"}
-                onValueChange={handleCustomerSelect}
-              >
-                <SelectTrigger className="bg-white text-neutral-900 border-neutral-300">
-                  <SelectValue placeholder="Select a frequent customer (optional)" />
-                </SelectTrigger>
-                <SelectContent className="bg-white text-neutral-900">
-                  <SelectItem value="__none__">— No frequent customer —</SelectItem>
-                  {customers.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name} · {c.phone}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CustomerCombobox
+                customers={customers}
+                value={form.customer_id}
+                onChange={handleCustomerSelect}
+              />
               {form.customer_id && (
                 <p className="mt-2 text-xs text-emerald-600">
-                  ✓ Sender fields auto-filled from customer record. This booking will appear in their
-                  account ledger.
+                  ✓ Sender fields auto-filled from customer record. This booking will appear in their account ledger.
                 </p>
               )}
             </div>
 
             {/* Sender + Receiver */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <PartyCard
-                title="Sender"
-                prefix="sender"
-                form={form}
-                errors={errors}
-                update={update}
-              />
-              <PartyCard
-                title="Receiver"
-                prefix="receiver"
-                form={form}
-                errors={errors}
-                update={update}
-              />
+              <PartyCard title="Sender" prefix="sender" form={form} errors={errors} update={update} />
+              <PartyCard title="Receiver" prefix="receiver" form={form} errors={errors} update={update} />
             </div>
 
             {/* Package */}
@@ -615,46 +782,34 @@ export default function CargoBookingForm({
                     placeholder="e.g. Clothes"
                     aria-invalid={!!errors.product_name}
                   />
-                  {errors.product_name && (
-                    <p className="text-xs text-red-600">{errors.product_name}</p>
-                  )}
+                  {errors.product_name && <p className="text-xs text-red-600">{errors.product_name}</p>}
                 </Field>
                 <Field label="Weight estimate (kg)" required>
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.weight_estimate}
-                    onChange={(e) =>
-                      update("weight_estimate", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("weight_estimate", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="10"
                     inputMode="decimal"
                     aria-invalid={!!errors.weight_estimate}
                   />
-                  {errors.weight_estimate && (
-                    <p className="text-xs text-red-600">{errors.weight_estimate}</p>
-                  )}
+                  {errors.weight_estimate && <p className="text-xs text-red-600">{errors.weight_estimate}</p>}
                 </Field>
                 <Field label="Delivery mode" required>
                   <Select
                     value={form.delivery_mode}
-                    onValueChange={(v) =>
-                      update("delivery_mode", v as CargoFormData["delivery_mode"])
-                    }
+                    onValueChange={(v) => update("delivery_mode", v as CargoFormData["delivery_mode"])}
                   >
-                    <SelectTrigger
-                      className="bg-white text-neutral-900 border-neutral-300"
-                      aria-invalid={!!errors.delivery_mode}
-                    >
+                    <SelectTrigger className="bg-white text-neutral-900 border-neutral-300" aria-invalid={!!errors.delivery_mode}>
                       <SelectValue placeholder="Choose mode" />
                     </SelectTrigger>
                     <SelectContent className="bg-white text-neutral-900">
-                      <SelectItem value="standard">Standard</SelectItem>
-                      <SelectItem value="express">Express</SelectItem>
+                      <SelectItem value="Indian Post">Indian Post</SelectItem>
+                      <SelectItem value="Normal Cargo">Normal Cargo</SelectItem>
+                      <SelectItem value="Express Cargo">Express Cargo</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.delivery_mode && (
-                    <p className="text-xs text-red-600">{errors.delivery_mode}</p>
-                  )}
+                  {errors.delivery_mode && <p className="text-xs text-red-600">{errors.delivery_mode}</p>}
                 </Field>
                 <Field label="Current status">
                   <Select
@@ -707,20 +862,11 @@ export default function CargoBookingForm({
                     <label className="flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 text-xs text-neutral-500 hover:border-emerald-400 hover:text-emerald-700">
                       <Camera className="h-3.5 w-3.5" />
                       Upload photo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhoto}
-                      />
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
                     </label>
                   ) : (
                     <div className="relative h-9 w-9 overflow-hidden rounded-md border border-neutral-200">
-                      <img
-                        src={photoPreview}
-                        alt="Package preview"
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={photoPreview} alt="Package preview" className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={removePhoto}
@@ -753,24 +899,18 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.estimate_charge}
-                    onChange={(e) =>
-                      update("estimate_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("estimate_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="100"
                     inputMode="decimal"
                     aria-invalid={!!errors.estimate_charge}
                   />
-                  {errors.estimate_charge && (
-                    <p className="text-xs text-red-600">{errors.estimate_charge}</p>
-                  )}
+                  {errors.estimate_charge && <p className="text-xs text-red-600">{errors.estimate_charge}</p>}
                 </Field>
                 <Field label="Handling charge">
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.handling_charge}
-                    onChange={(e) =>
-                      update("handling_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("handling_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -779,9 +919,7 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.docket_charge}
-                    onChange={(e) =>
-                      update("docket_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("docket_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -790,9 +928,7 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.pickup_charge}
-                    onChange={(e) =>
-                      update("pickup_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("pickup_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -801,9 +937,7 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.packaging_charge}
-                    onChange={(e) =>
-                      update("packaging_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("packaging_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -812,9 +946,7 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.extra_mile_delivery}
-                    onChange={(e) =>
-                      update("extra_mile_delivery", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("extra_mile_delivery", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -823,9 +955,7 @@ export default function CargoBookingForm({
                   <Input
                     className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                     value={form.final_charge}
-                    onChange={(e) =>
-                      update("final_charge", e.target.value.replace(/[^0-9.]/g, ""))
-                    }
+                    onChange={(e) => update("final_charge", e.target.value.replace(/[^0-9.]/g, ""))}
                     placeholder="Settled after delivery"
                     inputMode="decimal"
                   />
@@ -875,16 +1005,12 @@ export default function CargoBookingForm({
                     <Input
                       className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
                       value={form.amount_paid}
-                      onChange={(e) =>
-                        update("amount_paid", e.target.value.replace(/[^0-9.]/g, ""))
-                      }
+                      onChange={(e) => update("amount_paid", e.target.value.replace(/[^0-9.]/g, ""))}
                       placeholder="e.g. 500"
                       inputMode="decimal"
                       aria-invalid={!!errors.amount_paid}
                     />
-                    {errors.amount_paid && (
-                      <p className="text-xs text-red-600">{errors.amount_paid}</p>
-                    )}
+                    {errors.amount_paid && <p className="text-xs text-red-600">{errors.amount_paid}</p>}
                     {form.amount_paid && total > 0 && (
                       <p className="mt-1 text-xs text-neutral-500">
                         Remaining: ₹{Math.max(0, total - parseFloat(form.amount_paid)).toFixed(2)}

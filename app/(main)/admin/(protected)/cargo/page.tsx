@@ -1,4 +1,4 @@
-//app/(main)/admin/cargo/page.tsx
+// app/(main)/admin/cargo/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -11,15 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Search, X, ChevronDown, ChevronUp, FileText, Plus, Users } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  X,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Plus,
+  Users,
+  ArrowUpDown,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-// NOTE: the direct Supabase anon-key client is gone from this file on
-// purpose. cargo_bookings no longer has a public SELECT/UPDATE policy
-// (see sql/002_lock_down_cargo_bookings_rls.sql), so reads and writes
-// now go through /api/admin/cargo/bookings, which uses the service-role
-// key server-side and is itself gated by middleware + a session check.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,6 +52,12 @@ interface Booking {
 type SortKey = "created_at" | "estimate_charge" | "weight_estimate";
 
 const STATUS_STYLES: Record<string, string> = {
+  Pending: "bg-amber-50 text-amber-700 border-amber-200",
+  "Out for Delivery": "bg-blue-50 text-blue-700 border-blue-200",
+  Delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
+const STATUS_TRIGGER_STYLES: Record<string, string> = {
   Pending: "bg-amber-50 text-amber-700",
   "Out for Delivery": "bg-blue-50 text-blue-700",
   Delivered: "bg-emerald-50 text-emerald-700",
@@ -60,6 +70,124 @@ const PAYMENT_STYLES: Record<string, string> = {
 };
 
 const STATUS_OPTIONS: Booking["status"][] = ["Pending", "Out for Delivery", "Delivered"];
+
+function modeLabel(mode: string) {
+  if (mode === "Indian Post") return "Indian Post";
+  if (mode === "Express Cargo" || mode === "express") return "Express";
+  if (mode === "Normal Cargo" || mode === "normal") return "Normal";
+  if (mode === "standard") return "Indian Post";
+  return mode;
+}
+
+// ---------------------------------------------------------------------------
+// Mobile booking card
+// ---------------------------------------------------------------------------
+
+function BookingCard({
+  b,
+  updatingId,
+  onStatusChange,
+  onInvoice,
+}: {
+  b: Booking;
+  updatingId: string | null;
+  onStatusChange: (id: string, status: Booking["status"]) => void;
+  onInvoice: (id: string) => void;
+}) {
+  const charge = b.final_charge ?? b.estimate_charge;
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+      {/* Top row: tracking + date */}
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <span className="font-mono text-xs font-semibold text-emerald-700">{b.tracking_id}</span>
+        <span className="text-xs text-neutral-400">
+          {new Date(b.created_at).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </span>
+      </div>
+
+      {/* Sender → Receiver */}
+      <div className="mb-3 flex items-center gap-2 text-sm">
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium text-neutral-900">{b.sender_name}</p>
+          <p className="text-xs text-neutral-400">{b.sender_phone}</p>
+        </div>
+        <span className="text-neutral-300">→</span>
+        <div className="min-w-0 flex-1 text-right">
+          <p className="truncate font-medium text-neutral-900">{b.receiver_name}</p>
+          <p className="text-xs text-neutral-400">{b.receiver_phone}</p>
+        </div>
+      </div>
+
+      {/* Product + weight + mode */}
+      <div className="mb-3 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-md bg-neutral-100 px-2 py-1 text-neutral-600">
+          {b.product_name}
+        </span>
+        <span className="rounded-md bg-neutral-100 px-2 py-1 text-neutral-600">
+          {b.weight_estimate} kg
+        </span>
+        <span className="rounded-md bg-neutral-100 px-2 py-1 text-neutral-600">
+          {modeLabel(b.delivery_mode)}
+        </span>
+      </div>
+
+      {/* Status + payment + charge */}
+      <div className="mb-3 flex items-center gap-2">
+        <Select
+          value={b.status}
+          onValueChange={(v) => onStatusChange(b.id, v as Booking["status"])}
+          disabled={updatingId === b.id}
+        >
+          <SelectTrigger
+            className={`h-7 flex-1 border px-2 text-xs font-medium ${
+              STATUS_TRIGGER_STYLES[b.status] ?? "bg-neutral-100 text-neutral-600"
+            }`}
+          >
+            <div className="flex items-center gap-1">
+              {updatingId === b.id && <Loader2 className="h-3 w-3 animate-spin" />}
+              <SelectValue />
+            </div>
+          </SelectTrigger>
+          <SelectContent className="bg-white text-neutral-900">
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
+            PAYMENT_STYLES[b.payment_status] ?? "bg-neutral-100 text-neutral-600"
+          }`}
+        >
+          {b.payment_status}
+        </span>
+
+        <span className="ml-auto text-sm font-semibold text-neutral-900">
+          ₹{Number(charge).toFixed(0)}
+        </span>
+      </div>
+
+      {/* Invoice button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 w-full border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+        onClick={() => onInvoice(b.id)}
+      >
+        <FileText className="mr-1.5 h-3.5 w-3.5" />
+        Invoice
+      </Button>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -86,12 +214,9 @@ export default function AdminBookingsPage() {
       try {
         const res = await fetch("/api/admin/cargo/bookings");
         const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.message || "Could not load bookings");
-        }
+        if (!res.ok) throw new Error(json.message || "Could not load bookings");
         setBookings((json.data as Booking[]) ?? []);
       } catch (err: any) {
-        console.error("Bookings fetch error:", err);
         toast.error(err.message || "Could not load bookings");
       } finally {
         setLoading(false);
@@ -102,12 +227,10 @@ export default function AdminBookingsPage() {
 
   const handleStatusChange = async (bookingId: string, newStatus: Booking["status"]) => {
     const previous = bookings;
-    // Optimistic update
     setBookings((rows) =>
       rows.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
     );
     setUpdatingId(bookingId);
-
     try {
       const res = await fetch(`/api/admin/cargo/bookings/${bookingId}/status`, {
         method: "PATCH",
@@ -115,14 +238,11 @@ export default function AdminBookingsPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.message || "Could not update status");
-      }
+      if (!res.ok) throw new Error(json.message || "Could not update status");
       toast.success(`Status updated to "${newStatus}"`);
     } catch (err: any) {
-      console.error("Status update error:", err);
       toast.error(err.message || "Could not update status");
-      setBookings(previous); // roll back
+      setBookings(previous);
     } finally {
       setUpdatingId(null);
     }
@@ -130,7 +250,6 @@ export default function AdminBookingsPage() {
 
   const filtered = useMemo(() => {
     let rows = [...bookings];
-
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       rows = rows.filter(
@@ -143,11 +262,16 @@ export default function AdminBookingsPage() {
       );
     }
     if (status !== "all") rows = rows.filter((b) => b.status === status);
-    if (deliveryMode !== "all") rows = rows.filter((b) => b.delivery_mode === deliveryMode);
+    if (deliveryMode !== "all") rows = rows.filter((b) => {
+      const m = b.delivery_mode;
+      if (deliveryMode === "Indian Post") return m === "Indian Post" || m === "standard";
+      if (deliveryMode === "Express Cargo") return m === "Express Cargo" || m === "express";
+      if (deliveryMode === "Normal Cargo") return m === "Normal Cargo" || m === "normal";
+      return m === deliveryMode;
+    });
     if (paymentFilter !== "all") rows = rows.filter((b) => b.payment_status === paymentFilter);
     if (startDate) rows = rows.filter((b) => new Date(b.created_at) >= new Date(startDate));
-    if (endDate)
-      rows = rows.filter((b) => new Date(b.created_at) <= new Date(`${endDate}T23:59:59`));
+    if (endDate) rows = rows.filter((b) => new Date(b.created_at) <= new Date(`${endDate}T23:59:59`));
 
     rows.sort((a, b) => {
       let av: number, bv: number;
@@ -160,7 +284,6 @@ export default function AdminBookingsPage() {
       }
       return sortDir === "asc" ? av - bv : bv - av;
     });
-
     return rows;
   }, [bookings, search, status, deliveryMode, paymentFilter, startDate, endDate, sortKey, sortDir]);
 
@@ -174,21 +297,13 @@ export default function AdminBookingsPage() {
   };
 
   const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("desc");
-    }
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir("desc"); }
   };
 
   const hasActiveFilters =
-    search ||
-    status !== "all" ||
-    deliveryMode !== "all" ||
-    paymentFilter !== "all" ||
-    startDate ||
-    endDate;
+    search || status !== "all" || deliveryMode !== "all" ||
+    paymentFilter !== "all" || startDate || endDate;
 
   const totalOutstanding = bookings
     .filter((b) => b.payment_status !== "paid")
@@ -197,34 +312,33 @@ export default function AdminBookingsPage() {
       return s + Math.max(0, charge - (b.amount_paid ?? 0));
     }, 0);
 
-  const SortHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
+  const SortBtn = ({ label, k }: { label: string; k: SortKey }) => (
     <button
       type="button"
-      onClick={() => toggleSort(sortKeyName)}
-      className="flex items-center gap-1 text-left font-medium text-neutral-500 hover:text-neutral-900"
+      onClick={() => toggleSort(k)}
+      className="flex items-center gap-1 font-medium text-emerald-800 hover:text-emerald-600"
     >
       {label}
-      {sortKey === sortKeyName &&
-        (sortDir === "asc" ? (
-          <ChevronUp className="h-3 w-3" />
-        ) : (
-          <ChevronDown className="h-3 w-3" />
-        ))}
+      {sortKey === k ? (
+        sortDir === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+      ) : (
+        <ArrowUpDown className="h-3 w-3 opacity-40" />
+      )}
     </button>
   );
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-medium text-neutral-900">Bookings</h1>
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+
+        {/* Header */}
+        <div className="mb-5 flex flex-wrap items-start gap-3 sm:items-center">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-semibold text-neutral-900">Bookings</h1>
             <p className="text-sm text-neutral-500">
-              {loading
-                ? "Loading..."
-                : `${filtered.length} of ${bookings.length} bookings`}
+              {loading ? "Loading…" : `${filtered.length} of ${bookings.length} bookings`}
               {totalOutstanding > 0 && !loading && (
-                <span className="ml-2 text-red-600">
+                <span className="ml-2 font-medium text-red-600">
                   · ₹{totalOutstanding.toFixed(2)} outstanding
                 </span>
               )}
@@ -237,210 +351,267 @@ export default function AdminBookingsPage() {
               className="border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
             >
               <Users className="mr-1.5 h-4 w-4" />
-              Customers
+              <span className="hidden sm:inline">Customers</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/cargo/bookingPage")}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
             >
               <Plus className="mr-1.5 h-4 w-4" />
-              Create new order
+              <span className="hidden sm:inline">Create new order</span>
+              <span className="sm:hidden">New</span>
             </Button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 p-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tracking ID, name, phone"
-              className="bg-white pl-8 text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
-            />
+        <div className="mb-5 space-y-2 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+          {/* Row 1: search + clear */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search tracking ID, name or phone"
+                className="bg-white pl-8 text-neutral-900 placeholder:text-neutral-400 border-neutral-200"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="shrink-0 bg-white text-neutral-500 border-neutral-200 hover:bg-neutral-50"
+              >
+                <X className="mr-1 h-3.5 w-3.5" />
+                Clear
+              </Button>
+            )}
           </div>
 
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[160px] bg-white text-neutral-900 border-neutral-300">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-white text-neutral-900">
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Out for Delivery">Out for delivery</SelectItem>
-              <SelectItem value="Delivered">Delivered</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Row 2: dropdowns + dates */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="h-8 w-auto min-w-[120px] bg-white text-xs text-neutral-900 border-neutral-200">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-neutral-900">
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Out for Delivery">Out for delivery</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={deliveryMode} onValueChange={setDeliveryMode}>
-            <SelectTrigger className="w-[150px] bg-white text-neutral-900 border-neutral-300">
-              <SelectValue placeholder="Delivery mode" />
-            </SelectTrigger>
-            <SelectContent className="bg-white text-neutral-900">
-              <SelectItem value="all">All modes</SelectItem>
-              <SelectItem value="standard">Indian Post</SelectItem>
-              <SelectItem value="express">Cargo Express</SelectItem>
-              <SelectItem value="express">Cargo Normal</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={deliveryMode} onValueChange={setDeliveryMode}>
+              <SelectTrigger className="h-8 w-auto min-w-[120px] bg-white text-xs text-neutral-900 border-neutral-200">
+                <SelectValue placeholder="Mode" />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-neutral-900">
+                <SelectItem value="all">All modes</SelectItem>
+                <SelectItem value="Indian Post">Indian Post</SelectItem>
+                <SelectItem value="Normal Cargo">Normal Cargo</SelectItem>
+                <SelectItem value="Express Cargo">Express Cargo</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="w-[150px] bg-white text-neutral-900 border-neutral-300">
-              <SelectValue placeholder="Payment" />
-            </SelectTrigger>
-            <SelectContent className="bg-white text-neutral-900">
-              <SelectItem value="all">All payments</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="unpaid">Unpaid</SelectItem>
-              <SelectItem value="partial">Partial</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger className="h-8 w-auto min-w-[110px] bg-white text-xs text-neutral-900 border-neutral-200">
+                <SelectValue placeholder="Payment" />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-neutral-900">
+                <SelectItem value="all">All payments</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-[150px] bg-white text-neutral-900 border-neutral-300"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-[150px] bg-white text-neutral-900 border-neutral-300"
-          />
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="h-8 w-auto bg-white text-xs text-neutral-900 border-neutral-200"
+            />
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="h-8 w-auto bg-white text-xs text-neutral-900 border-neutral-200"
+            />
+          </div>
+        </div>
 
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilters}
-              className="bg-white text-neutral-500 border-neutral-300 hover:bg-neutral-50"
-            >
-              <X className="mr-1 h-3.5 w-3.5" />
-              Clear
-            </Button>
+        {/* ---------------------------------------------------------------- */}
+        {/* MOBILE: card list (hidden on md+)                                */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="md:hidden">
+          {loading ? (
+            <div className="flex justify-center py-16 text-neutral-400">
+              <Loader2 className="h-5 w-5 animate-spin" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center text-sm text-neutral-400">
+              No bookings match these filters.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((b) => (
+                <BookingCard
+                  key={b.id}
+                  b={b}
+                  updatingId={updatingId}
+                  onStatusChange={handleStatusChange}
+                  onInvoice={(id) => router.push(`/admin/cargo/invoice/${id}`)}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto rounded-lg border border-neutral-200">
-          <table className="min-w-full text-sm">
+        {/* ---------------------------------------------------------------- */}
+        {/* DESKTOP: full-width table (hidden below md)                      */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="hidden md:block">
+          <table className="w-full table-fixed border-collapse text-sm">
+            <colgroup>
+              {/* Tracking  Sender  Receiver  Product  Weight  Mode  Status  Charge  Payment  Date  Invoice */}
+              <col className="w-[10%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
+              <col className="w-[10%]" />
+              <col className="w-[7%]" />
+              <col className="w-[8%]" />
+              <col className="w-[14%]" />
+              <col className="w-[8%]" />
+              <col className="w-[8%]" />
+              <col className="w-[7%]" />
+              <col className="w-[6%]" />
+            </colgroup>
             <thead>
-              <tr className="border-b border-emerald-100 bg-emerald-50/50">
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Tracking ID</th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Sender</th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Receiver</th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Phone</th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Product</th>
-                <th className="px-4 py-2.5 text-left">
-                  <SortHeader label="Weight" sortKeyName="weight_estimate" />
+              <tr className="border-b border-emerald-100 bg-emerald-50/60">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Tracking</th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Sender</th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Receiver</th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Product</th>
+                <th className="px-3 py-2.5 text-left text-xs">
+                  <SortBtn label="Weight" k="weight_estimate" />
                 </th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Mode</th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Status</th>
-                <th className="px-4 py-2.5 text-left">
-                  <SortHeader label="Charge" sortKeyName="estimate_charge" />
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Mode</th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Status</th>
+                <th className="px-3 py-2.5 text-left text-xs">
+                  <SortBtn label="Charge" k="estimate_charge" />
                 </th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Payment</th>
-                <th className="px-4 py-2.5 text-left">
-                  <SortHeader label="Booked on" sortKeyName="created_at" />
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Payment</th>
+                <th className="px-3 py-2.5 text-left text-xs">
+                  <SortBtn label="Date" k="created_at" />
                 </th>
-                <th className="px-4 py-2.5 text-left font-medium text-emerald-800">Invoice</th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-emerald-800">Invoice</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={12} className="py-10 text-center text-neutral-400">
+                  <td colSpan={11} className="py-12 text-center text-neutral-400">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="py-10 text-center text-neutral-400">
+                  <td colSpan={11} className="py-12 text-center text-sm text-neutral-400">
                     No bookings match these filters.
                   </td>
                 </tr>
               ) : (
-                filtered.map((b) => (
-                  <tr
-                    key={b.id}
-                    className="border-b border-neutral-100 last:border-0 hover:bg-emerald-50/40"
-                  >
-                    <td className="px-4 py-2.5 font-mono text-xs text-neutral-700">
-                      {b.tracking_id}
-                    </td>
-                    <td className="px-4 py-2.5 text-neutral-700">{b.sender_name}</td>
-                    <td className="px-4 py-2.5 text-neutral-700">{b.receiver_name}</td>
-                    <td className="px-4 py-2.5 text-neutral-500">{b.receiver_phone}</td>
-                    <td className="px-4 py-2.5 text-neutral-700">{b.product_name}</td>
-                    <td className="px-4 py-2.5 text-neutral-500">{b.weight_estimate} kg</td>
-                    <td className="px-4 py-2.5 capitalize text-neutral-500">{b.delivery_mode}</td>
-                    <td className="px-4 py-2.5">
-                      <Select
-                        value={b.status}
-                        onValueChange={(value) =>
-                          handleStatusChange(b.id, value as Booking["status"])
-                        }
-                        disabled={updatingId === b.id}
-                      >
-                        <SelectTrigger
-                          className={`h-7 w-[150px] border-0 px-2 text-xs font-medium ${
-                            STATUS_STYLES[b.status] ?? "bg-neutral-100 text-neutral-600"
+                filtered.map((b) => {
+                  const charge = b.final_charge ?? b.estimate_charge;
+                  return (
+                    <tr
+                      key={b.id}
+                      className="border-b border-neutral-100 last:border-0 hover:bg-emerald-50/30 transition-colors"
+                    >
+                      <td className="px-3 py-2.5">
+                        <span className="font-mono text-xs font-medium text-emerald-700 leading-tight block truncate">
+                          {b.tracking_id}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <p className="truncate text-xs font-medium text-neutral-800">{b.sender_name}</p>
+                        <p className="truncate text-xs text-neutral-400">{b.sender_phone}</p>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <p className="truncate text-xs font-medium text-neutral-800">{b.receiver_name}</p>
+                        <p className="truncate text-xs text-neutral-400">{b.receiver_phone}</p>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span className="truncate text-xs text-neutral-700 block">{b.product_name}</span>
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-neutral-500 whitespace-nowrap">
+                        {b.weight_estimate} kg
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-neutral-500">
+                        {modeLabel(b.delivery_mode)}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Select
+                          value={b.status}
+                          onValueChange={(v) => handleStatusChange(b.id, v as Booking["status"])}
+                          disabled={updatingId === b.id}
+                        >
+                          <SelectTrigger
+                            className={`h-6 w-full border-0 px-2 text-xs font-medium ${
+                              STATUS_TRIGGER_STYLES[b.status] ?? "bg-neutral-100 text-neutral-600"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1 min-w-0">
+                              {updatingId === b.id && <Loader2 className="h-2.5 w-2.5 shrink-0 animate-spin" />}
+                              <SelectValue />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="bg-white text-neutral-900">
+                            {STATUS_OPTIONS.map((opt) => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-3 py-2.5 text-xs font-medium text-neutral-800 whitespace-nowrap">
+                        ₹{Number(charge).toFixed(0)}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize whitespace-nowrap ${
+                            PAYMENT_STYLES[b.payment_status] ?? "bg-neutral-100 text-neutral-600"
                           }`}
                         >
-                          <div className="flex items-center gap-1.5">
-                            {updatingId === b.id && (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            )}
-                            <SelectValue />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="bg-white text-neutral-900">
-                          {STATUS_OPTIONS.map((opt) => (
-                            <SelectItem key={opt} value={opt}>
-                              {opt}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="px-4 py-2.5 text-neutral-700">
-                      ₹{Number(b.estimate_charge).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-                          PAYMENT_STYLES[b.payment_status] ?? "bg-neutral-100 text-neutral-600"
-                        }`}
-                      >
-                        {b.payment_status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-neutral-500">
-                      {new Date(b.created_at).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
-                        onClick={() => router.push(`/admin/cargo/invoice/${b.id}`)}
-                      >
-                        <FileText className="mr-1.5 h-3.5 w-3.5" />
-                        Invoice
-                      </Button>
-                    </td>
-                  </tr>
-                ))
+                          {b.payment_status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-neutral-500 whitespace-nowrap">
+                        {new Date(b.created_at).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 w-full border-emerald-200 bg-white px-1.5 text-xs text-emerald-700 hover:bg-emerald-50"
+                          onClick={() => router.push(`/admin/cargo/invoice/${b.id}`)}
+                        >
+                          <FileText className="h-3 w-3" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   );
