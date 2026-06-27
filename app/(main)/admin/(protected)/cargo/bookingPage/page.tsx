@@ -209,17 +209,13 @@ function CustomerCombobox({
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return customers.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) || c.phone.includes(q)
+      (c) => c.name.toLowerCase().includes(q) || c.phone.includes(q)
     );
   }, [customers, search]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -332,18 +328,29 @@ const Field = ({
   </div>
 );
 
+// ---------------------------------------------------------------------------
+// Party card (sender / receiver) — with "same as customer" toggle
+// ---------------------------------------------------------------------------
+
 const PartyCard = ({
   title,
   prefix,
   form,
   errors,
   update,
+  // Customer-link props
+  selectedCustomer,
+  sameAsCustomer,
+  onSameAsCustomerChange,
 }: {
   title: string;
   prefix: "sender" | "receiver";
   form: CargoFormData;
   errors: Partial<Record<keyof CargoFormData, string>>;
   update: <K extends keyof CargoFormData>(key: K, value: CargoFormData[K]) => void;
+  selectedCustomer: CargoCustomer | null;
+  sameAsCustomer: boolean;
+  onSameAsCustomerChange: (checked: boolean) => void;
 }) => {
   const name = `${prefix}_name` as const;
   const phone = `${prefix}_phone` as const;
@@ -351,23 +358,49 @@ const PartyCard = ({
   const cityState = `${prefix}_city_state` as const;
   const pincode = `${prefix}_pincode` as const;
 
+  const isLocked = sameAsCustomer && !!selectedCustomer;
+
   return (
     <div className="rounded-lg border border-neutral-200 border-t-2 border-t-emerald-500 p-4">
-      <h3 className="mb-4 text-sm font-medium text-neutral-900">{title}</h3>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-medium text-neutral-900">{title}</h3>
+
+        {/* Same-as-customer checkbox — only show when a customer is selected */}
+        {selectedCustomer && (
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100">
+            <input
+              type="checkbox"
+              className="h-3.5 w-3.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
+              checked={sameAsCustomer}
+              onChange={(e) => onSameAsCustomerChange(e.target.checked)}
+            />
+            Same as&nbsp;<span className="font-semibold truncate max-w-[80px]">{selectedCustomer.name}</span>
+          </label>
+        )}
+      </div>
+
+      {/* Prefill banner */}
+      {isLocked && (
+        <div className="mb-3 rounded-md bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-700">
+          ✓ Fields auto-filled from customer record. Uncheck above to edit manually.
+        </div>
+      )}
+
       <div className="space-y-4">
         <Field label="Full name" required>
           <Input
-            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
+            className={`bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300 ${isLocked ? "opacity-70 cursor-not-allowed" : ""}`}
             value={form[name]}
             onChange={(e) => update(name, e.target.value as never)}
             placeholder="e.g. Bonison"
             aria-invalid={!!errors[name]}
+            readOnly={isLocked}
           />
           {errors[name] && <p className="text-xs text-red-600">{errors[name]}</p>}
         </Field>
         <Field label="Phone number" required>
           <Input
-            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
+            className={`bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300 ${isLocked ? "opacity-70 cursor-not-allowed" : ""}`}
             value={form[phone]}
             onChange={(e) =>
               update(phone, e.target.value.replace(/\D/g, "").slice(0, 10) as never)
@@ -375,32 +408,35 @@ const PartyCard = ({
             placeholder="10 digit mobile number"
             inputMode="numeric"
             aria-invalid={!!errors[phone]}
+            readOnly={isLocked}
           />
           {errors[phone] && <p className="text-xs text-red-600">{errors[phone]}</p>}
         </Field>
         <Field label="Address" required>
           <Textarea
-            className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
+            className={`bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300 ${isLocked ? "opacity-70 cursor-not-allowed" : ""}`}
             value={form[address]}
             onChange={(e) => update(address, e.target.value as never)}
             placeholder="House / street / locality"
             rows={2}
             aria-invalid={!!errors[address]}
+            readOnly={isLocked}
           />
           {errors[address] && <p className="text-xs text-red-600">{errors[address]}</p>}
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City / state">
             <Input
-              className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
+              className={`bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300 ${isLocked ? "opacity-70 cursor-not-allowed" : ""}`}
               value={form[cityState]}
               onChange={(e) => update(cityState, e.target.value as never)}
               placeholder="e.g. Imphal, Manipur"
+              readOnly={isLocked}
             />
           </Field>
           <Field label="Pincode" required>
             <Input
-              className="bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300"
+              className={`bg-white text-neutral-900 placeholder:text-neutral-400 placeholder:opacity-60 border-neutral-300 ${isLocked ? "opacity-70 cursor-not-allowed" : ""}`}
               value={form[pincode]}
               onChange={(e) =>
                 update(pincode, e.target.value.replace(/\D/g, "").slice(0, 6) as never)
@@ -408,6 +444,7 @@ const PartyCard = ({
               placeholder="795103"
               inputMode="numeric"
               aria-invalid={!!errors[pincode]}
+              readOnly={isLocked}
             />
             {errors[pincode] && <p className="text-xs text-red-600">{errors[pincode]}</p>}
           </Field>
@@ -536,6 +573,15 @@ export default function CargoBookingForm({
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [successData, setSuccessData] = useState<{ trackingId: string; bookingId: string } | null>(null);
 
+  // "Same as customer" state for each party
+  const [senderSameAsCustomer, setSenderSameAsCustomer] = useState(false);
+  const [receiverSameAsCustomer, setReceiverSameAsCustomer] = useState(false);
+
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => c.id === form.customer_id) ?? null,
+    [customers, form.customer_id]
+  );
+
   useEffect(() => {
     fetch("/api/admin/cargo/customers")
       .then((res) => res.json())
@@ -543,18 +589,98 @@ export default function CargoBookingForm({
       .catch((err) => console.error("Customers fetch error:", err));
   }, []);
 
+  // When customer changes, reset the same-as toggles
+  useEffect(() => {
+    setSenderSameAsCustomer(false);
+    setReceiverSameAsCustomer(false);
+  }, [form.customer_id]);
+
   const update = <K extends keyof CargoFormData>(key: K, value: CargoFormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
+  // Fill sender fields from customer
+  const fillSenderFromCustomer = (c: CargoCustomer) => {
+    setForm((prev) => ({
+      ...prev,
+      sender_name: c.name,
+      sender_phone: c.phone,
+      sender_address: c.address,
+      sender_city_state: c.city_state ?? "",
+      sender_pincode: c.pincode ?? "",
+    }));
+  };
+
+  // Fill receiver fields from customer
+  const fillReceiverFromCustomer = (c: CargoCustomer) => {
+    setForm((prev) => ({
+      ...prev,
+      receiver_name: c.name,
+      receiver_phone: c.phone,
+      receiver_address: c.address,
+      receiver_city_state: c.city_state ?? "",
+      receiver_pincode: c.pincode ?? "",
+    }));
+  };
+
+  // Clear sender fields
+  const clearSenderFields = () => {
+    setForm((prev) => ({
+      ...prev,
+      sender_name: "",
+      sender_phone: "",
+      sender_address: "",
+      sender_city_state: "",
+      sender_pincode: "",
+    }));
+  };
+
+  // Clear receiver fields
+  const clearReceiverFields = () => {
+    setForm((prev) => ({
+      ...prev,
+      receiver_name: "",
+      receiver_phone: "",
+      receiver_address: "",
+      receiver_city_state: "",
+      receiver_pincode: "",
+    }));
+  };
+
+  // Handle "same as customer" toggle for sender
+  const handleSenderSameAsCustomer = (checked: boolean) => {
+    setSenderSameAsCustomer(checked);
+    if (checked && selectedCustomer) {
+      fillSenderFromCustomer(selectedCustomer);
+    } else {
+      clearSenderFields();
+    }
+  };
+
+  // Handle "same as customer" toggle for receiver
+  const handleReceiverSameAsCustomer = (checked: boolean) => {
+    setReceiverSameAsCustomer(checked);
+    if (checked && selectedCustomer) {
+      fillReceiverFromCustomer(selectedCustomer);
+    } else {
+      clearReceiverFields();
+    }
+  };
+
   const handleCustomerSelect = (customerId: string) => {
+    // Reset both same-as toggles when switching customer
+    setSenderSameAsCustomer(false);
+    setReceiverSameAsCustomer(false);
+
     if (!customerId) {
       update("customer_id", "");
       return;
     }
     const c = customers.find((c) => c.id === customerId);
     if (!c) return;
+
+    // Auto-fill sender (default behaviour, same as before)
     setForm((prev) => ({
       ...prev,
       customer_id: customerId,
@@ -564,6 +690,8 @@ export default function CargoBookingForm({
       sender_city_state: c.city_state ?? "",
       sender_pincode: c.pincode ?? "",
     }));
+    // Mark sender as "same as customer" to reflect the auto-fill
+    setSenderSameAsCustomer(true);
   };
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -609,6 +737,8 @@ export default function CargoBookingForm({
     removePhoto();
     setTrackingId(generateTrackingId());
     setErrors({});
+    setSenderSameAsCustomer(false);
+    setReceiverSameAsCustomer(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -755,16 +885,39 @@ export default function CargoBookingForm({
                 onChange={handleCustomerSelect}
               />
               {form.customer_id && (
-                <p className="mt-2 text-xs text-emerald-600">
-                  ✓ Sender fields auto-filled from customer record. This booking will appear in their account ledger.
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-emerald-600">
+                    ✓ Customer selected. Use the checkboxes in Sender / Receiver to fill their details.
+                  </p>
+                  <p className="text-xs text-neutral-400">
+                    This booking will appear in their account ledger.
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Sender + Receiver */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <PartyCard title="Sender" prefix="sender" form={form} errors={errors} update={update} />
-              <PartyCard title="Receiver" prefix="receiver" form={form} errors={errors} update={update} />
+              <PartyCard
+                title="Sender"
+                prefix="sender"
+                form={form}
+                errors={errors}
+                update={update}
+                selectedCustomer={selectedCustomer}
+                sameAsCustomer={senderSameAsCustomer}
+                onSameAsCustomerChange={handleSenderSameAsCustomer}
+              />
+              <PartyCard
+                title="Receiver"
+                prefix="receiver"
+                form={form}
+                errors={errors}
+                update={update}
+                selectedCustomer={selectedCustomer}
+                sameAsCustomer={receiverSameAsCustomer}
+                onSameAsCustomerChange={handleReceiverSameAsCustomer}
+              />
             </div>
 
             {/* Package */}
@@ -807,6 +960,7 @@ export default function CargoBookingForm({
                       <SelectItem value="Indian Post">Indian Post</SelectItem>
                       <SelectItem value="Normal Cargo">Normal Cargo</SelectItem>
                       <SelectItem value="Express Cargo">Express Cargo</SelectItem>
+                      <SelectItem value="Surface(By Road)">Surface(By Road)</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.delivery_mode && <p className="text-xs text-red-600">{errors.delivery_mode}</p>}
@@ -821,6 +975,7 @@ export default function CargoBookingForm({
                     </SelectTrigger>
                     <SelectContent className="bg-white text-neutral-900">
                       <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Dispatched">Dispatched</SelectItem>
                       <SelectItem value="Out for Delivery">Out for delivery</SelectItem>
                       <SelectItem value="Delivered">Delivered</SelectItem>
                     </SelectContent>
