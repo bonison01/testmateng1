@@ -9,12 +9,9 @@ const COMPETITION_LABELS: Record<string, string> = {
   young_innovator: 'Young Innovator',
 };
 
-const COMPETITION_DATES: Record<string, string> = {
-  painting: 'TBA',
-  quiz: 'TBA',
-  mathematics: 'TBA',
-  young_innovator: 'TBA',
-};
+// Fixed for all candidates
+const EXAM_DATE_DISPLAY = '12 July 2026';
+const EXAM_TIME_DISPLAY = '10:00 AM';
 
 interface DocumentRow {
   document_type: string;
@@ -42,13 +39,13 @@ interface RegistrationData {
   participation_type: 'individual' | 'team';
   team_size: number | null;
   team_members: TeamMemberRow[] | null;
+  exam_center: string | null;
   documents?: DocumentRow[];
 }
 
 export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
   const photo = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
   const signature = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
-
   const regNo = `MED${String(data.id).padStart(6, '0')}`;
 
   return (
@@ -56,6 +53,7 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
       <div id="edufest-admit-card" className="bg-gray-100 p-4 md:p-8 max-w-3xl mx-auto">
         <div className="w-full bg-white shadow-lg" style={{ fontFamily: 'Arial, sans-serif' }}>
           <div className="border-2 border-black">
+
             {/* Header */}
             <div className="grid grid-cols-[2fr_1fr] border-b-2 border-black">
               <div className="border-r-2 border-black p-4 flex items-center justify-center">
@@ -85,6 +83,22 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
                 <Row label="Participation:" value={data.participation_type} capitalize last />
               </div>
             </div>
+
+            {/* Exam Details Band — always shown once centre is assigned */}
+            {data.exam_center && (
+              <div className="border-b-2 border-black">
+                <div className="bg-blue-50 px-4 py-1.5 text-center border-b border-black">
+                  <span className="text-xs font-bold tracking-widest uppercase text-blue-700">
+                    Exam Details
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-black">
+                  <ExamCell label="Exam Centre" value={data.exam_center} />
+                  <ExamCell label="Date"        value={EXAM_DATE_DISPLAY} />
+                  <ExamCell label="Time"        value={EXAM_TIME_DISPLAY} />
+                </div>
+              </div>
+            )}
 
             {/* QR + Signature + Photo */}
             <div className="grid grid-cols-3 border-b-2 border-black">
@@ -123,23 +137,22 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
               </div>
             </div>
 
-            {/* Competition Details Header */}
+            {/* Competition Details */}
             <div className="bg-gray-50 p-2 text-center font-bold border-b-2 border-black text-black">
               Competition Details
             </div>
-
             <div className="border-b-2 border-black">
               {data.competition_category?.map((cat, i) => (
                 <Row
                   key={cat}
                   label={COMPETITION_LABELS[cat] || cat}
-                  value={COMPETITION_DATES[cat] || 'TBA'}
+                  value={EXAM_DATE_DISPLAY}
                   last={i === data.competition_category.length - 1}
                 />
               ))}
             </div>
 
-            {/* Team members, if applicable */}
+            {/* Team Members */}
             {data.participation_type === 'team' && data.team_members && data.team_members.length > 0 && (
               <>
                 <div className="bg-gray-50 p-2 text-center font-bold border-b-2 border-black text-black">
@@ -158,7 +171,7 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
               </>
             )}
 
-            {/* Self declaration */}
+            {/* Self Declaration */}
             <div className="p-4 text-xs text-gray-800">
               <div className="text-center font-bold text-red-600 mb-2">SELF DECLARATION (UNDERTAKING)</div>
               <div>
@@ -173,6 +186,7 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
               This admit card is computer generated and does not require a physical signature. For assistance, contact
               Mateng at justmatengservice@gmail.com or call 600 944 9928.
             </div>
+
           </div>
         </div>
       </div>
@@ -180,12 +194,19 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
   );
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function ExamCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-4 py-2.5 bg-blue-50">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 mb-0.5">{label}</p>
+      <p className="text-sm font-bold text-gray-900">{value}</p>
+    </div>
+  );
+}
+
 function Row({
-  label,
-  value,
-  bold,
-  capitalize,
-  last,
+  label, value, bold, capitalize, last,
 }: {
   label: string;
   value: string;
