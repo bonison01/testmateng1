@@ -41,6 +41,7 @@ export default function CompleteClient() {
         gender: registration.gender,
         email: registration.email,
         father_name: registration.father_name,
+        exam_center: registration.exam_center ?? '',
         competition_category: registration.competition_category
             ? [registration.competition_category].flat()
             : [],

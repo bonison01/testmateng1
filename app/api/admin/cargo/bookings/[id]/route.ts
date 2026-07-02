@@ -44,39 +44,50 @@ export async function PATCH(
   const VALID_PAYMENT_STATUSES = ["paid", "unpaid", "partial"] as const;
   type PaymentStatus = (typeof VALID_PAYMENT_STATUSES)[number];
 
-  const { payment_status, amount_paid } = body as {
+  const { payment_status, amount_paid, ...rest } = body as {
     payment_status?: PaymentStatus;
     amount_paid?: number;
+    [key: string]: unknown;
   };
 
   if (payment_status && !VALID_PAYMENT_STATUSES.includes(payment_status)) {
     return NextResponse.json({ message: "Invalid payment_status." }, { status: 400 });
   }
 
-  // Fetch current booking to compute amount_paid when toggling to "paid"
-  const { data: current, error: fetchErr } = await supabaseAdmin
-    .from("cargo_bookings")
-    .select("estimate_charge, final_charge, amount_paid, payment_status")
-    .eq("id", id)
-    .single();
+  // Start with every other field the client sent (sender/receiver info,
+  // product, weight, delivery_mode, status, charges, notes, etc.)
+  const updates: Record<string, unknown> = { ...rest };
 
-  if (fetchErr) {
-    return NextResponse.json({ message: fetchErr.message }, { status: 500 });
-  }
-
-  const charge = current.final_charge ?? current.estimate_charge;
-
-  let newAmountPaid: number = current.amount_paid ?? 0;
-  if (payment_status === "paid") {
-    newAmountPaid = charge;
-  } else if (payment_status === "unpaid") {
-    newAmountPaid = 0;
-  } else if (payment_status === "partial" && typeof amount_paid === "number") {
-    newAmountPaid = amount_paid;
-  }
-
-  const updates: Record<string, unknown> = {};
+  // Payment status needs special handling because amount_paid depends on
+  // the charge amount, so only fetch the current row when it's involved.
   if (payment_status) {
+    const { data: current, error: fetchErr } = await supabaseAdmin
+      .from("cargo_bookings")
+      .select("estimate_charge, final_charge, amount_paid")
+      .eq("id", id)
+      .single();
+
+    if (fetchErr) {
+      return NextResponse.json({ message: fetchErr.message }, { status: 500 });
+    }
+
+    // Use the incoming final_charge/estimate_charge if this is a full edit
+    // (they'll be in `rest`), otherwise fall back to the current row.
+    const charge =
+      (updates.final_charge as number | undefined) ??
+      current.final_charge ??
+      (updates.estimate_charge as number | undefined) ??
+      current.estimate_charge;
+
+    let newAmountPaid: number = current.amount_paid ?? 0;
+    if (payment_status === "paid") {
+      newAmountPaid = charge;
+    } else if (payment_status === "unpaid") {
+      newAmountPaid = 0;
+    } else if (payment_status === "partial" && typeof amount_paid === "number") {
+      newAmountPaid = amount_paid;
+    }
+
     updates.payment_status = payment_status;
     updates.amount_paid = newAmountPaid;
   }
