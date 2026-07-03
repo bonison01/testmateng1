@@ -107,7 +107,7 @@ function Navbar() {
             </DropdownMenuItem>
             <DropdownMenuItem
                 className="hover:text-white cursor-pointer px-3 py-2"
-                onClick={() => { window.open("https://vendors2-01-lake.vercel.app/login", "_blank"); closedNav(); }}
+                onClick={() => { window.open("https://matengdelivery.com/", "_blank"); closedNav(); }}
             >
                 🏢 Business Login
             </DropdownMenuItem>
