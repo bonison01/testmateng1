@@ -1,11 +1,23 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/footer/Footer";
-import styles from "./../events/matengfest/page.module.css";
 import { useRouter } from "next/navigation";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
+const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+});
 
 export default function Page() {
   const router = useRouter();
@@ -27,376 +39,398 @@ export default function Page() {
   ];
 
   useEffect(() => {
-
     const targetParcels = 100;
     const targetMerchants = 300;
     const targetBusinesses = 130;
 
     const interval = setInterval(() => {
-
-      setParcels(prev => prev < targetParcels ? prev + 2 : targetParcels);
-      setMerchants(prev => prev < targetMerchants ? prev + 5 : targetMerchants);
-      setBusinesses(prev => prev < targetBusinesses ? prev + 3 : targetBusinesses);
-
+      setParcels((prev) => (prev < targetParcels ? prev + 2 : targetParcels));
+      setMerchants((prev) => (prev < targetMerchants ? prev + 5 : targetMerchants));
+      setBusinesses((prev) => (prev < targetBusinesses ? prev + 3 : targetBusinesses));
     }, 40);
 
     return () => clearInterval(interval);
-
   }, []);
 
   return (
-
-    <div className="w-full min-h-[calc(100svh-64px)] flex flex-col">
+    <div
+      className={`${fraunces.variable} ${inter.variable} ${mono.variable} w-full min-h-[calc(100svh-64px)] flex flex-col`}
+      style={{
+        background: "#0B1410",
+        fontFamily: "var(--font-body)",
+        color: "#F3F1EA",
+      }}
+    >
+      <style jsx global>{`
+        @keyframes dash-run {
+          to { stroke-dashoffset: -200; }
+        }
+        @keyframes drift {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        .route-line {
+          stroke-dasharray: 5 9;
+          animation: dash-run 14s linear infinite;
+        }
+        .stub-row > div + div {
+          position: relative;
+        }
+        .stub-row > div + div::before {
+          content: "";
+          position: absolute;
+          left: -1px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 9999px;
+          background: #0B1410;
+          box-shadow: 0 -34px 0 -1px #0B1410, 0 34px 0 -1px #0B1410;
+        }
+        .eyebrow {
+          font-family: var(--font-mono);
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+        .tabular {
+          font-family: var(--font-mono);
+          font-feature-settings: "tnum" 1;
+        }
+      `}</style>
 
       <div className="flex-grow">
-
-
         {/* HERO */}
-        <section className="flex flex-col items-center text-center px-6 pt-24 pb-16">
+        <section className="relative flex flex-col items-center text-center px-6 pt-28 pb-20 overflow-hidden">
+          <svg
+            className="absolute inset-x-0 top-10 w-full max-w-4xl mx-auto opacity-40 pointer-events-none"
+            viewBox="0 0 800 160"
+            fill="none"
+          >
+            <path
+              d="M20 120 C 180 20, 280 140, 420 60 S 640 20, 780 90"
+              stroke="#3FA637"
+              strokeWidth="1.5"
+              className="route-line"
+            />
+            <circle cx="20" cy="120" r="4" fill="#E8B84B" />
+            <circle cx="420" cy="60" r="4" fill="#3FA637" />
+            <circle cx="780" cy="90" r="4" fill="#E8B84B" />
+          </svg>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-b from-white to-gray-400 bg-clip-text">
-            Discover • Deliver • Events
+          <span className="eyebrow relative text-[11px] text-[#8FA391] mb-6">
+            Imphal · Delhi — On the Move
+          </span>
+
+          <h1
+            className="relative text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] max-w-4xl"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "#F3F1EA" }}
+          >
+            Discover, deliver, and{" "}
+            <em style={{ fontStyle: "italic", color: "#3FA637" }}>grow</em> — together.
           </h1>
-          <br />
-          <p className="text-gray-400 mt-6 max-w-xl text-sm sm:text-base">
-            Mateng connects people with local businesses, delivers essentials quickly,
-            and creates opportunities for youths through competitions and events.
+
+          <p className="relative text-[#92A395] mt-6 max-w-xl text-sm sm:text-base leading-relaxed">
+            Mateng connects people with local businesses, moves parcels
+            across Imphal and Delhi quickly, and opens doors for young
+            people through competitions and events.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 mt-10">
-
+          <div className="relative flex flex-col sm:flex-row gap-4 mt-10">
             <Link href="/events/matengfest">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-[#14710f] to-[#0f550c]
-              ring-4 ring-green-500/20 hover:opacity-90 transition">
+              <button
+                className="px-8 py-3 rounded-full font-semibold text-[#0B1410] transition-all duration-200 hover:-translate-y-0.5"
+                style={{ background: "#3FA637" }}
+              >
                 Explore Events →
               </button>
             </Link>
 
             <Link href="/delivery-rates">
-              <button className="px-8 py-3 rounded-full font-semibold text-white
-              bg-gradient-to-tr from-gray-800 to-gray-900
-              ring-4 ring-gray-700/30 hover:opacity-90 transition">
+              <button
+                className="px-8 py-3 rounded-full font-semibold text-[#F3F1EA] border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#3FA637]/60"
+                style={{ borderColor: "rgba(243,241,234,0.18)" }}
+              >
                 Book Delivery →
               </button>
             </Link>
-
           </div>
-
         </section>
-        
-        
 
-        {/* REGISTRATION OPEN BANNER - BIG */}
-<section className="w-full flex justify-center px-4 mt-8">
-  <div className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl min-h-[220px] sm:min-h-[260px] md:min-h-[300px] flex items-center">
-
-    {/* Background */}
-    <div className="absolute inset-0 bg-gradient-to-r from-[#14710f] via-[#1f9d1a] to-[#0f550c]" />
-
-    {/* Glow Effects */}
-    <div className="absolute -top-12 -left-12 w-52 h-52 bg-green-400/30 blur-3xl rounded-full" />
-    <div className="absolute -bottom-12 -right-12 w-52 h-52 bg-yellow-300/20 blur-3xl rounded-full" />
-
-    {/* Floating Math Symbols */}
-    <div className="absolute top-6 left-8 text-white/10 text-6xl font-bold">π</div>
-    <div className="absolute bottom-6 right-10 text-white/10 text-5xl font-bold">∑</div>
-    <div className="absolute top-10 right-24 text-white/10 text-4xl font-bold">√</div>
-
-    {/* Content */}
-    <div className="relative z-10 w-full text-center px-6 sm:px-10 py-10">
-
-
-      <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wide text-white leading-tight">
-        🎉 Mateng Education Festival 2026
-      </h2>
-
-      <p className="mt-4 text-base sm:text-lg md:text-xl text-green-100 max-w-3xl mx-auto">
-        Registrations are now open 🚀 Participate in the exciting
-        <span className="font-bold text-yellow-300">
-          {" "}Mathematics Competition
-        </span>
-        {" "}and showcase your problem-solving skills.
-      </p>
-
-      {/* Highlights */}
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <div className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white text-sm">
-          🧠 Quiz Competition
-        </div>
-
-        <div className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white text-sm">
-          🎨 Painting
-        </div>
-
-        <div className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white text-sm">
-          🏅 Young Innovators Challenge
-        </div>
-
-        <div className="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-white text-sm">
-          👨‍🎓 Maths Competition
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <Link href="/events/matengfest/edufest_registration">
-          <button
-            className="px-8 py-3 rounded-full font-bold text-[#0f550c] bg-white
-            hover:bg-green-50 hover:scale-105
-            shadow-[0_0_24px_rgba(255,255,255,0.3)]
-            transition-all duration-200 text-sm sm:text-base"
+        {/* EDUFEST TICKET BANNER */}
+        <section className="w-full flex justify-center px-4 mt-6">
+          <div
+            className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
+            style={{ background: "linear-gradient(120deg, #17240F 0%, #0F550C 60%, #0B1410 100%)" }}
           >
-            Register Now →
-          </button>
-        </Link>
+            <div className="flex-1 px-8 sm:px-12 py-10 text-left">
+              <span className="eyebrow text-[11px] text-[#E8B84B]">Registrations Open</span>
 
-        <Link href="/events/matengfest">
+              <h2
+                className="mt-3 text-3xl sm:text-4xl md:text-5xl leading-tight"
+                style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+              >
+                Mateng Education{" "}
+                <em style={{ fontStyle: "italic", color: "#E8B84B" }}>Festival</em> 2026
+              </h2>
+
+              <p className="mt-4 text-[#D7E4D8] max-w-xl text-sm sm:text-base leading-relaxed">
+                Enter the Mathematics Competition and put your problem-solving
+                to the test — plus quiz, painting, and innovation tracks for
+                every kind of student.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {["Quiz Competition", "Painting", "Young Innovators", "Mathematics"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="eyebrow px-3 py-1.5 rounded-full text-[10px] text-[#F3F1EA]"
+                    style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.15)" }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Link href="/events/matengfest/edufest_registration">
+                  <button
+                    className="px-8 py-3 rounded-full font-bold text-[#0F550C] bg-white hover:bg-[#F3F1EA] hover:scale-[1.03] transition-all duration-200 text-sm"
+                  >
+                    Register Now →
+                  </button>
+                </Link>
+                <Link href="/events/matengfest">
+                  <button className="px-8 py-3 rounded-full font-semibold text-white border border-white/30 hover:border-white/70 hover:bg-white/10 transition-all duration-200 text-sm">
+                    Learn More
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Ticket stub */}
+            <div
+              className="relative md:w-48 flex md:flex-col items-center justify-center gap-3 py-6 md:py-0 border-t md:border-t-0 md:border-l border-dashed"
+              style={{ borderColor: "rgba(243,241,234,0.25)" }}
+            >
+              <span
+                className="eyebrow text-[10px] text-[#E8B84B] md:[writing-mode:vertical-rl]"
+              >
+                Admit One
+              </span>
+              <span className="tabular text-xs text-[#D7E4D8]">EDU·26</span>
+            </div>
+          </div>
+        </section>
+
+        {/* NOTICE LINK */}
+        <div className="w-full flex justify-center px-6 mt-8">
           <button
-            className="px-8 py-3 rounded-full font-semibold text-white
-            border-2 border-white/40 hover:border-white/80 hover:bg-white/10
-            transition-all duration-200 text-sm sm:text-base"
-          >
-            Learn More
-          </button>
-        </Link>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-        <div className={styles.noticeContainer}>
-          <h4
-            className={styles.heroTitle1}
             onClick={() => router.push("/events/matengfest")}
-            style={{ cursor: "pointer" }}
+            className="eyebrow text-[11px] text-[#8FA391] hover:text-[#3FA637] transition-colors duration-200 flex items-center gap-2"
           >
-            Check Pre Neet Examination Answer Key
-          </h4>
+            Check Pre-Neet Examination Answer Key
+            <span aria-hidden>→</span>
+          </button>
         </div>
-
-
-        {/* APPLE STYLE EVENTS */}
-
-
-
 
         {/* WHAT WE DO */}
-
         <section className="mt-24 px-6 flex flex-col items-center">
-
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-12">
-            What We Do
+          <span className="eyebrow text-[11px] text-[#8FA391] mb-3">What We Do</span>
+          <h2
+            className="text-2xl sm:text-3xl mb-12"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+          >
+            Three ways we move Manipur
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl">
-
-            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
-
-              <h3 className="text-lg font-semibold text-white">
-                Events & Competitions
-              </h3>
-
-              <p className="text-gray-400 text-sm mt-3">
-                Structured competitions and events helping students
-                showcase their skills.
-              </p>
-
-            </div>
-
-            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
-
-              <h3 className="text-lg font-semibold text-white">
-                Business Discovery
-              </h3>
-
-              <p className="text-gray-400 text-sm mt-3">
-                Helping local businesses become discoverable and connect
-                with customers.
-              </p>
-
-            </div>
-
-            <div className="bg-[#0f172a] p-8 rounded-2xl text-center shadow-md">
-
-              <h3 className="text-lg font-semibold text-white">
-                Delivery
-              </h3>
-
-              <p className="text-gray-400 text-sm mt-3">
-                {/* Reliable hyperlocal delivery and porter services helping businesses move and deliver products quickly and efficiently. */}
-                Reliable hyperlocal delivery and porter services helping businesses move and deliver goods quickly.
-              </p>
-
-            </div>
-
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl w-full">
+            {[
+              {
+                tag: "Discovery",
+                title: "Events & Competitions",
+                body: "Structured competitions and events helping students showcase their skills.",
+                icon: (
+                  <path d="M11 4a7 7 0 105.29 12.29l4.2 4.2 1.42-1.41-4.2-4.2A7 7 0 0011 4zm0 2a5 5 0 110 10 5 5 0 010-10z" />
+                ),
+              },
+              {
+                tag: "Local Business",
+                title: "Business Discovery",
+                body: "Helping local businesses become discoverable and connect with customers.",
+                icon: (
+                  <path d="M4 4h16v4l-1 1v11h-6v-6H11v6H5V9L4 8V4zm2 2v1.17L6.83 8H17.2l.8-1V6H6z" />
+                ),
+              },
+              {
+                tag: "Logistics",
+                title: "Delivery",
+                body: "Reliable hyperlocal delivery and porter services helping businesses move goods quickly.",
+                icon: (
+                  <path d="M3 6h11v7h2.5l2.5 3.5V17h1v2h-2a2 2 0 11-4 0H8a2 2 0 11-4 0H3V6zm2 2v7h.28a2 2 0 013.44 0H12V8H5zm10 4v2h2l-1.5-2H15z" />
+                ),
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl p-8 text-left"
+                style={{
+                  background: "rgba(243,241,234,0.03)",
+                  border: "1px dashed rgba(243,241,234,0.16)",
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#3FA637" className="mb-4">
+                  {item.icon}
+                </svg>
+                <span className="eyebrow text-[10px] text-[#E8B84B]">{item.tag}</span>
+                <h3
+                  className="text-lg mt-2"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  {item.title}
+                </h3>
+                <p className="text-[#92A395] text-sm mt-3 leading-relaxed">{item.body}</p>
+              </div>
+            ))}
           </div>
-
         </section>
 
-
-
-        {/* STATS */}
-
-        
-
-
-
         {/* DELIVERY CTA */}
-
         <section className="mt-24 px-6 flex justify-center">
+          <div
+            className="relative overflow-hidden p-10 sm:p-12 rounded-2xl text-center max-w-3xl w-full shadow-xl"
+            style={{ background: "linear-gradient(120deg, #14710f, #0f550c)" }}
+          >
+            <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 140">
+              <path d="M-10 100 C 100 40, 200 130, 410 50" stroke="#F3F1EA" strokeWidth="1.5" className="route-line" />
+            </svg>
 
-          <div className="bg-gradient-to-r from-[#14710f] to-[#0f550c]
-          p-10 rounded-2xl text-white text-center max-w-3xl shadow-xl">
-
-            <h2 className="text-2xl font-bold">
-              Need Something Delivered?
+            <h2
+              className="relative text-2xl sm:text-3xl"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+            >
+              Need something delivered?
             </h2>
-
-            <p className="text-sm opacity-90 mt-3">
-              Book a fast and reliable local delivery with Mateng.
+            <p className="relative text-sm text-[#D7E4D8] mt-3">
+              Book a fast, reliable local delivery with Mateng.
             </p>
 
             <Link href="/delivery-rates">
-
-              <button className="mt-6 px-8 py-3 rounded-full bg-white text-[#14710f] font-semibold shadow-md hover:scale-105 transition">
+              <button className="relative mt-6 px-8 py-3 rounded-full bg-white text-[#14710f] font-semibold shadow-md hover:scale-[1.03] transition">
                 Book Delivery
               </button>
-
             </Link>
-
           </div>
-
         </section>
-
       </div>
 
-
-
       {/* MODAL */}
-
       {showModal && (
-
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-
-          <div className="bg-[#0f172a] p-8 rounded-2xl max-w-md w-full text-center shadow-xl">
-
-            <h3 className="text-xl font-semibold text-white">
-              Tickets Coming Soon
+          <div
+            className="p-8 rounded-2xl max-w-md w-full text-center shadow-xl border border-dashed"
+            style={{ background: "#101B15", borderColor: "rgba(243,241,234,0.2)" }}
+          >
+            <span className="eyebrow text-[10px] text-[#E8B84B]">Admit One</span>
+            <h3
+              className="text-xl mt-2"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+            >
+              Tickets coming soon
             </h3>
-
-            <p className="text-gray-400 mt-3 text-sm">
+            <p className="text-[#92A395] mt-3 text-sm">
               Online ticket booking for this event will be available soon.
               Stay tuned for updates.
             </p>
-
             <button
               onClick={() => setShowModal(false)}
-              className="mt-6 px-6 py-2 rounded-full bg-[#14710f] text-white font-semibold"
+              className="mt-6 px-6 py-2 rounded-full text-white font-semibold"
+              style={{ background: "#14710f" }}
             >
               Close
             </button>
-
           </div>
-
         </div>
-
       )}
 
+      {/* IMPACT — TICKET STUB ROW */}
+      <section className="mt-24 flex flex-col items-center text-center px-6">
+        <span className="eyebrow text-[11px] text-[#8FA391] mb-3">Our Impact</span>
+        <h2
+          className="text-2xl sm:text-3xl mb-10"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        >
+          On the road, every day
+        </h2>
 
-      <section className="mt-24 flex flex-col items-center text-center">
-
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
-            Our Impact
-          </h2>
-
-          <div className="flex flex-row justify-center gap-6 md:gap-16 text-gray-400 text-lg">
-
-            <div>
-              Delivered <span className="text-green-500 font-semibold">
-                {Math.floor(parcels)}K
-              </span> parcels
-            </div>
-
-            <div className="w-[2px] h-7 bg-gray-500/30" />
-
-            <div>
-              Merchants <span className="text-green-500 font-semibold">
-                {Math.floor(merchants)}+
-              </span>
-            </div>
-
-            <div className="w-[2px] h-7 bg-gray-500/30" />
-
-            <div>
-              Discovered <span className="text-green-500 font-semibold">
-                {Math.floor(businesses)}+
-              </span> businesses
-            </div>
-
+        <div
+          className="stub-row flex flex-row justify-center gap-8 md:gap-16 rounded-2xl px-8 sm:px-14 py-8"
+          style={{ background: "rgba(243,241,234,0.03)", border: "1px dashed rgba(243,241,234,0.16)" }}
+        >
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(parcels)}K
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Parcels delivered</p>
           </div>
 
-        </section>
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(merchants)}+
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Merchants</p>
+          </div>
 
-      {/* TRUSTED PARTNERS */}
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(businesses)}+
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Businesses discovered</p>
+          </div>
+        </div>
+      </section>
+
       {/* TRUSTED PARTNERS */}
       <section className="mt-28 px-6 flex flex-col items-center">
-
-        {/* Header */}
         <div className="text-center mb-12">
-          <span className="text-xs font-bold tracking-[0.2em] text-green-500/80 uppercase mb-3 block">
-            Our Network
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+          <span className="eyebrow text-[11px] text-[#E8B84B] mb-3 block">Our Network</span>
+          <h2
+            className="text-2xl sm:text-3xl mb-3"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+          >
             Trusted Partners
           </h2>
-          <p className="text-white-500 text-sm max-w-md mx-auto">
-            Proudly working with 400+ local businesses across Manipur
+          <p className="text-[#92A395] text-sm max-w-md mx-auto">
+            Proudly working with 400+ local businesses across Imphal and Delhi
           </p>
         </div>
 
-        {/* Marquee + Arrows wrapper */}
         <div className="relative w-full max-w-5xl">
-
-          {/* LEFT ARROW */}
           <button
             onClick={() => {
               const el = document.getElementById("partner-track");
               if (el) el.scrollBy({ left: -200, behavior: "smooth" });
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20
-        w-10 h-10 rounded-full
-        bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40
-        flex items-center justify-center
-        text-white transition-all duration-200 shadow-lg backdrop-blur-sm
-        -translate-x-1/2"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center text-[#F3F1EA] transition-all duration-200 shadow-lg backdrop-blur-sm -translate-x-1/2"
+            style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.16)" }}
           >
             ‹
           </button>
 
-          {/* RIGHT ARROW */}
           <button
             onClick={() => {
               const el = document.getElementById("partner-track");
               if (el) el.scrollBy({ left: 200, behavior: "smooth" });
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20
-        w-10 h-10 rounded-full
-        bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40
-        flex items-center justify-center
-        text-white transition-all duration-200 shadow-lg backdrop-blur-sm
-        translate-x-1/2"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center text-[#F3F1EA] transition-all duration-200 shadow-lg backdrop-blur-sm translate-x-1/2"
+            style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.16)" }}
           >
             ›
           </button>
 
-          {/* Fade edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0B1410] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0B1410] to-transparent z-10 pointer-events-none" />
 
-          {/* Scrollable track — no auto-scroll, manual only */}
           <div
             id="partner-track"
             className="flex gap-5 overflow-x-auto scroll-smooth px-8 pb-2"
@@ -407,56 +441,33 @@ export default function Page() {
             {[...PARTNERS, ...PARTNERS].map((partner, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 group relative w-40 h-24 rounded-2xl flex flex-col items-center justify-center px-5 gap-2
-            bg-white/[0.06] border-2 border-white/[0.12]
-            hover:bg-white/[0.12] hover:border-green-500/50
-            hover:shadow-[0_0_24px_rgba(20,113,15,0.2)]
-            transition-all duration-300 cursor-pointer"
+                className="flex-shrink-0 group relative w-40 h-24 rounded-2xl flex flex-col items-center justify-center px-5 gap-2 transition-all duration-300 cursor-pointer"
+                style={{
+                  background: "rgba(243,241,234,0.04)",
+                  border: "1px dashed rgba(243,241,234,0.14)",
+                }}
               >
-                {/* Glow dot top-right */}
-                <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-green-500/0 group-hover:bg-green-500/70 transition-all duration-300" />
-
+                <div
+                  className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  style={{ background: "#3FA637" }}
+                />
                 <img
                   src={partner.logo}
                   alt={partner.name}
-                  className="max-h-10 max-w-[75%] object-contain
-              opacity-50 group-hover:opacity-100
-              grayscale group-hover:grayscale-0
-              transition-all duration-300"
+                  className="max-h-10 max-w-[75%] object-contain opacity-50 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all duration-300"
                 />
-                <span className="text-[11px] font-bold text-white/30 group-hover:text-white/70
-            tracking-wide transition-all duration-300 truncate w-full text-center uppercase">
+                <span className="eyebrow text-[10px] text-[#8FA391] group-hover:text-[#F3F1EA] truncate w-full text-center transition-all duration-300">
                   {partner.name}
                 </span>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Bottom stat bar */}
-        {/* <div className="mt-12 flex flex-wrap justify-center gap-6 sm:gap-12">
-    {[
-      { value: "400+", label: "Partner Businesses" },
-      { value: "7+",   label: "Categories" },
-      { value: "3",    label: "Districts Covered" },
-    ].map(({ value, label }) => (
-      <div key={label} className="text-center">
-        <p className="text-2xl font-bold text-white">{value}</p>
-        <p className="text-xs text-gray-500 mt-1 font-medium">{label}</p>
-      </div>
-    ))}
-  </div> */}
-
       </section>
-
-      {/* FOOTER */}
 
       <footer className="w-full mt-20">
         <Footer />
       </footer>
-
     </div>
-
   );
-
 }
