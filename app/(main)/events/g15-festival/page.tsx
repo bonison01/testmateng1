@@ -13,12 +13,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowRight, Tickets, Plus, Minus, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, ArrowRight, Tickets, Plus, Minus, CheckCircle2, XCircle, CalendarDays } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const API_BASE_URL = "https://api.justmateng.info";
 // const API_BASE_URL = "http://127.0.0.1:8000";
+
+// --------------- Event details ---------------
+const EVENT_DATE_LABEL = "24 July 2026";
 
 // --------------- Validation helpers ---------------
 const isValidPhone = (val: string) => /^\d{10}$/.test(val);
@@ -91,7 +94,6 @@ export default function TicketRegistrationPage() {
   const prices = { earlyBird: 299, normal: 399 };
   const SERVICE_FEE_PER_TICKET = 7;
 
-  const EARLY_BIRD_END = new Date('2026-03-30T23:59:59');
   const passType = 'normal';
   const unitPrice = prices.normal;
 
@@ -188,13 +190,27 @@ export default function TicketRegistrationPage() {
               priority
             />
           </div>
-{/* 
-          <div className="mt-6 text-zinc-200 text-sm space-y-1">
-            <p>
-              Early Bird ends: <span className="text-green-300">20 March 2026</span>
-            </p>
-            <p>Limited passes available — grab yours now!</p>
-          </div> */}
+
+          {/* NEW DATE BANNER */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mt-6 w-full max-w-lg rounded-xl border border-green-500/30 bg-green-500/10 px-5 py-4 flex items-center gap-3"
+          >
+            <div className="flex items-center justify-center h-9 w-9 rounded-full bg-green-500/20 flex-shrink-0">
+              <CalendarDays className="h-4 w-4 text-green-300" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm text-zinc-200">
+                New date confirmed:{' '}
+                <span className="font-semibold text-green-300">{EVENT_DATE_LABEL}</span>
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Limited passes available — grab yours now!
+              </p>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* RIGHT SECTION */}
@@ -209,8 +225,12 @@ export default function TicketRegistrationPage() {
                 <Tickets className="h-6 w-6" />
                 Get Your Pass
               </CardTitle>
-              <CardDescription className="text-zinc-400">
-                Secure your spot at G15 Festival
+              <CardDescription className="text-zinc-400 flex items-center gap-2 flex-wrap">
+                <span>Secure your spot at G15 Festival</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 border border-green-500/30 px-2 py-0.5 text-[11px] font-medium text-green-300">
+                  <CalendarDays className="h-3 w-3" />
+                  {EVENT_DATE_LABEL}
+                </span>
               </CardDescription>
             </CardHeader>
 
@@ -223,15 +243,10 @@ export default function TicketRegistrationPage() {
                     <Label className="text-base">Pass Type</Label>
                     <div className="rounded-xl border-2 border-stone-600 bg-stone-600/30 p-4 flex justify-between items-center">
                       <div>
-                        <p className="font-semibold">
-                          
-                        Normal Pass
+                        <p className="font-semibold">Normal Pass</p>
+                        <p className="text-xs text-stone-400">
+                          Valid for entry on {EVENT_DATE_LABEL}
                         </p>
-                        {/* {passType === 'early_bird' && (
-                          <p className="text-xs text-stone-400">
-                            Early bird discount valid until 20 March 2026
-                          </p>
-                        )} */}
                       </div>
                       <span className="text-xl font-bold">₹{unitPrice}</span>
                     </div>
