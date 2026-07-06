@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Footer from "@/components/footer/Footer";
 import { useRouter } from "next/navigation";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
@@ -69,6 +70,10 @@ export default function Page() {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
         .route-line {
           stroke-dasharray: 5 9;
           animation: dash-run 14s linear infinite;
@@ -96,6 +101,9 @@ export default function Page() {
         .tabular {
           font-family: var(--font-mono);
           font-feature-settings: "tnum" 1;
+        }
+        .live-dot {
+          animation: pulse-glow 1.8s ease-in-out infinite;
         }
       `}</style>
 
@@ -219,6 +227,101 @@ export default function Page() {
                 Admit One
               </span>
               <span className="tabular text-xs text-[#D7E4D8]">EDU·26</span>
+            </div>
+          </div>
+        </section>
+
+        {/* G15 FESTIVAL TICKET BANNER */}
+        <section className="w-full flex justify-center px-4 mt-6">
+          <div
+            className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl"
+            style={{ background: "#150C33" }}
+          >
+            {/* PHOTO HERO STRIP */}
+            <div className="relative w-full h-48 sm:h-56 md:h-64">
+              <Image
+                src="/g15-festival.png"
+                alt="G15 Festival — live crowd and stage lights"
+                fill
+                className="object-cover"
+                priority={false}
+              />
+              {/* readability gradient over the photo */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(21,12,51,0.15) 0%, rgba(21,12,51,0.55) 65%, #150C33 100%)",
+                }}
+              />
+
+              <div className="absolute bottom-4 left-6 sm:left-10 flex items-center gap-2">
+                <span
+                  className="live-dot inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ background: "#50C273" }}
+                />
+                <span
+                  className="eyebrow text-[11px] text-[#F3F1EA] px-3 py-1.5 rounded-full"
+                  style={{ background: "rgba(0,0,0,0.35)" }}
+                >
+                  Booking Open · New Date Confirmed
+                </span>
+              </div>
+            </div>
+
+            {/* CONTENT */}
+            <div className="relative flex flex-col md:flex-row">
+              <div className="relative flex-1 px-8 sm:px-12 py-10 text-left">
+                <h2
+                  className="text-3xl sm:text-4xl md:text-5xl leading-tight"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  G15{" "}
+                  <em style={{ fontStyle: "italic", color: "#50C273" }}>Festival</em> 2026
+                </h2>
+
+                <p className="mt-4 text-[#E4DEF5] max-w-xl text-sm sm:text-base leading-relaxed">
+                  Live music, food, and good energy — the ultimate vibe is
+                  back. Now happening{" "}
+                  <strong className="text-white">24th July 2026</strong>.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {["Live Music", "Food & Drinks", "Community"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="eyebrow px-3 py-1.5 rounded-full text-[10px] text-[#F3F1EA]"
+                      style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.15)" }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                  <Link href="/events/g15-festival">
+                    <button className="px-8 py-3 rounded-full font-bold text-[#2D1B69] bg-white hover:bg-[#F3F1EA] hover:scale-[1.03] transition-all duration-200 text-sm">
+                      Book Your Pass →
+                    </button>
+                  </Link>
+                  <Link href="/events/g15-festival">
+                    <button className="px-8 py-3 rounded-full font-semibold text-white border border-white/30 hover:border-white/70 hover:bg-white/10 transition-all duration-200 text-sm">
+                      Learn More
+                    </button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Ticket stub */}
+              <div
+                className="relative md:w-48 flex md:flex-col items-center justify-center gap-3 py-6 md:py-0 border-t md:border-t-0 md:border-l border-dashed"
+                style={{ borderColor: "rgba(243,241,234,0.25)" }}
+              >
+                <span className="eyebrow text-[10px] text-[#E2DE59] md:[writing-mode:vertical-rl]">
+                  Admit One
+                </span>
+                <span className="tabular text-xs text-[#E4DEF5]">24 JUL</span>
+              </div>
             </div>
           </div>
         </section>
