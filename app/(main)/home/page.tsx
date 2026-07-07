@@ -27,6 +27,7 @@ export default function Page() {
   const [merchants, setMerchants] = useState(0);
   const [businesses, setBusinesses] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [showEventsPopup, setShowEventsPopup] = useState(false);
 
   const PARTNERS = [
     { name: "175c", logo: "/partners/partner1.png" },
@@ -51,6 +52,20 @@ export default function Page() {
     }, 40);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const alreadySeen = typeof window !== "undefined" && sessionStorage.getItem("mateng_events_popup_seen");
+    if (alreadySeen) return;
+
+    const timer = setTimeout(() => {
+      setShowEventsPopup(true);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("mateng_events_popup_seen", "1");
+      }
+    }, 900);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -105,6 +120,44 @@ export default function Page() {
         .live-dot {
           animation: pulse-glow 1.8s ease-in-out infinite;
         }
+        @keyframes pop-in {
+          0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes ring-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(63,166,55,0.35); }
+          50% { box-shadow: 0 0 0 10px rgba(63,166,55,0); }
+        }
+        @keyframes ring-pulse-purple {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(80,194,115,0.35); }
+          50% { box-shadow: 0 0 0 10px rgba(80,194,115,0); }
+        }
+        .event-card {
+          animation: pop-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+          will-change: transform;
+        }
+        .event-card:hover {
+          transform: translateY(-6px) scale(1.008);
+        }
+        .event-card-green {
+          box-shadow: 0 0 0 1px rgba(63,166,55,0.25), 0 20px 60px -20px rgba(63,166,55,0.35);
+        }
+        .event-card-green:hover {
+          box-shadow: 0 0 0 1px rgba(63,166,55,0.5), 0 30px 80px -20px rgba(63,166,55,0.55);
+        }
+        .event-card-purple {
+          box-shadow: 0 0 0 1px rgba(80,194,115,0.25), 0 20px 60px -20px rgba(80,60,180,0.45);
+        }
+        .event-card-purple:hover {
+          box-shadow: 0 0 0 1px rgba(80,194,115,0.5), 0 30px 80px -20px rgba(80,60,180,0.65);
+        }
+        .featured-badge {
+          animation: ring-pulse-purple 2.2s ease-in-out infinite;
+        }
+        .featured-badge-green {
+          animation: ring-pulse 2.2s ease-in-out infinite;
+        }
       `}</style>
 
       <div className="flex-grow">
@@ -127,21 +180,22 @@ export default function Page() {
           </svg>
 
           <span className="eyebrow relative text-[11px] text-[#8FA391] mb-6">
-            Imphal · Delhi — On the Move
+            All Across India — On the Move
           </span>
 
           <h1
             className="relative text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] max-w-4xl"
             style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "#F3F1EA" }}
           >
-            Discover, deliver, and{" "}
-            <em style={{ fontStyle: "italic", color: "#3FA637" }}>grow</em> — together.
+            Discover, Events & Delivery — Making a{" "}
+            <em style={{ fontStyle: "italic", color: "#3FA637" }}>Difference</em>.
           </h1>
 
           <p className="relative text-[#92A395] mt-6 max-w-xl text-sm sm:text-base leading-relaxed">
-            Mateng connects people with local businesses, moves parcels
-            across Imphal and Delhi quickly, and opens doors for young
-            people through competitions and events.
+            Mateng delivers parcels all across India, helps people
+            discover great local businesses, and creates events that
+            unite people — building community, joy, and healthy
+            competition along the way.
           </p>
 
           <div className="relative flex flex-col sm:flex-row gap-4 mt-10">
@@ -168,9 +222,16 @@ export default function Page() {
         {/* EDUFEST TICKET BANNER */}
         <section className="w-full flex justify-center px-4 mt-6">
           <div
-            className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
-            style={{ background: "linear-gradient(120deg, #17240F 0%, #0F550C 60%, #0B1410 100%)" }}
+            className="event-card event-card-green relative w-full max-w-6xl rounded-3xl overflow-hidden flex flex-col md:flex-row"
+            style={{ background: "linear-gradient(120deg, #17240F 0%, #0F550C 60%, #0B1410 100%)", animationDelay: "0.05s" }}
           >
+            <div
+              className="featured-badge-green absolute top-5 right-5 z-20 eyebrow text-[10px] px-3 py-1.5 rounded-full"
+              style={{ background: "#3FA637", color: "#0B1410", fontWeight: 700 }}
+            >
+              ★ Featured
+            </div>
+
             <div className="flex-1 px-8 sm:px-12 py-10 text-left">
               <span className="eyebrow text-[11px] text-[#E8B84B]">Registrations Open</span>
 
@@ -234,8 +295,8 @@ export default function Page() {
         {/* G15 FESTIVAL TICKET BANNER */}
         <section className="w-full flex justify-center px-4 mt-6">
           <div
-            className="relative w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl"
-            style={{ background: "#150C33" }}
+            className="event-card event-card-purple relative w-full max-w-6xl rounded-3xl overflow-hidden"
+            style={{ background: "#150C33", animationDelay: "0.15s" }}
           >
             {/* PHOTO HERO STRIP */}
             <div className="relative w-full h-48 sm:h-56 md:h-64">
@@ -254,6 +315,13 @@ export default function Page() {
                     "linear-gradient(180deg, rgba(21,12,51,0.15) 0%, rgba(21,12,51,0.55) 65%, #150C33 100%)",
                 }}
               />
+
+              <div
+                className="featured-badge absolute top-5 right-5 z-20 eyebrow text-[10px] px-3 py-1.5 rounded-full"
+                style={{ background: "#50C273", color: "#0B1410", fontWeight: 700 }}
+              >
+                ★ Featured
+              </div>
 
               <div className="absolute bottom-4 left-6 sm:left-10 flex items-center gap-2">
                 <span
@@ -426,6 +494,93 @@ export default function Page() {
           </div>
         </section>
       </div>
+
+      {/* ENTRANCE EVENTS POPUP */}
+      {showEventsPopup && (
+        <div
+          className="fixed inset-0 bg-black/75 flex items-center justify-center z-[60] px-4"
+          onClick={() => setShowEventsPopup(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
+            style={{
+              background: "#101B15",
+              border: "1px solid rgba(243,241,234,0.12)",
+              animation: "pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both",
+            }}
+          >
+            <button
+              onClick={() => setShowEventsPopup(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center text-[#F3F1EA] hover:bg-white/10 transition-colors"
+              style={{ background: "rgba(0,0,0,0.35)" }}
+            >
+              ✕
+            </button>
+
+            <div className="px-7 pt-7 pb-2 text-center">
+              <span className="eyebrow text-[10px] text-[#E8B84B]">Happening Soon</span>
+              <h3
+                className="text-xl sm:text-2xl mt-2"
+                style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "#F3F1EA" }}
+              >
+                Don&apos;t miss what&apos;s coming up
+              </h3>
+            </div>
+
+            <div className="p-5 flex flex-col gap-3">
+              {/* G15 event card */}
+              <Link href="/events/g15-festival" onClick={() => setShowEventsPopup(false)}>
+                <div
+                  className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(120deg, #2D1B69, #4D3799)" }}
+                >
+                  <div className="flex-shrink-0 text-center w-14">
+                    <p className="eyebrow text-[10px] text-[#E2DE59]">JUL</p>
+                    <p className="text-2xl font-bold text-white leading-none">24</p>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-white text-sm">G15 Festival 2026</p>
+                    <p className="text-xs text-[#E4DEF5] mt-0.5">
+                      Live music, food & community — booking open
+                    </p>
+                  </div>
+                  <span className="text-white text-lg">→</span>
+                </div>
+              </Link>
+
+              {/* EduFest event card */}
+              <Link href="/events/matengfest/edufest_registration" onClick={() => setShowEventsPopup(false)}>
+                <div
+                  className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(120deg, #17240F, #0F550C)" }}
+                >
+                  <div className="flex-shrink-0 text-center w-14">
+                    <p className="eyebrow text-[10px] text-[#E8B84B]">EDU</p>
+                    <p className="text-2xl font-bold text-white leading-none">26</p>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-white text-sm">Mateng Education Festival</p>
+                    <p className="text-xs text-[#D7E4D8] mt-0.5">
+                      Maths, quiz, painting & innovation — registrations open
+                    </p>
+                  </div>
+                  <span className="text-white text-lg">→</span>
+                </div>
+              </Link>
+            </div>
+
+            <button
+              onClick={() => setShowEventsPopup(false)}
+              className="w-full py-3 text-xs eyebrow text-[#8FA391] hover:text-[#F3F1EA] transition-colors border-t"
+              style={{ borderColor: "rgba(243,241,234,0.1)" }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MODAL */}
       {showModal && (
