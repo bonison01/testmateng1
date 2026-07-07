@@ -1,5 +1,5 @@
 export async function getCandidateById(id: string) {
-  const res = await fetch(`https://api.justmateng.info/candidates/${id}`);
+  const res = await fetch(`https://api.matengdelivery.com/candidates/${id}`);
 
   if (!res.ok) {
     if (res.status === 404) {
@@ -20,7 +20,7 @@ export async function getCandidateById(id: string) {
 
 export async function getCandidateBySearch(dob: string, phone: string) {
   const res = await fetch(
-    `https://api.justmateng.info/candidates/search?dob=${dob}&phone=${phone}`
+    `https://api.matengdelivery.com/candidates/search?dob=${dob}&phone=${phone}`
   );
 
   if (!res.ok) {
