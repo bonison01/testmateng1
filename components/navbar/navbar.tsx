@@ -43,7 +43,7 @@ function Navbar() {
 
     const links: NavLink[] = [
         { name: "Discover Businesses", href: "/businesses" },
-        { name: "Delivery Service", href: "/delivery-rates" },
+        { name: "Delivery Service", href: "https://matengdelivery.com/" },
         { name: "Events", href: "/events" },
     ];
 

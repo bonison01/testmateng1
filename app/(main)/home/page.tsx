@@ -208,7 +208,7 @@ export default function Page() {
               </button>
             </Link>
 
-            <Link href="/delivery-rates">
+            <Link href="https://matengdelivery.com/">
               <button
                 className="px-8 py-3 rounded-full font-semibold text-[#F3F1EA] border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#3FA637]/60"
                 style={{ borderColor: "rgba(243,241,234,0.18)" }}
@@ -486,7 +486,7 @@ export default function Page() {
               Book a fast, reliable local delivery with Mateng.
             </p>
 
-            <Link href="/delivery-rates">
+            <Link href="https://matengdelivery.com/">
               <button className="relative mt-6 px-8 py-3 rounded-full bg-white text-[#14710f] font-semibold shadow-md hover:scale-[1.03] transition">
                 Book Delivery
               </button>
