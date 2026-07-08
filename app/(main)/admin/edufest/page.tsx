@@ -38,6 +38,7 @@ interface RegistrationRow {
   team_members: TeamMemberRow[] | null;
   verification_status: VerificationStatus;
   exam_center: string | null;
+  roll_number: string | null;
   created_at: string;
   documents?: DocumentRow[];
 }
@@ -326,24 +327,23 @@ export default function EduFestAdminPage() {
     const reg = assignDialog;
     setAssignDialog(null);
 
-    const { data, error } = await supabase
-      .from('registrations')
-      .update({
-        verification_status: 'verified',
-        exam_center: center,
-        exam_date: EXAM_DATE,
-        exam_time: EXAM_TIME,
-      })
-      .eq('id', reg.id)
-      .select();
+    // Atomically assigns exam centre, marks verified, and generates a serial
+    // roll number (per class + centre) if the candidate doesn't already have one.
+    const { data, error } = await supabase.rpc('assign_exam_centre_and_roll_number', {
+      p_registration_id: reg.id,
+      p_centre: center,
+    });
 
     if (error) { alert('❌ Failed: ' + error.message); return; }
-    if (!data || data.length === 0) {
-      alert('❌ The update did not apply. Check Supabase → Authentication → Policies for a missing RLS UPDATE policy.');
-      return;
-    }
 
-    const updated: RegistrationRow = { ...reg, verification_status: 'verified', exam_center: center };
+    const rollNumber = (data as string) || reg.roll_number;
+
+    const updated: RegistrationRow = {
+      ...reg,
+      verification_status: 'verified',
+      exam_center: center,
+      roll_number: rollNumber,
+    };
     setRegistrations(prev => prev.map(r => (r.id === reg.id ? updated : r)));
     setVerifiedDialog(updated);
   };
@@ -389,7 +389,7 @@ export default function EduFestAdminPage() {
     ];
 
     const rows = filteredRegistrations.map(r => [
-      `MED${String(r.id).padStart(6, '0')}`,
+      r.roll_number || `MED${String(r.id).padStart(6, '0')}`,
       r.full_name, r.dob, r.gender, r.student_class, r.institution_name,
       r.contact_number, r.alternate_contact_number || '', r.email, r.address,
       r.father_name, r.father_occupation,
@@ -433,7 +433,7 @@ export default function EduFestAdminPage() {
     );
   });
 
-  const regNo = (id: number) => `MED${String(id).padStart(6, '0')}`;
+  const regNo = (r: RegistrationRow) => r.roll_number || `MED${String(r.id).padStart(6, '0')}`;
 
   if (loading && registrations.length === 0) return <p style={{ padding: 20 }}>Loading...</p>;
 
@@ -526,7 +526,7 @@ export default function EduFestAdminPage() {
                     <div>
                       <h2 style={{ margin: 0, fontSize: 18, color: '#111827' }}>{r.full_name}</h2>
                       <p style={{ fontSize: 13, color: '#6b7280', margin: '4px 0 0' }}>
-                        {regNo(r.id)} • {r.student_class} • {r.institution_name}
+                        {regNo(r)} • {r.student_class} • {r.institution_name}
                       </p>
                       <p style={{ fontSize: 13, margin: '4px 0 0', color: '#111827' }}>
                         Contact: <b>{r.contact_number}</b> &nbsp;·&nbsp; Email: <b>{r.email}</b>
@@ -631,14 +631,14 @@ export default function EduFestAdminPage() {
           onUpdateStatus={updateStatus}
           onDownloadAdmitCard={handleDownloadAdmitCard}
           downloading={downloadingId === selected.id}
-          regNo={regNo(selected.id)}
+          regNo={regNo(selected)}
         />
       )}
 
       {assignDialog && (
         <AssignExamDialog
           registration={assignDialog}
-          regNo={regNo(assignDialog.id)}
+          regNo={regNo(assignDialog)}
           onConfirm={handleAssignConfirm}
           onCancel={() => setAssignDialog(null)}
         />
@@ -647,7 +647,7 @@ export default function EduFestAdminPage() {
       {verifiedDialog && (
         <VerifiedDialog
           registration={verifiedDialog}
-          regNo={regNo(verifiedDialog.id)}
+          regNo={regNo(verifiedDialog)}
           onClose={() => setVerifiedDialog(null)}
         />
       )}

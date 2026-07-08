@@ -32,6 +32,7 @@ interface RegistrationData {
   team_size: number | null;
   team_members: TeamMemberRow[] | null;
   exam_center: string | null;
+  roll_number: string | null;
   documents?: DocumentRow[];
 }
 
@@ -53,15 +54,29 @@ function getImageFormat(dataUrl: string): string {
 }
 
 export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
+  if (!data.roll_number) {
+    throw new Error('Cannot generate admit card: candidate has not been verified yet (no roll number assigned).');
+  }
+  const rollNumber = data.roll_number;
+
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPosition = 5;
 
-  const regNo = `MED${String(data.id).padStart(6, '0')}`;
-
   const photoUrl = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
   const signatureUrl = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
+  const EXAM_CENTRE_NAMES: Record<string, string> = {
+  Bishnupur: 'Bishnupur Higher Secondary, Bishnupur',
+  Kakching: 'Wabagai Higher Secondary, Kakching',
+  Thoubal: 'Y.K. College, Wangjing, Thoubal',
+  Imphal: 'Oriental College, Sagolband, Imphal West',
+};
+
+const getExamCentreName = (centre: string | null) => {
+  if (!centre) return '';
+  return EXAM_CENTRE_NAMES[centre] || centre;
+};
 
   let photoBase64: string | null = null;
   let signatureBase64: string | null = null;
@@ -103,7 +118,7 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
   autoTable(doc, {
     startY: yPosition,
     body: [
-      ['Registration No:', regNo],
+      ['Roll Number:', rollNumber],
       ["Candidate's Name:", data.full_name],
       ['Gender:', data.gender],
       ['Class / Grade:', data.student_class],
@@ -140,7 +155,12 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
 
   // ===== Exam Details Band (only if centre assigned) =====
   if (data.exam_center) {
-    const examCols = [data.exam_center, EXAM_DATE_DISPLAY, EXAM_TIME_DISPLAY];
+    // const examCols = [data.exam_center, EXAM_DATE_DISPLAY, EXAM_TIME_DISPLAY];
+    const examCols = [
+  getExamCentreName(data.exam_center),
+  EXAM_DATE_DISPLAY,
+  EXAM_TIME_DISPLAY,
+];
     const examLabels = ['Exam Centre', 'Date', 'Time'];
     const colW = (pageWidth - 10) / 3;
     const bandH = 19;
@@ -181,7 +201,7 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
 
   // ===== QR + Signature + Photo =====
   const qrCodeDataUrl = await QRCode.toDataURL(
-    `Registration: ${regNo}, Name: ${data.full_name}`,
+    `Roll No: ${rollNumber}, Name: ${data.full_name}`,
     { width: 400, margin: 1, errorCorrectionLevel: 'H' }
   );
 
@@ -198,7 +218,7 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
   const qrSize = 32;
   doc.addImage(qrCodeDataUrl, 'PNG', 5 + col1Width / 2 - qrSize / 2, yPosition + 3, qrSize, qrSize);
   doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 0, 0);
-  doc.text(regNo, 5 + col1Width / 2, yPosition + 40, { align: 'center' });
+  doc.text(rollNumber, 5 + col1Width / 2, yPosition + 40, { align: 'center' });
 
   const signatureX = 5 + col1Width + col1Width / 2;
   if (signatureBase64) {
@@ -293,7 +313,7 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
   doc.text('This admit card is computer generated and does not require a physical signature. For assistance, contact', pageWidth / 2, footerY - 1.5, { align: 'center' });
   doc.text('Mateng at justmatengservice@gmail.com or call 600 944 9928.', pageWidth / 2, footerY + 2.5, { align: 'center' });
 
-  doc.save(`EduFest_Admit_Card_${data.full_name}_${regNo}.pdf`);
+  doc.save(`EduFest_Admit_Card_${data.full_name}_${rollNumber}.pdf`);
 };
 
 // ─── Image loader ─────────────────────────────────────────────────────────────

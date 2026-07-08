@@ -40,13 +40,27 @@ interface RegistrationData {
   team_size: number | null;
   team_members: TeamMemberRow[] | null;
   exam_center: string | null;
+  roll_number: string | null;
   documents?: DocumentRow[];
 }
 
 export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
   const photo = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
   const signature = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
-  const regNo = `MED${String(data.id).padStart(6, '0')}`;
+  const EXAM_DATE_DISPLAY = '12 July 2026';
+const EXAM_TIME_DISPLAY = '10:00 AM';
+const EXAM_CENTRE_NAMES: Record<string, string> = {
+  Bishnupur: 'Bishnupur Higher Secondary, Bishnupur',
+  Kakching: 'Wabagai Higher Secondary, Kakching',
+  Thoubal: 'Y.K. College, Wangjing, Thoubal',
+  Imphal: 'Oriental College, Sagolband, Imphal West',
+};
+
+function getExamCentreName(centre: string | null): string {
+  if (!centre) return '';
+  return EXAM_CENTRE_NAMES[centre] || centre;
+}
+  const rollNumber = data.roll_number;
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -68,10 +82,19 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
               </div>
             </div>
 
+            {/* Pending verification banner */}
+            {!rollNumber && (
+              <div className="bg-yellow-50 border-b-2 border-black px-4 py-2 text-center">
+                <span className="text-xs font-bold text-yellow-800">
+                  ⚠ Verification pending — roll number will appear here once the candidate is verified
+                </span>
+              </div>
+            )}
+
             {/* Candidate Information */}
             <div className="grid grid-cols-2 border-b-2 border-black">
               <div className="border-r-2 border-black">
-                <Row label="Registration No:" value={regNo} bold />
+                <Row label="Roll Number:" value={rollNumber || 'Pending Verification'} bold />
                 <Row label="Candidate's Name:" value={data.full_name} />
                 <Row label="Gender:" value={data.gender} />
                 <Row label="Class / Grade:" value={data.student_class} last />
@@ -93,7 +116,11 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
                   </span>
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-black">
-                  <ExamCell label="Exam Centre" value={data.exam_center} />
+                  {/* <ExamCell label="Exam Centre" value={data.exam_center} /> */}
+                  <ExamCell
+  label="Exam Centre"
+  value={getExamCentreName(data.exam_center)}
+/>
                   <ExamCell label="Date"        value={EXAM_DATE_DISPLAY} />
                   <ExamCell label="Time"        value={EXAM_TIME_DISPLAY} />
                 </div>
@@ -105,12 +132,12 @@ export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
               <div className="border-r-2 border-black p-4 flex flex-col items-center justify-center">
                 <div className="bg-white p-2">
                   <QRCode
-                    value={`Registration: ${regNo}, Name: ${data.full_name}`}
+                    value={`Roll No: ${rollNumber || 'N/A'}, Name: ${data.full_name}`}
                     size={110}
                     level="H"
                   />
                 </div>
-                <div className="text-sm font-bold mt-2 text-black">{regNo}</div>
+                <div className="text-sm font-bold mt-2 text-black">{rollNumber || 'Pending'}</div>
               </div>
               <div className="border-r-2 border-black p-4 flex items-center justify-center">
                 <div className="text-center">
