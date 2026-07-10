@@ -45,7 +45,15 @@ const COMPETITION_LABELS: Record<string, string> = {
 
 // Fixed for all candidates
 const EXAM_DATE_DISPLAY = '12 July 2026';
-const EXAM_TIME_DISPLAY = '10:00 AM';
+
+// Venue + start time per competition (Quiz / Painting / Young Innovator are fixed at MU Canchipur)
+const COMPETITION_EXAM_INFO: Record<string, { venue: string; time: string }> = {
+  young_innovator: { venue: 'Manipur University, Canchipur', time: '8:00 AM' },
+  quiz: { venue: 'Manipur University, Canchipur', time: '9:00 AM' },
+  painting: { venue: 'Manipur University, Canchipur', time: '10:00 AM' },
+};
+
+const MATH_EXAM_TIME_DISPLAY = '10:00 AM';
 
 function getImageFormat(dataUrl: string): string {
   if (dataUrl.startsWith('data:image/jpeg') || dataUrl.startsWith('data:image/jpg')) return 'JPEG';
@@ -53,7 +61,24 @@ function getImageFormat(dataUrl: string): string {
   return 'PNG';
 }
 
-export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
+// ─── Filename helper ──────────────────────────────────────────────────────────
+// Single source of truth for the admit card filename, used both for the
+// single-candidate download and for entries inside the bulk ZIP export.
+// Sanitized so it's safe as both a filesystem path and a ZIP entry name
+// (candidate names can contain spaces/punctuation that break on some OSes).
+export function getAdmitCardFilename(data: RegistrationData): string {
+  if (!data.roll_number) {
+    throw new Error('Cannot generate admit card filename: candidate has not been verified yet (no roll number assigned).');
+  }
+  const safeName = data.full_name
+    .trim()
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .replace(/\s+/g, '_');
+  return `EduFest_Admit_Card_${safeName}_${data.roll_number}.pdf`;
+}
+
+// ─── Core builder (shared by save + blob variants) ───────────────────────────
+async function buildAdmitCardDoc(data: RegistrationData): Promise<jsPDF> {
   if (!data.roll_number) {
     throw new Error('Cannot generate admit card: candidate has not been verified yet (no roll number assigned).');
   }
@@ -66,17 +91,26 @@ export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
 
   const photoUrl = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
   const signatureUrl = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
-  const EXAM_CENTRE_NAMES: Record<string, string> = {
-  Bishnupur: 'Bishnupur Higher Secondary, Bishnupur',
-  Kakching: 'Wabagai Higher Secondary, Kakching',
-  Thoubal: 'Y.K. College, Wangjing, Thoubal',
-  Imphal: 'Oriental College, Sagolband, Imphal West',
-};
 
-const getExamCentreName = (centre: string | null) => {
-  if (!centre) return '';
-  return EXAM_CENTRE_NAMES[centre] || centre;
-};
+  const EXAM_CENTRE_NAMES: Record<string, string> = {
+    Bishnupur: 'Bishnupur Higher Secondary, Bishnupur',
+    Kakching: 'Wabagai Higher Secondary, Kakching',
+    Thoubal: 'Y.K. College, Wangjing, Thoubal',
+    Imphal: 'Oriental College, Sagolband, Imphal West',
+  };
+
+  const getExamCentreName = (centre: string | null) => {
+    if (!centre) return 'To be announced';
+    return EXAM_CENTRE_NAMES[centre] || centre;
+  };
+
+  // Returns the venue + time for a given competition category
+  const getCompetitionVenueAndTime = (cat: string, mathCentre: string | null): { venue: string; time: string } => {
+    if (cat === 'mathematics') {
+      return { venue: getExamCentreName(mathCentre), time: MATH_EXAM_TIME_DISPLAY };
+    }
+    return COMPETITION_EXAM_INFO[cat] || { venue: 'To be announced', time: 'TBA' };
+  };
 
   let photoBase64: string | null = null;
   let signatureBase64: string | null = null;
@@ -153,51 +187,32 @@ const getExamCentreName = (centre: string | null) => {
 
   yPosition = (doc as any).lastAutoTable.finalY;
 
-  // ===== Exam Details Band (only if centre assigned) =====
-  if (data.exam_center) {
-    // const examCols = [data.exam_center, EXAM_DATE_DISPLAY, EXAM_TIME_DISPLAY];
-    const examCols = [
-  getExamCentreName(data.exam_center),
-  EXAM_DATE_DISPLAY,
-  EXAM_TIME_DISPLAY,
-];
-    const examLabels = ['Exam Centre', 'Date', 'Time'];
-    const colW = (pageWidth - 10) / 3;
-    const bandH = 19;
+  // ===== Exam Date Band (venue/time now shown per-competition below) =====
+  doc.setFillColor(239, 246, 255);
+  doc.rect(5, yPosition, pageWidth - 10, 7, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(29, 78, 216);
+  doc.text('EXAM DATE', pageWidth / 2, yPosition + 5, { align: 'center' });
+  yPosition += 7;
 
-    // Header row
-    doc.setFillColor(239, 246, 255);
-    doc.rect(5, yPosition, pageWidth - 10, 7, 'F');
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(29, 78, 216);
-    doc.text('EXAM DETAILS', pageWidth / 2, yPosition + 5, { align: 'center' });
-    yPosition += 7;
+  doc.setLineWidth(0.1);
+  doc.setDrawColor(0, 0, 0);
+  doc.setFillColor(239, 246, 255);
+  doc.rect(5, yPosition, pageWidth - 10, 12, 'FD');
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(17, 24, 39);
+  doc.text(EXAM_DATE_DISPLAY, pageWidth / 2, yPosition + 6, { align: 'center' });
+  doc.setFontSize(6.5);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(100, 116, 139);
+  doc.text('(see venue & time per competition below)', pageWidth / 2, yPosition + 10, { align: 'center' });
 
-    // Data row
-    doc.setLineWidth(0.1);
-    doc.setDrawColor(0, 0, 0);
-    examCols.forEach((val, i) => {
-      const x = 5 + i * colW;
-      doc.setFillColor(239, 246, 255);
-      doc.rect(x, yPosition, colW, bandH - 7, 'FD');
-
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(59, 130, 246);
-      doc.text(examLabels[i].toUpperCase(), x + 3, yPosition + 4.5);
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(17, 24, 39);
-      doc.text(val, x + 3, yPosition + 10);
-    });
-
-    yPosition += bandH - 7;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.line(5, yPosition, pageWidth - 5, yPosition);
-  }
+  yPosition += 12;
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(5, yPosition, pageWidth - 5, yPosition);
 
   // ===== QR + Signature + Photo =====
   const qrCodeDataUrl = await QRCode.toDataURL(
@@ -243,7 +258,7 @@ const getExamCentreName = (centre: string | null) => {
   yPosition += sectionHeight;
   doc.line(5, yPosition, pageWidth - 5, yPosition);
 
-  // ===== Competition Details =====
+  // ===== Competition Details (Competition | Venue | Time) =====
   doc.setFillColor(245, 245, 245);
   doc.rect(5, yPosition, pageWidth - 10, 7, 'F');
   doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 0, 0);
@@ -251,13 +266,19 @@ const getExamCentreName = (centre: string | null) => {
 
   autoTable(doc, {
     startY: yPosition,
-    body: data.competition_category.map(cat => [COMPETITION_LABELS[cat] || cat, EXAM_DATE_DISPLAY]),
+    head: [['Competition', 'Venue', 'Time']],
+    body: data.competition_category.map(cat => {
+      const { venue, time } = getCompetitionVenueAndTime(cat, data.exam_center);
+      return [COMPETITION_LABELS[cat] || cat, venue, time];
+    }),
     theme: 'grid',
     margin: { left: 5, right: 5 },
     styles: { fontSize: 8, cellPadding: 2.2, lineColor: [0, 0, 0], lineWidth: 0.1, textColor: [0, 0, 0] },
+    headStyles: { fillColor: [245, 245, 245], textColor: [0, 0, 0], fontStyle: 'bold' },
     columnStyles: {
-      0: { cellWidth: 80, fontStyle: 'bold', fillColor: [245, 245, 245] },
+      0: { cellWidth: 45, fontStyle: 'bold', fillColor: [250, 250, 250] },
       1: { cellWidth: 'auto' },
+      2: { cellWidth: 25 },
     },
   });
 
@@ -313,7 +334,23 @@ const getExamCentreName = (centre: string | null) => {
   doc.text('This admit card is computer generated and does not require a physical signature. For assistance, contact', pageWidth / 2, footerY - 1.5, { align: 'center' });
   doc.text('Mateng at justmatengservice@gmail.com or call 600 944 9928.', pageWidth / 2, footerY + 2.5, { align: 'center' });
 
-  doc.save(`EduFest_Admit_Card_${data.full_name}_${rollNumber}.pdf`);
+  return doc;
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+// Single-candidate download: builds the PDF and triggers a browser save.
+export const generateEduFestAdmitCardPDF = async (data: RegistrationData) => {
+  const doc = await buildAdmitCardDoc(data);
+  doc.save(getAdmitCardFilename(data));
+};
+
+// Bulk-export variant: builds the same PDF but returns it as a Blob instead of
+// saving directly, so callers (e.g. a JSZip bulk-download flow) can add it as
+// a ZIP entry using getAdmitCardFilename(data) for the entry name.
+export const generateEduFestAdmitCardPDFBlob = async (data: RegistrationData): Promise<Blob> => {
+  const doc = await buildAdmitCardDoc(data);
+  return doc.output('blob');
 };
 
 // ─── Image loader ─────────────────────────────────────────────────────────────

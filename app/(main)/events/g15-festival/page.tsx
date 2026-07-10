@@ -24,8 +24,8 @@ const API_BASE_URL = "https://api.matengdelivery.com";
 const EVENT_DATE_LABEL = "24 July 2026";
 
 // --------------- Limited-time offer deadline ---------------
-// Offer valid until 12 July 2026, 00:00:00 IST
-const OFFER_DEADLINE = new Date('2026-07-12T00:00:00+05:30');
+// Offer valid until 15 July 2026, 00:00:00 IST
+const OFFER_DEADLINE = new Date('2026-07-15T00:00:00+05:30');
 
 // --------------- Validation helpers ---------------
 const isValidPhone = (val: string) => /^\d{10}$/.test(val);
@@ -271,7 +271,7 @@ export default function TicketRegistrationPage() {
                       <span className="font-semibold text-amber-300">₹{prices.limitedTime}</span>{' '}
                       <span className="text-zinc-500 line-through">₹{prices.normal}</span>
                     </p>
-                    <p className="text-xs text-zinc-400 mt-0.5">Offer ends 12 July, midnight</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Offer ends 15 July, midnight</p>
                   </div>
                 </div>
 

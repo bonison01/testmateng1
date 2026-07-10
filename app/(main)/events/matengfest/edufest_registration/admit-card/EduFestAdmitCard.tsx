@@ -11,7 +11,15 @@ const COMPETITION_LABELS: Record<string, string> = {
 
 // Fixed for all candidates
 const EXAM_DATE_DISPLAY = '12 July 2026';
-const EXAM_TIME_DISPLAY = '10:00 AM';
+
+// Venue + start time per competition (Quiz / Painting / Young Innovator are fixed at MU Canchipur)
+const COMPETITION_EXAM_INFO: Record<string, { venue: string; time: string }> = {
+  young_innovator: { venue: 'Manipur University, Canchipur', time: '8:00 AM' },
+  quiz: { venue: 'Manipur University, Canchipur', time: '9:00 AM' },
+  painting: { venue: 'Manipur University, Canchipur', time: '10:00 AM' },
+};
+
+const MATH_EXAM_TIME_DISPLAY = '10:00 AM';
 
 interface DocumentRow {
   document_type: string;
@@ -44,11 +52,6 @@ interface RegistrationData {
   documents?: DocumentRow[];
 }
 
-export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
-  const photo = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
-  const signature = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
-  const EXAM_DATE_DISPLAY = '12 July 2026';
-const EXAM_TIME_DISPLAY = '10:00 AM';
 const EXAM_CENTRE_NAMES: Record<string, string> = {
   Bishnupur: 'Bishnupur Higher Secondary, Bishnupur',
   Kakching: 'Wabagai Higher Secondary, Kakching',
@@ -57,9 +60,24 @@ const EXAM_CENTRE_NAMES: Record<string, string> = {
 };
 
 function getExamCentreName(centre: string | null): string {
-  if (!centre) return '';
+  if (!centre) return 'To be announced';
   return EXAM_CENTRE_NAMES[centre] || centre;
 }
+
+// Returns the venue + time for a given competition category
+function getCompetitionVenueAndTime(
+  cat: string,
+  mathCentre: string | null
+): { venue: string; time: string } {
+  if (cat === 'mathematics') {
+    return { venue: getExamCentreName(mathCentre), time: MATH_EXAM_TIME_DISPLAY };
+  }
+  return COMPETITION_EXAM_INFO[cat] || { venue: 'To be announced', time: 'TBA' };
+}
+
+export default function EduFestAdmitCard({ data }: { data: RegistrationData }) {
+  const photo = data.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
+  const signature = data.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
   const rollNumber = data.roll_number;
 
   return (
@@ -107,25 +125,18 @@ function getExamCentreName(centre: string | null): string {
               </div>
             </div>
 
-            {/* Exam Details Band — always shown once centre is assigned */}
-            {data.exam_center && (
-              <div className="border-b-2 border-black">
-                <div className="bg-blue-50 px-4 py-1.5 text-center border-b border-black">
-                  <span className="text-xs font-bold tracking-widest uppercase text-blue-700">
-                    Exam Details
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 divide-x divide-black">
-                  {/* <ExamCell label="Exam Centre" value={data.exam_center} /> */}
-                  <ExamCell
-  label="Exam Centre"
-  value={getExamCentreName(data.exam_center)}
-/>
-                  <ExamCell label="Date"        value={EXAM_DATE_DISPLAY} />
-                  <ExamCell label="Time"        value={EXAM_TIME_DISPLAY} />
-                </div>
+            {/* Exam Date Band — date is common, venue/time now shown per competition below */}
+            <div className="border-b-2 border-black">
+              <div className="bg-blue-50 px-4 py-1.5 text-center border-b border-black">
+                <span className="text-xs font-bold tracking-widest uppercase text-blue-700">
+                  Exam Date
+                </span>
               </div>
-            )}
+              <div className="px-4 py-2.5 text-center">
+                <span className="text-sm font-bold text-gray-900">{EXAM_DATE_DISPLAY}</span>
+                <span className="text-xs text-gray-500 ml-2">(see venue &amp; time per competition below)</span>
+              </div>
+            </div>
 
             {/* QR + Signature + Photo */}
             <div className="grid grid-cols-3 border-b-2 border-black">
@@ -164,19 +175,33 @@ function getExamCentreName(centre: string | null): string {
               </div>
             </div>
 
-            {/* Competition Details */}
+            {/* Competition Details — now with per-competition venue and time */}
             <div className="bg-gray-50 p-2 text-center font-bold border-b-2 border-black text-black">
               Competition Details
             </div>
             <div className="border-b-2 border-black">
-              {data.competition_category?.map((cat, i) => (
-                <Row
-                  key={cat}
-                  label={COMPETITION_LABELS[cat] || cat}
-                  value={EXAM_DATE_DISPLAY}
-                  last={i === data.competition_category.length - 1}
-                />
-              ))}
+              {/* Table header */}
+              <div className="grid grid-cols-[1.2fr_1.6fr_1fr] border-b border-black bg-gray-50 text-[10px] font-bold uppercase tracking-wide text-gray-600">
+                <div className="p-2 border-r border-black">Competition</div>
+                <div className="p-2 border-r border-black">Venue</div>
+                <div className="p-2">Time</div>
+              </div>
+              {data.competition_category?.map((cat, i) => {
+                const { venue, time } = getCompetitionVenueAndTime(cat, data.exam_center);
+                const last = i === data.competition_category.length - 1;
+                return (
+                  <div
+                    key={cat}
+                    className={`grid grid-cols-[1.2fr_1.6fr_1fr] ${last ? '' : 'border-b border-black'}`}
+                  >
+                    <div className="p-2 border-r border-black font-bold text-sm text-black">
+                      {COMPETITION_LABELS[cat] || cat}
+                    </div>
+                    <div className="p-2 border-r border-black text-sm text-gray-900">{venue}</div>
+                    <div className="p-2 text-sm text-gray-900 font-semibold">{time}</div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Team Members */}
@@ -222,15 +247,6 @@ function getExamCentreName(centre: string | null): string {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function ExamCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="px-4 py-2.5 bg-blue-50">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 mb-0.5">{label}</p>
-      <p className="text-sm font-bold text-gray-900">{value}</p>
-    </div>
-  );
-}
 
 function Row({
   label, value, bold, capitalize, last,
