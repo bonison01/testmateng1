@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowRight, Tickets, Plus, Minus, CheckCircle2, XCircle, CalendarDays } from 'lucide-react';
+import { Loader2, ArrowRight, Tickets, Plus, Minus, CheckCircle2, XCircle, CalendarDays, Timer } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,10 +23,37 @@ const API_BASE_URL = "https://api.matengdelivery.com";
 // --------------- Event details ---------------
 const EVENT_DATE_LABEL = "24 July 2026";
 
+// --------------- Limited-time offer deadline ---------------
+// Offer valid until 12 July 2026, 00:00:00 IST
+const OFFER_DEADLINE = new Date('2026-07-12T00:00:00+05:30');
+
 // --------------- Validation helpers ---------------
 const isValidPhone = (val: string) => /^\d{10}$/.test(val);
 const isValidEmail = (val: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+// --------------- Countdown helper ---------------
+type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  expired: boolean;
+};
+
+const getTimeLeft = (deadline: Date): TimeLeft => {
+  const diff = deadline.getTime() - Date.now();
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+  }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  return { days, hours, minutes, seconds, expired: false };
+};
+
+const pad = (n: number) => n.toString().padStart(2, '0');
 
 // --------------- Animated field wrapper ---------------
 const FieldWrapper = ({
@@ -91,11 +118,23 @@ export default function TicketRegistrationPage() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
   }, []);
 
-  const prices = { earlyBird: 299, normal: 399 };
+  // --------------- Countdown state ---------------
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(OFFER_DEADLINE));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeLeft(OFFER_DEADLINE));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const offerActive = !timeLeft.expired;
+
+  const prices = { earlyBird: 299, normal: 399, limitedTime: 349 };
   const SERVICE_FEE_PER_TICKET = 7;
 
-  const passType = 'normal';
-  const unitPrice = prices.normal;
+  const passType = offerActive ? 'limited_time_offer' : 'normal';
+  const unitPrice = offerActive ? prices.limitedTime : prices.normal;
 
   const subtotal = unitPrice * quantity;
   const serviceFee = SERVICE_FEE_PER_TICKET * quantity;
@@ -211,6 +250,58 @@ export default function TicketRegistrationPage() {
               </p>
             </div>
           </motion.div>
+
+          {/* LIMITED-TIME OFFER COUNTDOWN BANNER */}
+          <AnimatePresence>
+            {offerActive && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-4 w-full max-w-lg rounded-xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 to-yellow-500/10 px-5 py-4"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center justify-center h-9 w-9 rounded-full bg-amber-400/20 flex-shrink-0">
+                    <Timer className="h-4 w-4 text-amber-300" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm text-zinc-200">
+                      Limited-time price:{' '}
+                      <span className="font-semibold text-amber-300">₹{prices.limitedTime}</span>{' '}
+                      <span className="text-zinc-500 line-through">₹{prices.normal}</span>
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Offer ends 12 July, midnight</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {[
+                    { label: 'D', value: timeLeft.days },
+                    { label: 'H', value: timeLeft.hours },
+                    { label: 'M', value: timeLeft.minutes },
+                    { label: 'S', value: timeLeft.seconds },
+                  ].map((unit, i) => (
+                    <div key={unit.label} className="flex items-center gap-2">
+                      <div className="flex flex-col items-center justify-center bg-zinc-900/70 border border-amber-400/20 rounded-lg h-14 w-14">
+                        <motion.span
+                          key={`${unit.label}-${unit.value}`}
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-lg font-bold tabular-nums text-amber-300"
+                        >
+                          {pad(unit.value)}
+                        </motion.span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{unit.label}</span>
+                      </div>
+                      {i < 3 && <span className="text-zinc-600 text-sm">:</span>}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* RIGHT SECTION */}
@@ -243,12 +334,24 @@ export default function TicketRegistrationPage() {
                     <Label className="text-base">Pass Type</Label>
                     <div className="rounded-xl border-2 border-stone-600 bg-stone-600/30 p-4 flex justify-between items-center">
                       <div>
-                        <p className="font-semibold">Normal Pass</p>
+                        <p className="font-semibold flex items-center gap-2">
+                          Normal Pass
+                          {offerActive && (
+                            <span className="text-[10px] font-bold uppercase tracking-wide bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">
+                              Limited Offer
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs text-stone-400">
                           Valid for entry on {EVENT_DATE_LABEL}
                         </p>
                       </div>
-                      <span className="text-xl font-bold">₹{unitPrice}</span>
+                      <div className="text-right">
+                        {offerActive && (
+                          <span className="block text-xs text-stone-400 line-through">₹{prices.normal}</span>
+                        )}
+                        <span className="text-xl font-bold">₹{unitPrice}</span>
+                      </div>
                     </div>
                   </div>
                 </FieldWrapper>
@@ -414,6 +517,9 @@ export default function TicketRegistrationPage() {
                     <div className="flex justify-between">
                       <span>
                         Subtotal ({quantity} × ₹{unitPrice})
+                        {offerActive && (
+                          <span className="ml-2 text-[10px] text-amber-300 font-medium">Offer price</span>
+                        )}
                       </span>
                       <motion.span
                         key={subtotal}

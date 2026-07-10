@@ -6,6 +6,7 @@ import Image from "next/image";
 import Footer from "@/components/footer/Footer";
 import { useRouter } from "next/navigation";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Timer } from "lucide-react";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -20,6 +21,31 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
+// Limited-time offer deadline: 12 July 2026, 00:00:00 IST
+const OFFER_DEADLINE = new Date('2026-07-12T00:00:00+05:30');
+
+type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  expired: boolean;
+};
+
+const getTimeLeft = (deadline: Date): TimeLeft => {
+  const diff = deadline.getTime() - Date.now();
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+  }
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  return { days, hours, minutes, seconds, expired: false };
+};
+
+const pad = (n: number) => n.toString().padStart(2, '0');
+
 export default function Page() {
   const router = useRouter();
 
@@ -28,6 +54,16 @@ export default function Page() {
   const [businesses, setBusinesses] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showEventsPopup, setShowEventsPopup] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(OFFER_DEADLINE));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeLeft(OFFER_DEADLINE));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const offerActive = !timeLeft.expired;
 
   const PARTNERS = [
     { name: "175c", logo: "/partners/partner1.png" },
@@ -353,6 +389,43 @@ export default function Page() {
                   back. Now happening{" "}
                   <strong className="text-white">24th July 2026</strong>.
                 </p>
+
+                {/* LIMITED-TIME OFFER COUNTDOWN */}
+                {offerActive && (
+                  <div className="mt-5 inline-flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 to-yellow-500/10 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center h-7 w-7 rounded-full bg-amber-400/20 flex-shrink-0">
+                        <Timer className="h-3.5 w-3.5 text-amber-300" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-zinc-200 font-medium">
+                          Limited-time price <span className="text-amber-300">₹349</span>{" "}
+                          <span className="text-zinc-500 line-through">₹399</span>
+                        </p>
+                        <p className="text-[10px] text-zinc-400">Ends 12 July, midnight</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      {[
+                        { label: "D", value: timeLeft.days },
+                        { label: "H", value: timeLeft.hours },
+                        { label: "M", value: timeLeft.minutes },
+                        { label: "S", value: timeLeft.seconds },
+                      ].map((unit, i) => (
+                        <div key={unit.label} className="flex items-center gap-1.5">
+                          <div className="flex flex-col items-center justify-center bg-black/30 border border-amber-400/20 rounded-md h-10 w-10">
+                            <span className="text-sm font-bold tabular-nums text-amber-300 leading-none">
+                              {pad(unit.value)}
+                            </span>
+                            <span className="text-[8px] text-zinc-500 uppercase tracking-wide">{unit.label}</span>
+                          </div>
+                          {i < 3 && <span className="text-zinc-600 text-xs">:</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-6 flex flex-wrap gap-2">
                   {["Live Music", "Food & Drinks", "Community"].map((tag) => (
