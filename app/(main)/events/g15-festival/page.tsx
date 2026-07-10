@@ -317,7 +317,9 @@ export default function TicketRegistrationPage() {
                 Get Your Pass
               </CardTitle>
               <CardDescription className="text-zinc-400 flex items-center gap-2 flex-wrap">
-                <span>Secure your spot at G15 Festival</span>
+                <span>Secure your spot at G15 Festival</span> 
+                
+                {/* <span>Secure your spot at G15 Festival</span> */}
                 <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 border border-green-500/30 px-2 py-0.5 text-[11px] font-medium text-green-300">
                   <CalendarDays className="h-3 w-3" />
                   {EVENT_DATE_LABEL}

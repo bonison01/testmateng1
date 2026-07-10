@@ -4,10 +4,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../events/matengfest/edufest_registration/type';
 import { generateEduFestAdmitCardPDF } from '../../events/matengfest/edufest_registration/generatePDF';
+import BulkUploadDialog from './BulkUploadDialog';
 
 type VerificationStatus = 'pending' | 'verified' | 'rejected';
 
 interface DocumentRow {
+  id: number;
   document_type: string;
   s3_url: string;
 }
@@ -274,6 +276,8 @@ export default function EduFestAdminPage() {
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [verifiedDialog, setVerifiedDialog] = useState<RegistrationRow | null>(null);
   const [assignDialog, setAssignDialog] = useState<RegistrationRow | null>(null);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<number | null>(null);
 
   const fetchRegistrations = async () => {
     setLoading(true);
@@ -288,7 +292,7 @@ export default function EduFestAdminPage() {
       const ids = regs.map((r: any) => r.id);
       const { data: docs, error: docError } = await supabase
         .from('documents')
-        .select('registration_id, document_type, s3_url')
+        .select('id, registration_id, document_type, s3_url')
         .in('registration_id', ids);
 
       if (docError) throw docError;
@@ -296,7 +300,7 @@ export default function EduFestAdminPage() {
       const docsByReg: Record<number, DocumentRow[]> = {};
       (docs || []).forEach((d: any) => {
         if (!docsByReg[d.registration_id]) docsByReg[d.registration_id] = [];
-        docsByReg[d.registration_id].push({ document_type: d.document_type, s3_url: d.s3_url });
+        docsByReg[d.registration_id].push({ id: d.id, document_type: d.document_type, s3_url: d.s3_url });
       });
 
       setRegistrations(regs.map((r: any) => ({ ...r, documents: docsByReg[r.id] || [] })));
@@ -375,6 +379,56 @@ export default function EduFestAdminPage() {
       alert('❌ Could not generate admit card.');
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  // Deletes a single document (photo/signature/payment screenshot) — removes
+  // the DB row and, if the URL points at Supabase Storage, the stored file too.
+  // Storage URLs hosted elsewhere (e.g. an external S3 bucket not managed via
+  // the Supabase Storage API) will only have their DB record removed; delete
+  // the file on that host separately if needed.
+  const handleDeleteDocument = async (registrationId: number, doc: DocumentRow) => {
+    const confirmed = window.confirm(
+      `Delete this ${doc.document_type.replace(/_/g, ' ')}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingDocId(doc.id);
+    try {
+      const { error: dbError } = await supabase.from('documents').delete().eq('id', doc.id);
+      if (dbError) throw dbError;
+
+      // Best-effort storage cleanup if the file lives in a known Supabase bucket.
+      try {
+        const marker = '/storage/v1/object/public/';
+        const idx = doc.s3_url.indexOf(marker);
+        if (idx !== -1) {
+          const pathPart = doc.s3_url.slice(idx + marker.length); // "<bucket>/<path...>"
+          const [bucket, ...rest] = pathPart.split('/');
+          if (bucket && rest.length > 0) {
+            await supabase.storage.from(bucket).remove([rest.join('/')]);
+          }
+        }
+      } catch (storageErr) {
+        console.warn('Document DB record removed, but storage file cleanup failed:', storageErr);
+      }
+
+      setRegistrations(prev => prev.map(r => (
+        r.id === registrationId
+          ? { ...r, documents: (r.documents || []).filter(d => d.id !== doc.id) }
+          : r
+      )));
+      setSelected(prev => (
+        prev && prev.id === registrationId
+          ? { ...prev, documents: (prev.documents || []).filter(d => d.id !== doc.id) }
+          : prev
+      ));
+      setToast('✅ Document deleted');
+    } catch (err) {
+      console.error('Failed to delete document:', err);
+      alert('❌ Could not delete document: ' + (err as any)?.message);
+    } finally {
+      setDeletingDocId(null);
     }
   };
 
@@ -457,12 +511,20 @@ export default function EduFestAdminPage() {
               Review documents, assign exam centre, verify candidates, and manage admit card access.
             </p>
           </div>
-          <button
-            onClick={handleExportCSV}
-            style={{ padding: '10px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#111827', color: '#fff', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}
-          >
-            ⬇ Export CSV
-          </button>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowBulkUpload(true)}
+              style={{ padding: '10px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#14710F', color: '#fff', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}
+            >
+              ⬆ Bulk Upload
+            </button>
+            <button
+              onClick={handleExportCSV}
+              style={{ padding: '10px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', background: '#111827', color: '#fff', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}
+            >
+              ⬇ Export CSV
+            </button>
+          </div>
         </div>
 
         {/* Fixed exam info banner */}
@@ -630,6 +692,8 @@ export default function EduFestAdminPage() {
           onInitiateVerify={initiateVerify}
           onUpdateStatus={updateStatus}
           onDownloadAdmitCard={handleDownloadAdmitCard}
+          onDeleteDocument={handleDeleteDocument}
+          deletingDocId={deletingDocId}
           downloading={downloadingId === selected.id}
           regNo={regNo(selected)}
         />
@@ -651,6 +715,16 @@ export default function EduFestAdminPage() {
           onClose={() => setVerifiedDialog(null)}
         />
       )}
+
+      {showBulkUpload && (
+        <BulkUploadDialog
+          onClose={() => setShowBulkUpload(false)}
+          onComplete={() => {
+            setShowBulkUpload(false);
+            fetchRegistrations();
+          }}
+        />
+      )}
     </>
   );
 }
@@ -658,19 +732,21 @@ export default function EduFestAdminPage() {
 // ─── Detail Modal ─────────────────────────────────────────────────────────────
 
 function DetailModal({
-  registration, onClose, onInitiateVerify, onUpdateStatus, onDownloadAdmitCard, downloading, regNo,
+  registration, onClose, onInitiateVerify, onUpdateStatus, onDownloadAdmitCard, onDeleteDocument, deletingDocId, downloading, regNo,
 }: {
   registration: RegistrationRow;
   onClose: () => void;
   onInitiateVerify: (r: RegistrationRow) => void;
   onUpdateStatus: (id: number, status: Exclude<VerificationStatus, 'verified'>) => void;
   onDownloadAdmitCard: (r: RegistrationRow) => void;
+  onDeleteDocument: (registrationId: number, doc: DocumentRow) => void;
+  deletingDocId: number | null;
   downloading: boolean;
   regNo: string;
 }) {
-  const photoUrl = registration.documents?.find(d => d.document_type === 'passport_photo')?.s3_url;
-  const sigUrl = registration.documents?.find(d => d.document_type === 'candidate_signature')?.s3_url;
-  const paymentUrl = registration.documents?.find(d => d.document_type === 'payment_screenshot')?.s3_url;
+  const photoDoc = registration.documents?.find(d => d.document_type === 'passport_photo');
+  const sigDoc = registration.documents?.find(d => d.document_type === 'candidate_signature');
+  const paymentDoc = registration.documents?.find(d => d.document_type === 'payment_screenshot');
   const colors = STATUS_COLORS[registration.verification_status];
 
   return (
@@ -736,11 +812,27 @@ function DetailModal({
 
           <SectionTitle style={{ marginTop: 24 }}>Documents</SectionTitle>
           <Grid>
-            <DocPreview label="Passport Photo" url={photoUrl} />
-            <DocPreview label="Signature" url={sigUrl} />
+            <DocPreview
+              label="Passport Photo"
+              doc={photoDoc}
+              deleting={!!photoDoc && deletingDocId === photoDoc.id}
+              onDelete={photoDoc ? () => onDeleteDocument(registration.id, photoDoc) : undefined}
+            />
+            <DocPreview
+              label="Signature"
+              doc={sigDoc}
+              deleting={!!sigDoc && deletingDocId === sigDoc.id}
+              onDelete={sigDoc ? () => onDeleteDocument(registration.id, sigDoc) : undefined}
+            />
           </Grid>
           <div style={{ marginTop: 12 }}>
-            <DocPreview label="Payment Screenshot" url={paymentUrl} wide />
+            <DocPreview
+              label="Payment Screenshot"
+              doc={paymentDoc}
+              deleting={!!paymentDoc && deletingDocId === paymentDoc.id}
+              onDelete={paymentDoc ? () => onDeleteDocument(registration.id, paymentDoc) : undefined}
+              wide
+            />
           </div>
         </div>
 
@@ -785,15 +877,43 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DocPreview({ label, url, wide }: { label: string; url?: string; wide?: boolean }) {
+function DocPreview({
+  label, doc, onDelete, deleting, wide,
+}: {
+  label: string;
+  doc?: DocumentRow;
+  onDelete?: () => void;
+  deleting?: boolean;
+  wide?: boolean;
+}) {
+  const url = doc?.s3_url;
   return (
     <div>
       <p style={{ fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>{label}</p>
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt={label} style={{ maxHeight: wide ? 220 : 140, maxWidth: '100%', objectFit: 'contain', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fff' }} />
-        </a>
+        <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
+          <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={url} alt={label} style={{ maxHeight: wide ? 220 : 140, maxWidth: '100%', objectFit: 'contain', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fff', display: 'block' }} />
+          </a>
+          {onDelete && (
+            <button
+              onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
+              disabled={deleting}
+              title={`Delete ${label}`}
+              style={{
+                position: 'absolute', top: 6, right: 6,
+                width: 26, height: 26, borderRadius: '50%', border: 'none',
+                background: deleting ? 'rgba(156,163,175,0.9)' : 'rgba(239,68,68,0.92)',
+                color: '#fff', cursor: deleting ? 'not-allowed' : 'pointer',
+                fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+              }}
+            >
+              {deleting ? '…' : '🗑'}
+            </button>
+          )}
+        </div>
       ) : (
         <div style={{ height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #e5e7eb', borderRadius: 10, color: '#9ca3af', fontSize: 12 }}>
           Not uploaded
