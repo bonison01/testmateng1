@@ -32,29 +32,30 @@ export default function CompleteClient() {
     }, [id]);
 
     const buildPdfData = (registration: any) => ({
-        id: registration.id,
-        full_name: registration.full_name,
-        dob: registration.dob,
-        student_class: registration.student_class,
-        institution_name: registration.institution_name,
-        contact_number: registration.contact_number,
-        gender: registration.gender,
-        email: registration.email,
-        father_name: registration.father_name,
-        exam_center: registration.exam_center ?? '',
-        competition_category: registration.competition_category
-            ? [registration.competition_category].flat()
-            : [],
-        participation_type: registration.participation_type,
-        team_size: registration.team_size ?? null,
-        team_members: (registration.team_members || []).map((m: any) => ({
-            name: m.name,
-            student_class: m.student_class || '',
-            dob: m.dob || '',
-            institute: m.institute || '',
-        })),
-        documents: registration.documents || [],
-    });
+    id: registration.id,
+    full_name: registration.full_name,
+    dob: registration.dob,
+    student_class: registration.student_class,
+    institution_name: registration.institution_name,
+    contact_number: registration.contact_number,
+    gender: registration.gender,
+    email: registration.email,
+    father_name: registration.father_name,
+    roll_number: registration.roll_number ?? '',
+    exam_center: registration.exam_center ?? '',
+    competition_category: registration.competition_category
+        ? [registration.competition_category].flat()
+        : [],
+    participation_type: registration.participation_type,
+    team_size: registration.team_size ?? null,
+    team_members: (registration.team_members || []).map((m: any) => ({
+        name: m.name,
+        student_class: m.student_class || '',
+        dob: m.dob || '',
+        institute: m.institute || '',
+    })),
+    documents: registration.documents || [],
+});
 
     const handleDownloadPDF = async () => {
         if (!registration) return;
