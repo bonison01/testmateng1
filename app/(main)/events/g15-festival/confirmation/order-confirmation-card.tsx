@@ -151,7 +151,7 @@ const OrderConfirmationCard = React.forwardRef<HTMLDivElement, TicketProps>(
                 <div>
                     <h2 className="text-lg font-bold">G15 Festival 2026</h2>
                     <p className="text-sm text-muted-foreground">April 14, 2026</p>
-                    <p className="text-sm text-muted-foreground">Langthabal Public Ground</p>
+                    <p className="text-sm text-muted-foreground">Chumthang Sanapung</p>
                     <p className="text-sm text-muted-foreground">Gate Open • 1:00 PM</p>
                 </div>
             </div>

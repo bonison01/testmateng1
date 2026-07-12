@@ -86,7 +86,7 @@ function Page() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval)
-          router.push('/g15-festival')
+          router.push('/events/g15-festival')
           return 0
         }
         return prev - 1
