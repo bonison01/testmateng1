@@ -3,7 +3,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -42,9 +42,9 @@ const timelineEvents = [
     date: "12th July 2026",
     name: "Mathematics Championship",
     chips: ["Class 3–8", "₹200 Fee"],
-    open: true,
-    closed: false,
-    body: "A rigorous mathematics olympiad to identify and celebrate young math talent across primary and middle school students in Manipur. Conducted in 6 separate categories (Class 3 to Class 8).",
+    open: false,
+    closed: true,
+    body: "A rigorous mathematics olympiad to identify and celebrate young math talent across primary and middle school students in Manipur. Conducted in 6 separate categories (Class 3 to Class 8). The exam has been conducted and registration is now closed.",
     info: [
       { label: "Last Date", value: "07th July 2026" },
       { label: "Admit Card", value: "10th July 2026" },
@@ -62,7 +62,7 @@ const timelineEvents = [
       ["Best Institute Award", "Memento + Certificate of Recognition"],
     ],
     registerHref: "/events/matengfest/edufest_registration",
-    canRegister: true,
+    canRegister: false,
   },
   {
     id: "grand",
@@ -115,6 +115,15 @@ const mathsSyllabus = [
   },
 ];
 
+// ─── MATHS ANSWER KEY / QUESTION PAPER DATA ───────────────────────
+// NOTE: File names below follow the convention
+//   /maths-papers/class{N}-set{A|B|C}.pdf   (question papers)
+//   /maths-keys/class{N}-set{A|B|C}.pdf     (answer keys)
+// Place the matching PDFs in the /public folder using these exact
+// names, or update the paths below to match your actual file names.
+const mathsClasses = [3, 4, 5, 6, 7, 8];
+const mathsSets = ["A", "B", "C"];
+
 // ─── SEGMENT DATA ─────────────────────────────────────────────────
 const segments = [
   {
@@ -160,9 +169,9 @@ const segments = [
     sub: "Class 3 – 8",
     fee: "₹200",
     date: "12th July 2026",
-    open: true,
-    closed: false,
-    about: "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Conducted in 6 separate categories (Class 3 to Class 8). Prizes are awarded separately for each class category.",
+    open: false,
+    closed: true,
+    about: "A structured mathematics olympiad designed to challenge and celebrate young problem-solvers. Conducted in 6 separate categories (Class 3 to Class 8). Prizes are awarded separately for each class category. The exam has been conducted and registration is now closed.",
     info: [
       { label: "Eligibility", value: "Class 3 to 8" },
       { label: "Duration", value: "2 hours" },
@@ -185,7 +194,7 @@ const segments = [
       categories: mathsSyllabus,
     },
     registerHref: "/events/matengfest/edufest_registration",
-    canRegister: true,
+    canRegister: false,
   },
   {
     id: "painting",
@@ -402,6 +411,36 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
                   ))}
                 </tbody>
               </table>
+
+              {/* Maths answer keys & question papers */}
+              {seg.id === "maths" && (
+                <>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", margin: "1.25rem 0 10px" }}>
+                    Question Papers &amp; Answer Keys
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {mathsClasses.map((cls) => (
+                      <div key={cls} style={{ background: "#f8f8f8", borderRadius: 8, padding: "10px 12px" }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#0c3d14", display: "block", marginBottom: 6 }}>Class {cls}</span>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                          {mathsSets.map((set) => (
+                            <span key={set} style={{ fontSize: 12, color: "#555" }}>
+                              Set {set}:{" "}
+                              <a href={`/maths-papers/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
+                                Question Paper
+                              </a>
+                              {" · "}
+                              <a href={`/maths-keys/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
+                                Answer Key
+                              </a>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -558,14 +597,89 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
   );
 }
 
+// ─── ANNOUNCEMENT POPUP ────────────────────────────────────────────
+function AnnouncementModal({ onClose, onView }: { onClose: () => void; onView: () => void }) {
+  return (
+    <motion.div
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1100, padding: "1.5rem",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        style={{
+          background: "#fff", borderRadius: 18, width: "100%", maxWidth: 420,
+          border: "0.5px solid #ddd", overflow: "hidden", textAlign: "center",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+        }}
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.25 }}
+      >
+        <div style={{ background: "#0c3d14", padding: "1.5rem 1.5rem 1.25rem", position: "relative" }}>
+          <button
+            onClick={onClose}
+            style={{ position: "absolute", top: 12, right: 12, background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14 }}
+          >
+            ✕
+          </button>
+          <div style={{ fontSize: 34, marginBottom: 8 }}>📢</div>
+          <h3 style={{ fontFamily: "Georgia, serif", fontSize: 19, color: "#fff", fontWeight: 700, lineHeight: 1.35 }}>
+            Announcement
+          </h3>
+        </div>
+
+        <div style={{ padding: "1.5rem" }}>
+          <p style={{ fontSize: 15, color: "#222", fontWeight: 600, lineHeight: 1.6, marginBottom: 8 }}>
+            Question Papers &amp; Answer Keys have been released
+          </p>
+          <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+            For the <strong>Jr. Mathematics Championship</strong>, Mateng EduFest 2026 (Class 3–8) — all sets (A, B, C) are now available to download.
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button
+              onClick={onView}
+              style={{ background: "#14710F", color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+            >
+              View Question Papers &amp; Keys
+            </button>
+            <button
+              onClick={onClose}
+              style={{ background: "#f0f0f0", color: "#555", border: "0.5px solid #ddd", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────
 export default function MatengFestPage() {
   const [openTl, setOpenTl] = useState<string | null>("maths");
   const [modalSeg, setModalSeg] = useState<Segment | null>(null);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
   const router = useRouter();
 
   const toggleTl = (id: string) =>
     setOpenTl((prev) => (prev === id ? null : id));
+
+  // Show the "papers & keys released" popup once per browser session
+  useEffect(() => {
+    const alreadySeen = sessionStorage.getItem("mathsKeysAnnouncementSeen");
+    if (!alreadySeen) {
+      setShowAnnouncement(true);
+      sessionStorage.setItem("mathsKeysAnnouncementSeen", "true");
+    }
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -809,12 +923,43 @@ export default function MatengFestPage() {
               ))}
             </div>
           </div>
+
+          {/* Question Papers & Answer Keys */}
+          <div style={{ padding: "0 1.5rem 1.5rem" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", margin: "0.5rem 0 12px" }}>
+              Question Papers &amp; Answer Keys
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+              {mathsClasses.map((cls) => (
+                <div key={cls} style={{ background: "#f8f8f8", borderRadius: 10, padding: "12px 14px", border: "0.5px solid #eee" }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#0c3d14", marginBottom: 8 }}>Class {cls}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {mathsSets.map((set) => (
+                      <div key={set} style={{ fontSize: 12, color: "#555", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                        <span style={{ fontWeight: 600, color: "#333" }}>Set {set}</span>
+                        <span>
+                          <a href={`/maths-papers/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
+                            Question Paper
+                          </a>
+                          {"  ·  "}
+                          <a href={`/maths-keys/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
+                            Answer Key
+                          </a>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className={styles.mathsFooter}>
             <button className={styles.secondaryBtn} onClick={() => setModalSeg(segments.find((s) => s.id === "maths")!)}>
               More Details &amp; Syllabus
             </button>
-            <button className={styles.primaryBtn} onClick={() => router.push("/events/matengfest/edufest_registration")}>
-              Register →
+            <button className={styles.primaryBtn} style={{ opacity: 0.45, cursor: "not-allowed" }} disabled>
+              Registration Closed
             </button>
           </div>
         </div>
@@ -973,6 +1118,19 @@ export default function MatengFestPage() {
             seg={modalSeg}
             onClose={() => setModalSeg(null)}
             onRegister={(href) => router.push(href)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── ANNOUNCEMENT POPUP ── */}
+      <AnimatePresence>
+        {showAnnouncement && (
+          <AnnouncementModal
+            onClose={() => setShowAnnouncement(false)}
+            onView={() => {
+              setShowAnnouncement(false);
+              setModalSeg(segments.find((s) => s.id === "maths") ?? null);
+            }}
           />
         )}
       </AnimatePresence>
