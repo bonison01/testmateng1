@@ -117,8 +117,9 @@ const mathsSyllabus = [
 
 // ─── MATHS ANSWER KEY / QUESTION PAPER DATA ───────────────────────
 // NOTE: File names below follow the convention
-//   /maths-papers/class{N}-set{A|B|C}.pdf   (question papers)
-//   /maths-keys/class{N}-set{A|B|C}.pdf     (answer keys)
+//   /maths-papers/class{N}-set{A|B|C}.pdf   (question papers — one per class per set)
+//   /maths-keys/class{N}.pdf                (answer keys — ONE shared file per class,
+//                                             common to all sets A/B/C)
 // Place the matching PDFs in the /public folder using these exact
 // names, or update the paths below to match your actual file names.
 const mathsClasses = [3, 4, 5, 6, 7, 8];
@@ -429,12 +430,16 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
                               <a href={`/maths-papers/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
                                 Question Paper
                               </a>
-                              {" · "}
-                              <a href={`/maths-keys/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
-                                Answer Key
-                              </a>
                             </span>
                           ))}
+                        </div>
+                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid #eee" }}>
+                          <span style={{ fontSize: 12, color: "#555" }}>
+                            Answer Key (all sets):{" "}
+                            <a href={`/maths-keys/class${cls}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
+                              Download
+                            </a>
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -937,17 +942,17 @@ export default function MatengFestPage() {
                     {mathsSets.map((set) => (
                       <div key={set} style={{ fontSize: 12, color: "#555", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
                         <span style={{ fontWeight: 600, color: "#333" }}>Set {set}</span>
-                        <span>
-                          <a href={`/maths-papers/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
-                            Question Paper
-                          </a>
-                          {"  ·  "}
-                          <a href={`/maths-keys/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
-                            Answer Key
-                          </a>
-                        </span>
+                        <a href={`/maths-papers/class${cls}-set${set}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
+                          Question Paper
+                        </a>
                       </div>
                     ))}
+                    <div style={{ fontSize: 12, color: "#555", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "0.5px solid #e5e5e5", marginTop: 4, paddingTop: 6 }}>
+                      <span style={{ fontWeight: 600, color: "#333" }}>Answer Key</span>
+                      <a href={`/maths-keys/class${cls}.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
+                        Download (all sets)
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
