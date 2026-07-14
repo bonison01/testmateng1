@@ -1,16 +1,25 @@
+// app/(main)/events/matengfest/edufest_registration/page.tsx
 'use client';
 
+import RegistrationForm from './RegistrationForm';
+
+// Registration closes at midnight on 20th July 2026 (IST) — i.e. open through 19th July.
+// If you actually meant "open through the 20th, closes as the 21st begins", just change
+// the date below to '2026-07-21T00:00:00+05:30'.
+const REGISTRATION_DEADLINE = new Date('2026-07-20T00:00:00+05:30');
+
 export default function EduFestPage() {
+  const isClosed = new Date() >= REGISTRATION_DEADLINE;
+
+  if (!isClosed) {
+    return <RegistrationForm />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
-          <svg
-            className="w-8 h-8 text-red-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -23,8 +32,7 @@ export default function EduFestPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Registration Closed</h1>
           <p className="text-white/60">
-            Registrations for EduFest are now closed. Thank you to everyone
-            who registered.
+            Registrations for EduFest are now closed. Thank you to everyone who registered.
           </p>
         </div>
 

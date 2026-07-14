@@ -33,7 +33,7 @@ interface Props {
     onNext: (registrationId: number) => void;
 }
 
-const COMPETITIONS: CompetitionKey[] = ['painting', 'quiz', 'mathematics', 'young_innovator'];
+const COMPETITIONS: CompetitionKey[] = ['painting', 'quiz', 'young_innovator'];
 
 const COMPETITION_ICONS: Record<CompetitionKey, string> = {
     painting: '🎨',
