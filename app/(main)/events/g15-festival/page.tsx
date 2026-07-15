@@ -25,7 +25,7 @@ const EVENT_DATE_LABEL = "24 July 2026";
 
 // --------------- Limited-time offer deadline ---------------
 // Offer valid until 15 July 2026, 00:00:00 IST
-const OFFER_DEADLINE = new Date('2026-07-15T00:00:00+05:30');
+const OFFER_DEADLINE = new Date('2026-07-15T23:59:59+05:30');
 
 // --------------- Validation helpers ---------------
 const isValidPhone = (val: string) => /^\d{10}$/.test(val);
