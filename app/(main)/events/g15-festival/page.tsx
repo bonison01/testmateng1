@@ -241,11 +241,11 @@ export default function TicketRegistrationPage() {
               <CalendarDays className="h-4 w-4 text-green-300" />
             </div>
             <div className="text-left">
-              <p className="text-sm text-zinc-200">
+              <p className="text-sm text-zinc-200 font-semibold">
                 New date confirmed:{' '}
                 <span className="font-semibold text-green-300">{EVENT_DATE_LABEL}</span>
               </p>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-300 mt-0.5 font-bold">
                 Limited passes available — grab yours now!
               </p>
             </div>
