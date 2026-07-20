@@ -125,6 +125,28 @@ const mathsSyllabus = [
 const mathsClasses = [3, 4, 5, 6, 7, 8];
 const mathsSets = ["A", "B", "C"];
 
+// ─── EXAM RESULTS DATA ─────────────────────────────────────────────
+// NOTE: File names below follow the convention
+//   /results/preneet-result.pdf            (Pre-NEET — single merit list)
+//   /results/maths-class{N}-result.pdf      (Mathematics Championship — one per class)
+// Place the matching PDFs in the /public folder using these exact
+// names, or update the paths below to match your actual file names.
+// Flip `declared` to false to show a "Coming Soon" state instead of links.
+const examResults = [
+  {
+    id: "preneet",
+    name: "Pre-NEET Competition",
+    declared: true,
+    resultHref: "/results/preneet-result.pdf",
+  },
+  {
+    id: "maths",
+    name: "Mathematics Championship",
+    declared: true,
+    classes: mathsClasses,
+  },
+];
+
 // ─── SEGMENT DATA ─────────────────────────────────────────────────
 const segments = [
   {
@@ -326,6 +348,190 @@ const segments = [
 
 type Segment = (typeof segments)[number];
 
+// ─── EXAM RESULT PICKER MODAL ──────────────────────────────────────
+function ExamResultModal({ onClose }: { onClose: () => void }) {
+  const [choice, setChoice] = useState<"preneet" | "maths" | null>(null);
+
+  return (
+    <motion.div
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1100, padding: "1.5rem",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        style={{
+          background: "#fff", borderRadius: 16, width: "100%", maxWidth: 420,
+          border: "0.5px solid #ddd", overflow: "hidden",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+        }}
+        initial={{ opacity: 0, y: 30, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.96 }}
+        transition={{ duration: 0.22 }}
+      >
+        <div style={{ background: "#0c3d14", padding: "1.25rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ fontFamily: "Georgia, serif", fontSize: 18, color: "#fff", fontWeight: 700, margin: 0 }}>
+            Check Exam Result
+          </h3>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", width: 28, height: 28, borderRadius: "50%", cursor: "pointer", fontSize: 14 }}>✕</button>
+        </div>
+
+        <div style={{ padding: "1.5rem" }}>
+          {!choice && (
+            <>
+              <p style={{ fontSize: 13, color: "#666", marginBottom: 16, lineHeight: 1.6 }}>
+                Select the exam you appeared for to view or download your result.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <button
+                  onClick={() => setChoice("preneet")}
+                  style={{
+                    textAlign: "left", background: "#f8f8f8", border: "0.5px solid #eee", borderRadius: 10,
+                    padding: "14px 16px", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#0c3d14",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                  }}
+                >
+                  Pre-NEET Competition
+                  <span style={{ fontSize: 13, color: "#14710F" }}>→</span>
+                </button>
+                <button
+                  onClick={() => setChoice("maths")}
+                  style={{
+                    textAlign: "left", background: "#f8f8f8", border: "0.5px solid #eee", borderRadius: 10,
+                    padding: "14px 16px", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#0c3d14",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                  }}
+                >
+                  Mathematics Championship
+                  <span style={{ fontSize: 13, color: "#14710F" }}>→</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {choice === "preneet" && (
+            <>
+              <button onClick={() => setChoice(null)} style={{ background: "none", border: "none", color: "#14710F", fontSize: 12, fontWeight: 600, cursor: "pointer", marginBottom: 14, padding: 0 }}>
+                ← Back
+              </button>
+              <p style={{ fontSize: 13, color: "#555", marginBottom: 16, lineHeight: 1.6 }}>
+                The Pre-NEET Competition merit list &amp; scorecard is ready to view or download.
+              </p>
+              <a
+                href="/results/preneet-result.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", width: "100%",
+                  background: "#14710F", color: "#fff", borderRadius: 8, padding: "12px 18px",
+                  fontSize: 14, fontWeight: 700, textDecoration: "none", boxSizing: "border-box",
+                }}
+              >
+                View / Download Result →
+              </a>
+            </>
+          )}
+
+          {choice === "maths" && (
+            <>
+              <button onClick={() => setChoice(null)} style={{ background: "none", border: "none", color: "#14710F", fontSize: 12, fontWeight: 600, cursor: "pointer", marginBottom: 14, padding: 0 }}>
+                ← Back
+              </button>
+              <p style={{ fontSize: 13, color: "#555", marginBottom: 16, lineHeight: 1.6 }}>
+                Select your class to view or download the Mathematics Championship result.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                {mathsClasses.map((cls) => (
+                  <a
+                    key={cls}
+                    href={`/results/maths-class${cls}-result.pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: "#e8f5e9", color: "#0c3d14", borderRadius: 8, padding: "12px 8px",
+                      fontSize: 13, fontWeight: 700, textDecoration: "none", textAlign: "center",
+                    }}
+                  >
+                    Class {cls}
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+
+          <p style={{ fontSize: 11, color: "#999", marginTop: 18, lineHeight: 1.6 }}>
+            Results are provisional. Rechecking requests must be submitted within 10 days of declaration, along with a
+            rechecking fee of ₹1,000.
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── EXAM RESULTS BANNER ────────────────────────────────────────────
+function ExamResultsBanner({ onCheck }: { onCheck: () => void }) {
+  return (
+    <section style={{ maxWidth: 900, margin: "1.75rem auto 0", padding: "0 1rem" }}>
+      <motion.button
+        onClick={onCheck}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+          background: "linear-gradient(135deg, #0c3d14, #14710F)",
+          border: "none",
+          borderRadius: 14,
+          padding: "1.1rem 1.5rem",
+          cursor: "pointer",
+          boxShadow: "0 12px 30px rgba(12,61,20,0.25)",
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 24, flexShrink: 0 }}>📢</span>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "#fff", margin: 0 }}>
+              Exam Result is Out!
+            </p>
+            <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", margin: "2px 0 0" }}>
+              Pre-NEET &amp; Mathematics Championship results are now declared.
+            </p>
+          </div>
+        </div>
+        <span
+          style={{
+            flexShrink: 0,
+            background: "#fff",
+            color: "#0c3d14",
+            borderRadius: 8,
+            padding: "9px 18px",
+            fontSize: 13,
+            fontWeight: 700,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Click Here to Check →
+        </span>
+      </motion.button>
+    </section>
+  );
+}
+
 // ─── DETAIL MODAL ─────────────────────────────────────────────────
 function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () => void; onRegister: (href: string) => void }) {
   const [tab, setTab] = useState<"overview" | "syllabus">("overview");
@@ -441,8 +647,33 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
                             </a>
                           </span>
                         </div>
+                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid #eee" }}>
+                          <span style={{ fontSize: 12, color: "#555" }}>
+                            Result:{" "}
+                            <a href={`/results/maths-class${cls}-result.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
+                              View Result
+                            </a>
+                          </span>
+                        </div>
                       </div>
                     ))}
+                  </div>
+                </>
+              )}
+
+              {/* Pre-NEET result link */}
+              {seg.id === "preneet" && (
+                <>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#888", margin: "1.25rem 0 10px" }}>
+                    Exam Result
+                  </p>
+                  <div style={{ background: "#f8f8f8", borderRadius: 8, padding: "10px 12px" }}>
+                    <span style={{ fontSize: 12, color: "#555" }}>
+                      Merit List / Scorecard:{" "}
+                      <a href="/results/preneet-result.pdf" target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600 }}>
+                        View Result
+                      </a>
+                    </span>
                   </div>
                 </>
               )}
@@ -672,6 +903,7 @@ export default function MatengFestPage() {
   const [openTl, setOpenTl] = useState<string | null>("maths");
   const [modalSeg, setModalSeg] = useState<Segment | null>(null);
   const [showAnnouncement, setShowAnnouncement] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
   const router = useRouter();
 
   const toggleTl = (id: string) =>
@@ -738,6 +970,9 @@ export default function MatengFestPage() {
 </div>
         </motion.div>
       </section>
+
+      {/* ── EXAM RESULTS ── */}
+      <ExamResultsBanner onCheck={() => setShowResultModal(true)} />
 
       {/* ── CO-POWERED ── */}
       <div className="w-full flex justify-center px-4 mt-10">
@@ -953,6 +1188,12 @@ export default function MatengFestPage() {
                         Download (all sets)
                       </a>
                     </div>
+                    <div style={{ fontSize: 12, color: "#555", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "0.5px solid #e5e5e5", marginTop: 4, paddingTop: 6 }}>
+                      <span style={{ fontWeight: 600, color: "#333" }}>Result</span>
+                      <a href={`/results/maths-class${cls}-result.pdf`} target="_blank" rel="noopener noreferrer" style={{ color: "#14710F", fontWeight: 600, textDecoration: "none" }}>
+                        View Result
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1137,6 +1378,13 @@ export default function MatengFestPage() {
               setModalSeg(segments.find((s) => s.id === "maths") ?? null);
             }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* ── EXAM RESULT PICKER MODAL ── */}
+      <AnimatePresence>
+        {showResultModal && (
+          <ExamResultModal onClose={() => setShowResultModal(false)} />
         )}
       </AnimatePresence>
 
