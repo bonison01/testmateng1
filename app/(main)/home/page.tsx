@@ -168,6 +168,10 @@ export default function Page() {
           0%, 100% { box-shadow: 0 0 0 0 rgba(80,194,115,0.35); }
           50% { box-shadow: 0 0 0 10px rgba(80,194,115,0); }
         }
+        @keyframes ring-pulse-amber {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(232,184,75,0.35); }
+          50% { box-shadow: 0 0 0 10px rgba(232,184,75,0); }
+        }
         .event-card {
           animation: pop-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
@@ -193,6 +197,9 @@ export default function Page() {
         }
         .featured-badge-green {
           animation: ring-pulse 2.2s ease-in-out infinite;
+        }
+        .featured-badge-amber {
+          animation: ring-pulse-amber 2.2s ease-in-out infinite;
         }
       `}</style>
 
@@ -298,7 +305,7 @@ export default function Page() {
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Link href="/events/matengfest/edufest_registration">
+                <Link href="/events/matengfest">
                   <button
                     className="px-8 py-3 rounded-full font-bold text-[#0F550C] bg-white hover:bg-[#F3F1EA] hover:scale-[1.03] transition-all duration-200 text-sm"
                   >
@@ -603,6 +610,35 @@ export default function Page() {
             </div>
 
             <div className="p-5 flex flex-col gap-3">
+              {/* EXAM RESULT card */}
+              <Link href="/events/matengfest" onClick={() => setShowEventsPopup(false)}>
+                <div
+                  className="relative rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(120deg, #3D2E05, #7A5C0E)" }}
+                >
+                  <div
+                    className="featured-badge-amber absolute top-2.5 right-2.5 eyebrow text-[9px] px-2 py-1 rounded-full"
+                    style={{ background: "#E8B84B", color: "#0B1410", fontWeight: 700 }}
+                  >
+                    New
+                  </div>
+                  <div className="flex-shrink-0 text-center w-14">
+                    <span
+                      className="live-dot inline-block w-1.5 h-1.5 rounded-full mb-1"
+                      style={{ background: "#E8B84B" }}
+                    />
+                    <p className="eyebrow text-[10px] text-[#F3E7C4]">Result</p>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-white text-sm">Exam Result is Out!</p>
+                    <p className="text-xs text-[#F3E7C4] mt-0.5">
+                      Pre-NEET &amp; Mathematics Championship — click to check
+                    </p>
+                  </div>
+                  <span className="text-white text-lg">→</span>
+                </div>
+              </Link>
+
               {/* G15 event card */}
               <Link href="/events/g15-festival" onClick={() => setShowEventsPopup(false)}>
                 <div
@@ -624,7 +660,7 @@ export default function Page() {
               </Link>
 
               {/* EduFest event card */}
-              <Link href="/events/matengfest/edufest_registration" onClick={() => setShowEventsPopup(false)}>
+              <Link href="/events/matengfest" onClick={() => setShowEventsPopup(false)}>
                 <div
                   className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
                   style={{ background: "linear-gradient(120deg, #17240F, #0F550C)" }}

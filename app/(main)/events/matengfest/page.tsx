@@ -834,7 +834,17 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
 }
 
 // ─── ANNOUNCEMENT POPUP ────────────────────────────────────────────
-function AnnouncementModal({ onClose, onView }: { onClose: () => void; onView: () => void }) {
+// Now covers BOTH: (1) exam results being declared, and
+// (2) Mathematics Championship question papers & answer keys release.
+function AnnouncementModal({
+  onClose,
+  onView,
+  onCheckResult,
+}: {
+  onClose: () => void;
+  onView: () => void;
+  onCheckResult: () => void;
+}) {
   return (
     <motion.div
       style={{
@@ -873,15 +883,28 @@ function AnnouncementModal({ onClose, onView }: { onClose: () => void; onView: (
 
         <div style={{ padding: "1.5rem" }}>
           <p style={{ fontSize: 15, color: "#222", fontWeight: 600, lineHeight: 1.6, marginBottom: 8 }}>
-            Question Papers &amp; Answer Keys have been released
+            Exam Results are Out!
+          </p>
+          <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: 14 }}>
+            <strong>Pre-NEET Competition</strong> and <strong>Mathematics Championship</strong> results have been
+            declared and are now available to view or download.
+          </p>
+          <p style={{ fontSize: 15, color: "#222", fontWeight: 600, lineHeight: 1.6, marginBottom: 8 }}>
+            Question Papers &amp; Answer Keys Released
           </p>
           <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: "1.5rem" }}>
             For the <strong>Jr. Mathematics Championship</strong>, Mateng EduFest 2026 (Class 3–8) — all sets (A, B, C) are now available to download.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button
-              onClick={onView}
+              onClick={onCheckResult}
               style={{ background: "#14710F", color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+            >
+              Check Exam Result
+            </button>
+            <button
+              onClick={onView}
+              style={{ background: "#ffffff", color: "#14710F", border: "1.5px solid #14710F", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
             >
               View Question Papers &amp; Keys
             </button>
@@ -909,12 +932,12 @@ export default function MatengFestPage() {
   const toggleTl = (id: string) =>
     setOpenTl((prev) => (prev === id ? null : id));
 
-  // Show the "papers & keys released" popup once per browser session
+  // Show the "results declared / papers & keys released" popup once per browser session
   useEffect(() => {
-    const alreadySeen = sessionStorage.getItem("mathsKeysAnnouncementSeen");
+    const alreadySeen = sessionStorage.getItem("edufestAnnouncementSeen");
     if (!alreadySeen) {
       setShowAnnouncement(true);
-      sessionStorage.setItem("mathsKeysAnnouncementSeen", "true");
+      sessionStorage.setItem("edufestAnnouncementSeen", "true");
     }
   }, []);
 
@@ -1368,7 +1391,7 @@ export default function MatengFestPage() {
         )}
       </AnimatePresence>
 
-      {/* ── ANNOUNCEMENT POPUP ── */}
+      {/* ── ANNOUNCEMENT POPUP (results + papers/keys) ── */}
       <AnimatePresence>
         {showAnnouncement && (
           <AnnouncementModal
@@ -1376,6 +1399,10 @@ export default function MatengFestPage() {
             onView={() => {
               setShowAnnouncement(false);
               setModalSeg(segments.find((s) => s.id === "maths") ?? null);
+            }}
+            onCheckResult={() => {
+              setShowAnnouncement(false);
+              setShowResultModal(true);
             }}
           />
         )}
