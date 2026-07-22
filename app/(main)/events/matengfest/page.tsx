@@ -9,7 +9,7 @@ import Link from "next/link";
 
 // ─── TIMELINE DATA ────────────────────────────────────────────────
 const timelineEvents = [
-  
+
   {
     id: "preneet",
     date: "20th April 2026",
@@ -348,6 +348,35 @@ const segments = [
 
 type Segment = (typeof segments)[number];
 
+// ─── GRAND FINAL DAY SCHEDULE (26th July 2026) ─────────────────────
+const grandFinalSchedule = [
+  {
+    time: "8:00 AM",
+    title: "Reporting Time & Spot Registrations",
+    desc: "Gates open. On-the-spot competition registrations begin. Young Innovators Challenge project/stall setup begins.",
+  },
+  {
+    time: "9:00 AM",
+    title: "Quiz Championship — Preliminary Round",
+    desc: "Written evaluation round for all registered Quiz Championship teams.",
+  },
+  {
+    time: "10:00 AM – 12:30 PM",
+    title: "Painting Championship",
+    desc: "On-the-spot painting competition. Themes announced at the venue.",
+  },
+  {
+    time: "1:00 PM",
+    title: "Quiz Final & Young Innovators Final Pitch",
+    desc: "Top 5 Quiz teams compete live on stage. Top 5 Young Innovators finalists pitch their projects before judges.",
+  },
+  {
+    time: "3:00 PM",
+    title: "Formal Function & Prize Distribution Ceremony",
+    desc: "Felicitation of winners across all Mateng EduFest 2026 segments — Pre-NEET, Mathematics, Painting, Quiz, and Young Innovators.",
+  },
+];
+
 // ─── EXAM RESULT PICKER MODAL ──────────────────────────────────────
 function ExamResultModal({ onClose }: { onClose: () => void }) {
   const [choice, setChoice] = useState<"preneet" | "maths" | null>(null);
@@ -478,7 +507,17 @@ function ExamResultModal({ onClose }: { onClose: () => void }) {
 // ─── EXAM RESULTS BANNER ────────────────────────────────────────────
 function ExamResultsBanner({ onCheck }: { onCheck: () => void }) {
   return (
-    <section style={{ maxWidth: 900, margin: "1.75rem auto 0", padding: "0 1rem" }}>
+    <section
+      style={{
+        maxWidth: 900,
+        margin: "1.75rem auto 0",
+        padding: "0 1rem",
+        display: "grid",
+        gap: 16,
+      }}
+    >
+
+      {/* Exam Result */}
       <motion.button
         onClick={onCheck}
         initial={{ opacity: 0, y: 20 }}
@@ -503,19 +542,32 @@ function ExamResultsBanner({ onCheck }: { onCheck: () => void }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 24, flexShrink: 0 }}>📢</span>
+          <span style={{ fontSize: 24 }}>📢</span>
           <div>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "#fff", margin: 0 }}>
-              Exam Result is Out!
+            <p
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#fff",
+                margin: 0,
+              }}
+            >
+              Exam Results are Out!
             </p>
-            <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", margin: "2px 0 0" }}>
-              Pre-NEET &amp; Mathematics Championship results are now declared.
+            <p
+              style={{
+                fontSize: 12.5,
+                color: "rgba(255,255,255,0.75)",
+                margin: "2px 0 0",
+              }}
+            >
+              Pre-NEET &amp; Mathematics Championship results are now available.
             </p>
           </div>
         </div>
+
         <span
           style={{
-            flexShrink: 0,
             background: "#fff",
             color: "#0c3d14",
             borderRadius: 8,
@@ -525,10 +577,75 @@ function ExamResultsBanner({ onCheck }: { onCheck: () => void }) {
             whiteSpace: "nowrap",
           }}
         >
-          Click Here to Check →
+          Check Result →
+        </span>
+      </motion.button>
+
+      {/* Question Papers & Answer Keys */}
+      <motion.button
+        onClick={() => window.open("/details.pdf", "_blank")}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+          background: "#fff",
+          border: "2px solid #14710F",
+          borderRadius: 14,
+          padding: "1.1rem 1.5rem",
+          cursor: "pointer",
+          boxShadow: "0 10px 24px rgba(20,113,15,.12)",
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 24 }}>📄</span>
+          <div>
+            <p
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#14710F",
+                margin: 0,
+              }}
+            >
+              Question Papers &amp; Answer Keys
+            </p>
+            <p
+              style={{
+                fontSize: 12.5,
+                color: "#666",
+                margin: "2px 0 0",
+              }}
+            >
+              Download all sets (A, B &amp; C) for the Jr. Mathematics Championship.
+            </p>
+          </div>
+        </div>
+
+        <span
+          style={{
+            background: "#14710F",
+            color: "#fff",
+            borderRadius: 8,
+            padding: "9px 18px",
+            fontSize: 13,
+            fontWeight: 700,
+            whiteSpace: "nowrap",
+          }}
+        >
+          View PDF →
         </span>
       </motion.button>
     </section>
+
   );
 }
 
@@ -807,7 +924,7 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
             </button>
           )}
           {/* Syllabus Download */}
-<a
+          {/* <a
   href={`/bulletin.pdf`}
   download
   style={{
@@ -825,7 +942,8 @@ function DetailModal({ seg, onClose, onRegister }: { seg: Segment; onClose: () =
   }}
 >
   Download Prospectus & Syllabus
-</a>
+</a> */}
+
           <span style={{ fontSize: 12, color: "#aaa", marginLeft: "auto" }}>Contact: +91 60094 49928</span>
         </div>
       </motion.div>
@@ -882,40 +1000,120 @@ function AnnouncementModal({
         </div>
 
         <div style={{ padding: "1.5rem" }}>
-          <p style={{ fontSize: 15, color: "#222", fontWeight: 600, lineHeight: 1.6, marginBottom: 8 }}>
-            Exam Results are Out!
+          {/* Grand Final */}
+          <p
+            style={{
+              fontSize: 15,
+              color: "#222",
+              fontWeight: 600,
+              marginBottom: 10,
+            }}
+          >
+            🏆 Grand Final Event Timeline
           </p>
-          <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: 14 }}>
-            <strong>Pre-NEET Competition</strong> and <strong>Mathematics Championship</strong> results have been
-            declared and are now available to view or download.
+
+          <button
+            onClick={() => window.open("/details.pdf", "_blank")}
+            style={{
+              background: "#f6ff00",
+              color: "#333",
+              border: "1px solid #c7d600",
+              borderRadius: 8,
+              padding: "10px 22px",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              marginBottom: 14,
+            }}
+          >
+            View Grand Final Details
+          </button>
+
+          <p
+            style={{
+              fontSize: 13,
+              color: "#666",
+              lineHeight: 1.6,
+              marginBottom: 20,
+            }}
+          >
+            The <strong>Mateng EduFest 2026 Grand Finale</strong> consists of the full
+            day event schedule including registrations, competitions, innovation
+            challenge presentations, prize distribution, and the closing ceremony.
           </p>
-          <p style={{ fontSize: 15, color: "#222", fontWeight: 600, lineHeight: 1.6, marginBottom: 8 }}>
-            Question Papers &amp; Answer Keys Released
+
+          {/* Results */}
+          <p
+            style={{
+              fontSize: 15,
+              color: "#222",
+              fontWeight: 600,
+              marginBottom: 10,
+            }}
+          >
+            📢 Exam Results are Out!
           </p>
-          <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: "1.5rem" }}>
-            For the <strong>Jr. Mathematics Championship</strong>, Mateng EduFest 2026 (Class 3–8) — all sets (A, B, C) are now available to download.
+
+          <button
+            onClick={onCheckResult}
+            style={{
+              background: "#14710F",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              padding: "10px 22px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              marginBottom: 14,
+            }}
+          >
+            Check Exam Result
+          </button>
+
+          <p
+            style={{
+              fontSize: 13,
+              color: "#666",
+              lineHeight: 1.6,
+              marginBottom: 20,
+            }}
+          >
+            <strong>Pre-NEET Competition</strong> and{" "}
+            <strong>Mathematics Championship</strong> results have been declared and
+            are now available to view or download.
           </p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={onCheckResult}
-              style={{ background: "#14710F", color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-            >
-              Check Exam Result
-            </button>
-            <button
-              onClick={onView}
-              style={{ background: "#ffffff", color: "#14710F", border: "1.5px solid #14710F", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-            >
-              View Question Papers &amp; Keys
-            </button>
-            <button
-              onClick={onClose}
-              style={{ background: "#f0f0f0", color: "#555", border: "0.5px solid #ddd", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-            >
-              Maybe Later
-            </button>
-          </div>
+
+          {/* Question Papers */}
+          <p
+            style={{
+              fontSize: 15,
+              color: "#222",
+              fontWeight: 600,
+              marginBottom: 10,
+            }}
+          >
+            📄 Question Papers &amp; Answer Keys Released
+          </p>
+
+          <button
+            onClick={onView}
+            style={{
+              background: "#fff",
+              color: "#14710F",
+              border: "1.5px solid #14710F",
+              borderRadius: 8,
+              padding: "10px 22px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              marginBottom: 14,
+            }}
+          >
+            View Question Papers &amp; Keys
+          </button>
         </div>
+
       </motion.div>
     </motion.div>
   );
@@ -962,15 +1160,77 @@ export default function MatengFestPage() {
           <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
           <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
           <div className={styles.heroButtons} style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-  <button
+            <motion.button
+              onClick={() => window.open("/details.pdf", "_blank")}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+                background: "linear-gradient(135deg, #FFD600, #FFF176)",
+                border: "none",
+                borderRadius: 14,
+                padding: "1.1rem 1.5rem",
+                cursor: "pointer",
+                boxShadow: "0 12px 30px rgba(255,214,0,.25)",
+                textAlign: "left",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 24 }}>🏆</span>
+                <div>
+                  <p
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: "#222",
+                      margin: 0,
+                    }}
+                  >
+                    Grand Final Event Timeline
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 12.5,
+                      color: "#555",
+                      margin: "2px 0 0",
+                    }}
+                  >
+                    View the complete schedule for the Mateng EduFest 2026 Grand Finale.
+                  </p>
+                </div>
+              </div>
+
+              <span
+                style={{
+                  background: "#222",
+                  color: "#fff",
+                  borderRadius: 8,
+                  padding: "9px 18px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                View Timeline →
+              </span>
+            </motion.button>
+            {/* <button
     onClick={() => router.push("/events/matengfest/edufest_registration")}
     className={styles.primaryBtn}
   >
     Register for EduFest →
-  </button>
+  </button> */}
 
-  {/* Prospectus Download */}
-  <a
+            {/* Prospectus Download */}
+            {/* <a
     href="/bulletin.pdf"
     download
     style={{
@@ -989,8 +1249,8 @@ export default function MatengFestPage() {
     }}
   >
     Download Prospectus & Syllabus
-  </a>
-</div>
+  </a> */}
+          </div>
         </motion.div>
       </section>
 
