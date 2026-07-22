@@ -1538,23 +1538,7 @@ export default function MatengFestPage() {
         </div>
       </section>
 
-      {/* ── ACADEMIC PARTNER ── */}
-      <div className="w-full flex justify-center px-4 mt-6">
-        <div className="w-full sm:w-[95vw] md:w-[85vw] lg:w-[75vw] rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="text-center md:text-left max-w-xl">
-              <h1 className="text-2xl md:text-4xl font-extrabold text-[#14710f] tracking-tight">Academic Partner</h1>
-              <p className="text-base md:text-lg text-gray-600 mt-3">In Collaboration With</p>
-              <p className="text-sm md:text-base mt-4 font-semibold text-gray-800">Supporting Educational Growth Through Strategic Academic Partnership</p>
-            </div>
-            <a href="https://www.facebook.com/khan.sarori" target="_blank" rel="noopener noreferrer">
-              <div className="bg-gray-50 rounded-2xl px-10 py-8 shadow-md cursor-pointer hover:shadow-lg transition">
-                <Image src="/nefsa.png" alt="Academic Partner" width={260} height={120} />
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
+
 
       {/* ── CHAMPIONSHIP SEGMENTS ── */}
       <section className={styles.segments}>
