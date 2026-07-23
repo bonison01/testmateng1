@@ -1599,6 +1599,7 @@ export default function MatengFestPage() {
             "The decision of judges and the organizing committee will be final and binding.",
             "Requests for rechecking must be submitted within 10 days of result declaration, along with a rechecking fee of ₹1,000.",
             "The organizing committee reserves the right to modify rules if necessary.",
+            "Negative marking will be applied if two candidates obtain the same score."
           ].map((rule, i) => (
             <div key={i} style={{ display: "flex", gap: 12, marginBottom: 10, alignItems: "flex-start" }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "#14710F", background: "#e8f5e9", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
