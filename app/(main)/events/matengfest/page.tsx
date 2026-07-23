@@ -1160,7 +1160,7 @@ export default function MatengFestPage() {
             priority
           />
           <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
-          <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
+          {/* <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p> */}
           {/* EduFest Registration */}
 <p
   style={{
