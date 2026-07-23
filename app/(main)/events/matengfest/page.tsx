@@ -1000,6 +1000,8 @@ function AnnouncementModal({
         </div>
 
         <div style={{ padding: "1.5rem" }}>
+
+          
           {/* Grand Final */}
           <p
             style={{
@@ -1159,6 +1161,46 @@ export default function MatengFestPage() {
           />
           <h1 className={styles.heroTitle}>Academic Excellence Platform 2026</h1>
           <p className={styles.heroSub}>Competitive • Structured • Scholarship Driven</p>
+          {/* EduFest Registration */}
+<p
+  style={{
+    fontSize: 15,
+    color: "#222",
+    fontWeight: 600,
+    marginBottom: 10,
+  }}
+>
+  🎓 EduFest Registration is Open!
+</p>
+
+<button
+  onClick={() => window.location.href = "/events/matengfest/edufest_registration"}
+  style={{
+    background: "#14710F",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "10px 22px",
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: "pointer",
+    marginBottom: 14,
+  }}
+>
+  Register Now →
+</button>
+
+<p
+  style={{
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 1.6,
+    marginBottom: 20,
+  }}
+>
+  Register now for <strong>Mateng EduFest 2026</strong> — spots are limited and
+  registration closes soon.
+</p>
           <div className={styles.heroButtons} style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
             <motion.button
               onClick={() => window.open("/details.pdf", "_blank")}
@@ -1183,9 +1225,11 @@ export default function MatengFestPage() {
                 textAlign: "left",
               }}
             >
+              
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: 24 }}>🏆</span>
                 <div>
+                  
                   <p
                     style={{
                       fontSize: 15,
