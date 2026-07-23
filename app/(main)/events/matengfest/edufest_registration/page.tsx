@@ -3,10 +3,8 @@
 
 import RegistrationForm from './RegistrationForm';
 
-// Registration closes at midnight on 20th July 2026 (IST) — i.e. open through 19th July.
-// If you actually meant "open through the 20th, closes as the 21st begins", just change
-// the date below to '2026-07-21T00:00:00+05:30'.
-const REGISTRATION_DEADLINE = new Date('2026-07-20T00:00:00+05:30');
+// Registration closes at 5:00 PM on 25th July 2026 (IST).
+const REGISTRATION_DEADLINE = new Date('2026-07-25T17:00:00+05:30');
 
 export default function EduFestPage() {
   const isClosed = new Date() >= REGISTRATION_DEADLINE;
