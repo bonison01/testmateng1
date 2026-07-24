@@ -661,7 +661,7 @@ export default function BusinessDiscoveryPage() {
                       </svg>
                       Events
                     </a>
-                    <a href="/delivery-rates" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 18px", background: "#6ee7b7", border: "1px solid transparent", borderRadius: 10, color: "#064e3b", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
+                    {/* <a href="/delivery-rates" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 18px", background: "#6ee7b7", border: "1px solid transparent", borderRadius: 10, color: "#064e3b", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="1" y="6" width="10" height="7" rx="1" />
                         <path d="M11 8h2.2l1.8 3v2h-4V8z" />
@@ -669,7 +669,7 @@ export default function BusinessDiscoveryPage() {
                         <circle cx="12" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
                       </svg>
                       Delivery Service
-                    </a>
+                    </a> */}
                   </div>
                   {/* <div style={{ position: "relative", maxWidth: 480 }}>
                     <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: "#94a3b8" }}>🔍</span>
