@@ -6,12 +6,8 @@ import RegistrationForm from './RegistrationForm';
 // Registration closes at 5:00 PM on 25th July 2026 (IST).
 const REGISTRATION_DEADLINE = new Date('2026-07-25T17:00:00+05:30');
 
-// Manual override: set to true to force-close registration immediately,
-// regardless of the deadline above.
-const FORCE_CLOSED = true;
-
 export default function EduFestPage() {
-  const isClosed = FORCE_CLOSED || new Date() >= REGISTRATION_DEADLINE;
+  const isClosed = new Date() >= REGISTRATION_DEADLINE;
 
   if (!isClosed) {
     return <RegistrationForm />;
