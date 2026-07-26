@@ -27,9 +27,9 @@ const timelineEvents = [
       { label: "Duration", value: "3 hours 20 minutes" },
     ],
     prizes: [
-      ["1st Prize", "₹30,000 + Book worth ₹1,000 + Certificate"],
-      ["2nd Prize", "₹15,000 + Book worth ₹1,000 + Certificate"],
-      ["3rd Prize", "₹10,000 + Book worth ₹1,000 + Certificate"],
+      ["1st Prize", "₹10,000 + Book worth ₹1,000 + Certificate"],
+      ["2nd Prize", "₹5,000 + Book worth ₹1,000 + Certificate"],
+      ["3rd Prize", "₹3,000 + Book worth ₹1,000 + Certificate"],
       ["10 Consolation Prizes", "Cash + Book worth ₹1,000 + Certificate"],
       ["Best Institute Award", "Special Recognition"],
       ["MBBS Scholarship", "₹1,00,000 (abroad via Mateng Events)"],
