@@ -1565,11 +1565,11 @@ export default function MatengFestPage() {
           <div className={styles.prizeCard}>
             <h2><strong>Top Rewards</strong></h2>
             <ul>
-              <li><strong>1st Prize:</strong> ₹30,000 + Book worth ₹1,000 + Certificate of Appreciation</li>
-              <li><strong>2nd Prize:</strong> ₹15,000 + Book worth ₹1,000 + Certificate of Appreciation</li>
-              <li><strong>3rd Prize:</strong> ₹10,000 + Book worth ₹1,000 + Certificate of Appreciation</li>
-              <li><strong>10 Consolation Prizes:</strong> Cash Prize + Book worth ₹1,000 + Certificate</li>
-              <li><strong>Best Institute Award</strong></li>
+              <li><strong>1st Prize:</strong> ₹10,000 </li>
+              <li><strong>2nd Prize:</strong> ₹5,000 </li>
+              <li><strong>3rd Prize:</strong> ₹3,000 </li>
+              <li><strong>10 Consolation Prizes:</strong> Cash Prize </li>
+              {/* <li><strong>Best Institute Award</strong></li> */}
             </ul>
             <div className={styles.answerLinks}>
               <p>Download Pre-NEET Answer Key:</p>
