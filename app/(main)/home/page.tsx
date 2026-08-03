@@ -6,7 +6,6 @@ import Image from "next/image";
 import Footer from "@/components/footer/Footer";
 import { useRouter } from "next/navigation";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
-import { Timer } from "lucide-react";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -21,31 +20,6 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-// Limited-time offer deadline: 12 July 2026, 00:00:00 IST
-const OFFER_DEADLINE = new Date('2026-07-12T00:00:00+05:30');
-
-type TimeLeft = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  expired: boolean;
-};
-
-const getTimeLeft = (deadline: Date): TimeLeft => {
-  const diff = deadline.getTime() - Date.now();
-  if (diff <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
-  }
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-  return { days, hours, minutes, seconds, expired: false };
-};
-
-const pad = (n: number) => n.toString().padStart(2, '0');
-
 export default function Page() {
   const router = useRouter();
 
@@ -53,17 +27,6 @@ export default function Page() {
   const [merchants, setMerchants] = useState(0);
   const [businesses, setBusinesses] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [showEventsPopup, setShowEventsPopup] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(OFFER_DEADLINE));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(OFFER_DEADLINE));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const offerActive = !timeLeft.expired;
 
   const PARTNERS = [
     { name: "175c", logo: "/partners/partner1.png" },
@@ -77,9 +40,9 @@ export default function Page() {
   ];
 
   useEffect(() => {
-    const targetParcels = 100;
-    const targetMerchants = 300;
-    const targetBusinesses = 130;
+    const targetParcels = 200;
+    const targetMerchants = 400;
+    const targetBusinesses = 180;
 
     const interval = setInterval(() => {
       setParcels((prev) => (prev < targetParcels ? prev + 2 : targetParcels));
@@ -88,20 +51,6 @@ export default function Page() {
     }, 40);
 
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const alreadySeen = typeof window !== "undefined" && sessionStorage.getItem("mateng_events_popup_seen");
-    if (alreadySeen) return;
-
-    const timer = setTimeout(() => {
-      setShowEventsPopup(true);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("mateng_events_popup_seen", "1");
-      }
-    }, 900);
-
-    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -120,10 +69,6 @@ export default function Page() {
         @keyframes drift {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
-        }
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
         }
         .route-line {
           stroke-dasharray: 5 9;
@@ -153,53 +98,25 @@ export default function Page() {
           font-family: var(--font-mono);
           font-feature-settings: "tnum" 1;
         }
-        .live-dot {
-          animation: pulse-glow 1.8s ease-in-out infinite;
-        }
         @keyframes pop-in {
           0% { opacity: 0; transform: translateY(24px) scale(0.98); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes ring-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(63,166,55,0.35); }
-          50% { box-shadow: 0 0 0 10px rgba(63,166,55,0); }
-        }
-        @keyframes ring-pulse-purple {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(80,194,115,0.35); }
-          50% { box-shadow: 0 0 0 10px rgba(80,194,115,0); }
-        }
-        @keyframes ring-pulse-amber {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(232,184,75,0.35); }
-          50% { box-shadow: 0 0 0 10px rgba(232,184,75,0); }
         }
         .event-card {
           animation: pop-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
           will-change: transform;
         }
-        .event-card:hover {
-          transform: translateY(-6px) scale(1.008);
+        .event-card-past {
+          box-shadow: 0 0 0 1px rgba(243,241,234,0.08), 0 20px 50px -25px rgba(0,0,0,0.6);
         }
-        .event-card-green {
-          box-shadow: 0 0 0 1px rgba(63,166,55,0.25), 0 20px 60px -20px rgba(63,166,55,0.35);
+        .event-card-past:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 0 0 1px rgba(243,241,234,0.14), 0 24px 60px -25px rgba(0,0,0,0.7);
         }
-        .event-card-green:hover {
-          box-shadow: 0 0 0 1px rgba(63,166,55,0.5), 0 30px 80px -20px rgba(63,166,55,0.55);
-        }
-        .event-card-purple {
-          box-shadow: 0 0 0 1px rgba(80,194,115,0.25), 0 20px 60px -20px rgba(80,60,180,0.45);
-        }
-        .event-card-purple:hover {
-          box-shadow: 0 0 0 1px rgba(80,194,115,0.5), 0 30px 80px -20px rgba(80,60,180,0.65);
-        }
-        .featured-badge {
-          animation: ring-pulse-purple 2.2s ease-in-out infinite;
-        }
-        .featured-badge-green {
-          animation: ring-pulse 2.2s ease-in-out infinite;
-        }
-        .featured-badge-amber {
-          animation: ring-pulse-amber 2.2s ease-in-out infinite;
+        .concluded-badge {
+          background: rgba(243,241,234,0.08);
+          border: 1px solid rgba(243,241,234,0.18);
         }
       `}</style>
 
@@ -262,231 +179,11 @@ export default function Page() {
           </div>
         </section>
 
-        {/* EDUFEST TICKET BANNER */}
-        <section className="w-full flex justify-center px-4 mt-6">
-          <div
-            className="event-card event-card-green relative w-full max-w-6xl rounded-3xl overflow-hidden flex flex-col md:flex-row"
-            style={{ background: "linear-gradient(120deg, #17240F 0%, #0F550C 60%, #0B1410 100%)", animationDelay: "0.05s" }}
-          >
-            <div
-              className="featured-badge-green absolute top-5 right-5 z-20 eyebrow text-[10px] px-3 py-1.5 rounded-full"
-              style={{ background: "#3FA637", color: "#0B1410", fontWeight: 700 }}
-            >
-              ★ Featured
-            </div>
+        
 
-            <div className="flex-1 px-8 sm:px-12 py-10 text-left">
-              <span className="eyebrow text-[11px] text-[#E8B84B]">Registrations Open</span>
-
-              <h2
-                className="mt-3 text-3xl sm:text-4xl md:text-5xl leading-tight"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-              >
-                Mateng Education{" "}
-                <em style={{ fontStyle: "italic", color: "#E8B84B" }}>Festival</em> 2026
-              </h2>
-
-              <p className="mt-4 text-[#D7E4D8] max-w-xl text-sm sm:text-base leading-relaxed">
-                Enter the Mathematics Competition and put your problem-solving
-                to the test — plus quiz, painting, and innovation tracks for
-                every kind of student.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {["Quiz Competition", "Painting", "Young Innovators", "Mathematics"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="eyebrow px-3 py-1.5 rounded-full text-[10px] text-[#F3F1EA]"
-                    style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.15)" }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Link href="/events/matengfest">
-                  <button
-                    className="px-8 py-3 rounded-full font-bold text-[#0F550C] bg-white hover:bg-[#F3F1EA] hover:scale-[1.03] transition-all duration-200 text-sm"
-                  >
-                    Register Now →
-                  </button>
-                </Link>
-                <Link href="/events/matengfest">
-                  <button className="px-8 py-3 rounded-full font-semibold text-white border border-white/30 hover:border-white/70 hover:bg-white/10 transition-all duration-200 text-sm">
-                    Learn More
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Ticket stub */}
-            <div
-              className="relative md:w-48 flex md:flex-col items-center justify-center gap-3 py-6 md:py-0 border-t md:border-t-0 md:border-l border-dashed"
-              style={{ borderColor: "rgba(243,241,234,0.25)" }}
-            >
-              <span
-                className="eyebrow text-[10px] text-[#E8B84B] md:[writing-mode:vertical-rl]"
-              >
-                Admit One
-              </span>
-              <span className="tabular text-xs text-[#D7E4D8]">EDU·26</span>
-            </div>
-          </div>
-        </section>
-
-        {/* G15 FESTIVAL TICKET BANNER */}
-        <section className="w-full flex justify-center px-4 mt-6">
-          <div
-            className="event-card event-card-purple relative w-full max-w-6xl rounded-3xl overflow-hidden"
-            style={{ background: "#150C33", animationDelay: "0.15s" }}
-          >
-            {/* PHOTO HERO STRIP */}
-            <div className="relative w-full h-48 sm:h-56 md:h-64">
-              <Image
-                src="/g15-festival.png"
-                alt="G15 Festival — live crowd and stage lights"
-                fill
-                className="object-cover"
-                priority={false}
-              />
-              {/* readability gradient over the photo */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(21,12,51,0.15) 0%, rgba(21,12,51,0.55) 65%, #150C33 100%)",
-                }}
-              />
-
-              <div
-                className="featured-badge absolute top-5 right-5 z-20 eyebrow text-[10px] px-3 py-1.5 rounded-full"
-                style={{ background: "#50C273", color: "#0B1410", fontWeight: 700 }}
-              >
-                ★ Featured
-              </div>
-
-              <div className="absolute bottom-4 left-6 sm:left-10 flex items-center gap-2">
-                <span
-                  className="live-dot inline-block w-1.5 h-1.5 rounded-full"
-                  style={{ background: "#50C273" }}
-                />
-                <span
-                  className="eyebrow text-[11px] text-[#F3F1EA] px-3 py-1.5 rounded-full"
-                  style={{ background: "rgba(0,0,0,0.35)" }}
-                >
-                  Booking Open · New Date Confirmed
-                </span>
-              </div>
-            </div>
-
-            {/* CONTENT */}
-            <div className="relative flex flex-col md:flex-row">
-              <div className="relative flex-1 px-8 sm:px-12 py-10 text-left">
-                <h2
-                  className="text-3xl sm:text-4xl md:text-5xl leading-tight"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-                >
-                  G15{" "}
-                  <em style={{ fontStyle: "italic", color: "#50C273" }}>Festival</em> 2026
-                </h2>
-
-                <p className="mt-4 text-[#E4DEF5] max-w-xl text-sm sm:text-base leading-relaxed">
-                  Live music, food, and good energy — the ultimate vibe is
-                  back. Now happening{" "}
-                  <strong className="text-white">24th July 2026</strong>.
-                </p>
-
-                {/* LIMITED-TIME OFFER COUNTDOWN */}
-                {offerActive && (
-                  <div className="mt-5 inline-flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 to-yellow-500/10 px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center justify-center h-7 w-7 rounded-full bg-amber-400/20 flex-shrink-0">
-                        <Timer className="h-3.5 w-3.5 text-amber-300" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-zinc-200 font-medium">
-                          Limited-time price <span className="text-amber-300">₹349</span>{" "}
-                          <span className="text-zinc-500 line-through">₹399</span>
-                        </p>
-                        <p className="text-[10px] text-zinc-400">Ends 12 July, midnight</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      {[
-                        { label: "D", value: timeLeft.days },
-                        { label: "H", value: timeLeft.hours },
-                        { label: "M", value: timeLeft.minutes },
-                        { label: "S", value: timeLeft.seconds },
-                      ].map((unit, i) => (
-                        <div key={unit.label} className="flex items-center gap-1.5">
-                          <div className="flex flex-col items-center justify-center bg-black/30 border border-amber-400/20 rounded-md h-10 w-10">
-                            <span className="text-sm font-bold tabular-nums text-amber-300 leading-none">
-                              {pad(unit.value)}
-                            </span>
-                            <span className="text-[8px] text-zinc-500 uppercase tracking-wide">{unit.label}</span>
-                          </div>
-                          {i < 3 && <span className="text-zinc-600 text-xs">:</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {["Live Music", "Food & Drinks", "Community"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="eyebrow px-3 py-1.5 rounded-full text-[10px] text-[#F3F1EA]"
-                      style={{ background: "rgba(243,241,234,0.08)", border: "1px solid rgba(243,241,234,0.15)" }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                  <Link href="/events/g15-festival">
-                    <button className="px-8 py-3 rounded-full font-bold text-[#2D1B69] bg-white hover:bg-[#F3F1EA] hover:scale-[1.03] transition-all duration-200 text-sm">
-                      Book Your Pass →
-                    </button>
-                  </Link>
-                  <Link href="/events/g15-festival">
-                    <button className="px-8 py-3 rounded-full font-semibold text-white border border-white/30 hover:border-white/70 hover:bg-white/10 transition-all duration-200 text-sm">
-                      Learn More
-                    </button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Ticket stub */}
-              <div
-                className="relative md:w-48 flex md:flex-col items-center justify-center gap-3 py-6 md:py-0 border-t md:border-t-0 md:border-l border-dashed"
-                style={{ borderColor: "rgba(243,241,234,0.25)" }}
-              >
-                <span className="eyebrow text-[10px] text-[#E2DE59] md:[writing-mode:vertical-rl]">
-                  Admit One
-                </span>
-                <span className="tabular text-xs text-[#E4DEF5]">24 JUL</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* NOTICE LINK */}
-        <div className="w-full flex justify-center px-6 mt-8">
-          <button
-            onClick={() => router.push("/events/matengfest")}
-            className="eyebrow text-[11px] text-[#8FA391] hover:text-[#3FA637] transition-colors duration-200 flex items-center gap-2"
-          >
-            Check Pre-Neet Examination Answer Key
-            <span aria-hidden>→</span>
-          </button>
-        </div>
 
         {/* WHAT WE DO */}
-        <section className="mt-24 px-6 flex flex-col items-center">
+        <section className="mt-6 px-6 flex flex-col items-center">
           <span className="eyebrow text-[11px] text-[#8FA391] mb-3">What We Do</span>
           <h2
             className="text-2xl sm:text-3xl mb-12"
@@ -546,6 +243,247 @@ export default function Page() {
           </div>
         </section>
 
+        {/* PAST EVENTS */}
+        <section className="mt-24 px-6 flex flex-col items-center">
+          <span className="eyebrow text-[11px] text-[#8FA391] mb-3">Past Events</span>
+          <h2
+            className="text-2xl sm:text-3xl mb-10 text-center"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+          >
+            Successfully concluded
+          </h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl w-full">
+            {/* HIYANGEI KEITHEL — PAST EVENT CARD */}
+            <div
+              className="event-card event-card-past relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "#111812", animationDelay: "0.05s" }}
+            >
+              <div className="px-5 py-5 text-left">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="concluded-badge eyebrow text-[8px] px-2 py-1 rounded-full text-[#B8C4BA]">
+                    Concluded
+                  </span>
+                  <span className="eyebrow text-[8px] text-[#5C6B5E]">NOV · 2025</span>
+                </div>
+
+                <h3
+                  className="mt-2.5 text-base leading-tight text-[#D7DED9]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Hiyangei Keithel
+                </h3>
+
+                <p className="mt-2 text-[#7C8A7E] text-xs leading-relaxed line-clamp-2">
+                  A celebration of local trade and tradition, bringing
+                  together vendors and visitors from across the state.
+                </p>
+
+                <div className="mt-4">
+                  <Link href="https://www.instagram.com/matengevents/?hl=en">
+                    <button className="px-4 py-1.5 rounded-full font-semibold text-[#F3F1EA] border border-white/15 hover:border-white/35 hover:bg-white/5 transition-all duration-200 text-xs">
+                      View Highlights →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* EDU FAIR THOUBAL 2025 — PAST EVENT CARD */}
+            <div
+              className="event-card event-card-past relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "#111812", animationDelay: "0.1s" }}
+            >
+              <div className="px-5 py-5 text-left">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="concluded-badge eyebrow text-[8px] px-2 py-1 rounded-full text-[#B8C4BA]">
+                    Concluded
+                  </span>
+                  <span className="eyebrow text-[8px] text-[#5C6B5E]">DEC · 2025</span>
+                </div>
+
+                <h3
+                  className="mt-2.5 text-base leading-tight text-[#D7DED9]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Career Fair Thoubal
+                </h3>
+
+                <p className="mt-2 text-[#7C8A7E] text-xs leading-relaxed line-clamp-2">
+                  Connecting Thoubal students with schools, courses, and
+                  career guidance under one roof.
+                </p>
+
+                <div className="mt-4">
+                  <Link href="https://www.instagram.com/matengevents/?hl=en">
+                    <button className="px-4 py-1.5 rounded-full font-semibold text-[#F3F1EA] border border-white/15 hover:border-white/35 hover:bg-white/5 transition-all duration-200 text-xs">
+                      View Highlights →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* MANIPUR BOOK FAIR 2026 — PAST EVENT CARD */}
+            <div
+              className="event-card event-card-past relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "#111812", animationDelay: "0.15s" }}
+            >
+              <div className="px-5 py-5 text-left">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="concluded-badge eyebrow text-[8px] px-2 py-1 rounded-full text-[#B8C4BA]">
+                    Concluded
+                  </span>
+                  <span className="eyebrow text-[8px] text-[#5C6B5E]">FEB · 2026</span>
+                </div>
+
+                <h3
+                  className="mt-2.5 text-base leading-tight text-[#D7DED9]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Manipur Book Fair
+                </h3>
+
+                <p className="mt-2 text-[#7C8A7E] text-xs leading-relaxed line-clamp-2">
+                  10 days of books, readers, and publishers — 7 to 17
+                  February. Thanks to everyone who came by.
+                </p>
+
+                <div className="mt-4">
+                  <Link href="https://www.instagram.com/matengevents/?hl=en">
+                    <button className="px-4 py-1.5 rounded-full font-semibold text-[#F3F1EA] border border-white/15 hover:border-white/35 hover:bg-white/5 transition-all duration-200 text-xs">
+                      View Highlights →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* G15 FESTIVAL — PAST EVENT CARD */}
+            <div
+              className="event-card event-card-past relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "#111812", animationDelay: "0.2s" }}
+            >
+              <div className="relative w-full h-20">
+                <Image
+                  src="/g15-festival.png"
+                  alt="G15 Festival — past event"
+                  fill
+                  className="object-cover grayscale opacity-60"
+                  priority={false}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(17,24,18,0.2) 0%, rgba(17,24,18,0.75) 70%, #111812 100%)",
+                  }}
+                />
+                <span className="concluded-badge absolute top-2 right-2 eyebrow text-[8px] px-2 py-1 rounded-full text-[#B8C4BA]">
+                  Concluded
+                </span>
+              </div>
+
+              <div className="px-5 py-5 text-left">
+                <span className="eyebrow text-[8px] text-[#5C6B5E]">24 JUL 2026</span>
+
+                <h3
+                  className="mt-1.5 text-base leading-tight text-[#D7DED9]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  G15 Festival
+                </h3>
+
+                <p className="mt-2 text-[#7C8A7E] text-xs leading-relaxed line-clamp-2">
+                  Live music, food & good energy — the festival wrapped up
+                  with a great turnout.
+                </p>
+
+                <div className="mt-4">
+                  <Link href="/events/g15-festival">
+                    <button className="px-4 py-1.5 rounded-full font-semibold text-[#F3F1EA] border border-white/15 hover:border-white/35 hover:bg-white/5 transition-all duration-200 text-xs">
+                      View Highlights →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* EDUFEST — PAST EVENT CARD */}
+            <div
+              className="event-card event-card-past relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "#111812", animationDelay: "0.25s" }}
+            >
+              <div className="px-5 py-5 text-left">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="concluded-badge eyebrow text-[8px] px-2 py-1 rounded-full text-[#B8C4BA]">
+                    Concluded
+                  </span>
+                  <span className="eyebrow text-[8px] text-[#5C6B5E]">EDU · 2026</span>
+                </div>
+
+                <h3
+                  className="mt-2.5 text-base leading-tight text-[#D7DED9]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Mateng Education Festival
+                </h3>
+
+                <p className="mt-2 text-[#7C8A7E] text-xs leading-relaxed line-clamp-2">
+                  Thanks to everyone who joined the Maths, quiz, painting &
+                  innovation tracks. Results are available.
+                </p>
+
+                <div className="mt-4">
+                  <Link href="/events/matengfest">
+                    <button className="px-4 py-1.5 rounded-full font-semibold text-[#F3F1EA] border border-white/15 hover:border-white/35 hover:bg-white/5 transition-all duration-200 text-xs">
+                      View Results →
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        {/* IMPACT — TICKET STUB ROW */}
+      <section className="mt-24 flex flex-col items-center text-center px-6">
+        <span className="eyebrow text-[11px] text-[#8FA391] mb-3">Our Impact</span>
+        <h2
+          className="text-2xl sm:text-3xl mb-10"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        >
+          Ahead on every road, by far.
+        </h2>
+
+        <div
+          className="stub-row flex flex-row justify-center gap-8 md:gap-16 rounded-2xl px-8 sm:px-14 py-8"
+          style={{ background: "rgba(243,241,234,0.03)", border: "1px dashed rgba(243,241,234,0.16)" }}
+        >
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(parcels)}K
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Parcels delivered</p>
+          </div>
+
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(merchants)}+
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Merchants</p>
+          </div>
+
+          <div>
+            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
+              {Math.floor(businesses)}+
+            </p>
+            <p className="text-[#92A395] text-xs mt-1">Businesses discovered</p>
+          </div>
+        </div>
+      </section>
+
+
         {/* DELIVERY CTA */}
         <section className="mt-24 px-6 flex justify-center">
           <div
@@ -575,122 +513,8 @@ export default function Page() {
         </section>
       </div>
 
-      {/* ENTRANCE EVENTS POPUP */}
-      {showEventsPopup && (
-        <div
-          className="fixed inset-0 bg-black/75 flex items-center justify-center z-[60] px-4"
-          onClick={() => setShowEventsPopup(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
-            style={{
-              background: "#101B15",
-              border: "1px solid rgba(243,241,234,0.12)",
-              animation: "pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both",
-            }}
-          >
-            <button
-              onClick={() => setShowEventsPopup(false)}
-              aria-label="Close"
-              className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center text-[#F3F1EA] hover:bg-white/10 transition-colors"
-              style={{ background: "rgba(0,0,0,0.35)" }}
-            >
-              ✕
-            </button>
-
-            <div className="px-7 pt-7 pb-2 text-center">
-              <span className="eyebrow text-[10px] text-[#E8B84B]">Happening Soon</span>
-              <h3
-                className="text-xl sm:text-2xl mt-2"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "#F3F1EA" }}
-              >
-                Don&apos;t miss what&apos;s coming up
-              </h3>
-            </div>
-
-            <div className="p-5 flex flex-col gap-3">
-              {/* EXAM RESULT card */}
-              <Link href="/events/matengfest" onClick={() => setShowEventsPopup(false)}>
-                <div
-                  className="relative rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-                  style={{ background: "linear-gradient(120deg, #3D2E05, #7A5C0E)" }}
-                >
-                  <div
-                    className="featured-badge-amber absolute top-2.5 right-2.5 eyebrow text-[9px] px-2 py-1 rounded-full"
-                    style={{ background: "#E8B84B", color: "#0B1410", fontWeight: 700 }}
-                  >
-                    New
-                  </div>
-                  <div className="flex-shrink-0 text-center w-14">
-                    <span
-                      className="live-dot inline-block w-1.5 h-1.5 rounded-full mb-1"
-                      style={{ background: "#E8B84B" }}
-                    />
-                    <p className="eyebrow text-[10px] text-[#F3E7C4]">Result</p>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-white text-sm">Exam Result is Out!</p>
-                    <p className="text-xs text-[#F3E7C4] mt-0.5">
-                      Pre-NEET &amp; Mathematics Championship — click to check
-                    </p>
-                  </div>
-                  <span className="text-white text-lg">→</span>
-                </div>
-              </Link>
-
-              {/* G15 event card */}
-              <Link href="/events/g15-festival" onClick={() => setShowEventsPopup(false)}>
-                <div
-                  className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-                  style={{ background: "linear-gradient(120deg, #2D1B69, #4D3799)" }}
-                >
-                  <div className="flex-shrink-0 text-center w-14">
-                    <p className="eyebrow text-[10px] text-[#E2DE59]">JUL</p>
-                    <p className="text-2xl font-bold text-white leading-none">24</p>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-white text-sm">G15 Festival 2026</p>
-                    <p className="text-xs text-[#E4DEF5] mt-0.5">
-                      Live music, food & community — booking open
-                    </p>
-                  </div>
-                  <span className="text-white text-lg">→</span>
-                </div>
-              </Link>
-
-              {/* EduFest event card */}
-              <Link href="/events/matengfest" onClick={() => setShowEventsPopup(false)}>
-                <div
-                  className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-                  style={{ background: "linear-gradient(120deg, #17240F, #0F550C)" }}
-                >
-                  <div className="flex-shrink-0 text-center w-14">
-                    <p className="eyebrow text-[10px] text-[#E8B84B]">EDU</p>
-                    <p className="text-2xl font-bold text-white leading-none">26</p>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-white text-sm">Mateng Education Festival</p>
-                    <p className="text-xs text-[#D7E4D8] mt-0.5">
-                      Maths, quiz, painting & innovation — registrations open
-                    </p>
-                  </div>
-                  <span className="text-white text-lg">→</span>
-                </div>
-              </Link>
-            </div>
-
-            <button
-              onClick={() => setShowEventsPopup(false)}
-              className="w-full py-3 text-xs eyebrow text-[#8FA391] hover:text-[#F3F1EA] transition-colors border-t"
-              style={{ borderColor: "rgba(243,241,234,0.1)" }}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
-
+      
+      
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
@@ -720,42 +544,7 @@ export default function Page() {
         </div>
       )}
 
-      {/* IMPACT — TICKET STUB ROW */}
-      <section className="mt-24 flex flex-col items-center text-center px-6">
-        <span className="eyebrow text-[11px] text-[#8FA391] mb-3">Our Impact</span>
-        <h2
-          className="text-2xl sm:text-3xl mb-10"
-          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-        >
-          On the road, every day
-        </h2>
-
-        <div
-          className="stub-row flex flex-row justify-center gap-8 md:gap-16 rounded-2xl px-8 sm:px-14 py-8"
-          style={{ background: "rgba(243,241,234,0.03)", border: "1px dashed rgba(243,241,234,0.16)" }}
-        >
-          <div>
-            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
-              {Math.floor(parcels)}K
-            </p>
-            <p className="text-[#92A395] text-xs mt-1">Parcels delivered</p>
-          </div>
-
-          <div>
-            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
-              {Math.floor(merchants)}+
-            </p>
-            <p className="text-[#92A395] text-xs mt-1">Merchants</p>
-          </div>
-
-          <div>
-            <p className="tabular text-2xl sm:text-3xl text-[#3FA637] font-semibold">
-              {Math.floor(businesses)}+
-            </p>
-            <p className="text-[#92A395] text-xs mt-1">Businesses discovered</p>
-          </div>
-        </div>
-      </section>
+      
 
       {/* TRUSTED PARTNERS */}
       <section className="mt-28 px-6 flex flex-col items-center">
